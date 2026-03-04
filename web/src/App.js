@@ -1,10 +1,10 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Register from './Register';
-import HomeBooks from './HomeBooks';
+import Login from './Login.jsx';
+import Register from './Register.jsx';
+import HomeBooks from './HomeBooks.jsx';
 
-function App() {
+export default function App() {
   return (
     <Router>
       <Routes>
@@ -16,5 +16,3 @@ function App() {
     </Router>
   );
 }
-
-export default App;
