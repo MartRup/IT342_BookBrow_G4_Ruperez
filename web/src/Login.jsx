@@ -1,42 +1,101 @@
 import './Login.css';
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { validateEmail, sanitizeInput, rateLimit } from './utils/validation';
+import axios from 'axios';
+import Alert from './components/Alert';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if there's a message from registration
+    if (location.state?.message) {
+      setAlertMessage(location.state.message);
+      setAlertType('success');
+      setShowAlert(true);
+      // Clear the location state to prevent showing the message again
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const sanitizedValue = sanitizeInput(value);
+    
+    if (name === 'email') {
+      setEmail(sanitizedValue);
+    } else if (name === 'password') {
+      setPassword(sanitizedValue);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    // Rate limiting check
+    const clientIdentifier = email || 'anonymous';
+    if (!rateLimit.isAllowed(clientIdentifier)) {
+      setError('Too many login attempts. Please try again later.');
+      setLoading(false);
+      return;
+    }
+
+    // Input validation and sanitization
+    const sanitizedEmail = validateEmail(email);
+    const sanitizedPassword = sanitizeInput(password);
+
+    if (!sanitizedEmail) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!sanitizedPassword || sanitizedPassword.length < 1) {
+      setError('Please enter your password');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const response = await axios.post('/api/users/login', {
+        email: sanitizedEmail,
+        password: sanitizedPassword,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Store token if needed
-        localStorage.setItem('authToken', data.token);
-        navigate('/home');
+      if (response.data.error) {
+        setError(response.data.error);
       } else {
-        setError('Invalid email or password');
+        // Reset rate limit on successful login
+        rateLimit.reset(clientIdentifier);
+        
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Show success alert before navigating
+        setAlertMessage('Successful login');
+        setAlertType('success');
+        setShowAlert(true);
+        
+        // Navigate to dashboard after a short delay to allow user to see the alert
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
       }
     } catch (err) {
       setError('Error logging in. Please try again.');
-      console.error(err);
+      // Log error without exposing details in production
+      console.error('Login error:', err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -64,10 +123,12 @@ export default function Login() {
             <input
               type="email"
               id="email"
+              name="email"
               placeholder="your.email@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChange}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -76,10 +137,12 @@ export default function Login() {
             <input
               type="password"
               id="password"
+              name="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange}
               required
+              autoComplete="current-password"
             />
           </div>
 
@@ -102,6 +165,14 @@ export default function Login() {
           Forgot your password?
         </Link>
       </div>
+      
+      {showAlert && (
+        <Alert
+          message={alertMessage}
+          type={alertType}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 }

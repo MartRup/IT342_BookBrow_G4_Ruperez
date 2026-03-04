@@ -1,6 +1,9 @@
 import './Register.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from './utils/validation';
+import axios from 'axios';
+import Alert from './components/Alert';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -12,13 +15,18 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const sanitizedValue = sanitizeInput(value);
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
   };
 
@@ -26,43 +34,69 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Rate limiting check
+    const clientIdentifier = formData.email || 'anonymous';
+    if (!rateLimit.isAllowed(clientIdentifier, 3, 15 * 60 * 1000)) {
+      setError('Too many registration attempts. Please try again later.');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Input validation and sanitization
+    const sanitizedEmail = validateEmail(formData.email);
+    const sanitizedName = validateName(formData.fullName);
+    const sanitizedRole = validateRole(formData.role);
+    
+    if (!sanitizedEmail) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    if (!sanitizedName) {
+      setError('Please enter a valid name (letters, spaces, hyphens, and apostrophes only)');
+      return;
+    }
+
+    // Password validation
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors.join(' '));
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        }),
+      const response = await axios.post('/api/users/register', {
+        fullName: sanitizedName,
+        email: sanitizedEmail,
+        password: formData.password, // Don't sanitize password as it might affect validation
+        role: sanitizedRole,
       });
 
-      if (response.ok) {
-        navigate('/login', {
-          state: { message: 'Account created successfully! Please sign in.' },
-        });
+      if (response.data.error) {
+        setError(response.data.error);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Error creating account');
+        // Reset rate limit on successful registration
+        rateLimit.reset(clientIdentifier);
+        
+        // Show success alert before navigating
+        setAlertMessage('Successful user registration');
+        setAlertType('success');
+        setShowAlert(true);
+        
+        // Navigate to login after a short delay to allow user to see the alert
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
     } catch (err) {
       setError('Error creating account. Please try again.');
-      console.error(err);
+      console.error('Registration error:', err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -111,6 +145,7 @@ export default function Register() {
               value={formData.fullName}
               onChange={handleChange}
               required
+              autoComplete="name"
             />
           </div>
 
@@ -124,6 +159,7 @@ export default function Register() {
               value={formData.email}
               onChange={handleChange}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -137,6 +173,7 @@ export default function Register() {
               value={formData.password}
               onChange={handleChange}
               required
+              autoComplete="new-password"
             />
           </div>
 
@@ -150,6 +187,7 @@ export default function Register() {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              autoComplete="new-password"
             />
           </div>
 
@@ -168,6 +206,14 @@ export default function Register() {
           Already have an account? Sign in
         </Link>
       </div>
+      
+      {showAlert && (
+        <Alert
+          message={alertMessage}
+          type={alertType}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 }
