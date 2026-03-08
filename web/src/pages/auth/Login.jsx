@@ -1,9 +1,9 @@
 import './Login.css';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { validateEmail, sanitizeInput, rateLimit } from './utils/validation';
+import { validateEmail, sanitizeInput, rateLimit } from '../../utils/validation';
 import axios from 'axios';
-import Alert from './components/Alert';
+import Alert from '../../components/Alert';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -93,7 +93,7 @@ export default function Login() {
         
         // Navigate to dashboard after a short delay
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/home');
         }, 1500);
       }
     } catch (err) {

@@ -1,48 +1,78 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
-import Login from './Login.jsx';
-import Register from './Register.jsx';
-import Dashboard from './Dashboard.jsx';
-import HomeBooks from './HomeBooks.jsx';
-import UserHome from './pages/UserHome.jsx';
-import BorrowItems from './pages/BorrowItems.jsx';
-import MyBooks from './pages/MyBooks.jsx';
+
+// ── Auth ──────────────────────────────────────────────────
+import Login    from './pages/auth/Login.jsx';
+import Register from './pages/auth/Register.jsx';
+
+// ── User ─────────────────────────────────────────────────
+import UserHome    from './pages/user/UserHome.jsx';
+import BorrowItems from './pages/user/BorrowItems.jsx';
+import MyBooks     from './pages/user/MyBooks.jsx';
+
+// ── Librarian ─────────────────────────────────────────────
+import LibrarianDashboard from './pages/librarian/LibrarianDashboard.jsx';
+import ManageBooks        from './pages/librarian/ManageBooks.jsx';
+
+// ── Admin ─────────────────────────────────────────────────
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import ManageUsers    from './pages/admin/ManageUsers.jsx';
+
+// ── Helpers ───────────────────────────────────────────────
+const getUser = () => {
+  try { return JSON.parse(localStorage.getItem('user')); }
+  catch { return null; }
+};
+
+/** Redirect to the right dashboard based on role */
+function RoleRedirect() {
+  const user = getUser();
+  if (!user) return <Navigate to="/login" />;
+  if (user.role === 'ADMIN')      return <Navigate to="/admin/dashboard" />;
+  if (user.role === 'LIBRARIAN')  return <Navigate to="/librarian/dashboard" />;
+  return <Navigate to="/dashboard" />;
+}
+
+/** Guard — only allow if authenticated AND role matches */
+function ProtectedRoute({ element, allowedRoles }) {
+  const user = getUser();
+  if (!user) return <Navigate to="/login" />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <RoleRedirect />;
+  return element;
+}
 
 function AppContent() {
-  console.log('AppContent rendering...');
-  
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    const user = localStorage.getItem('user');
-    return user !== null;
-  };
-
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={<Login />} />
+      {/* Public */}
+      <Route path="/"         element={<Navigate to="/login" />} />
+      <Route path="/login"    element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route 
-        path="/dashboard" 
-        element={isAuthenticated() ? <UserHome /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="/borrow-items" 
-        element={isAuthenticated() ? <BorrowItems /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="/my-books" 
-        element={isAuthenticated() ? <MyBooks /> : <Navigate to="/login" />} 
-      />
-      <Route path="/home" element={<HomeBooks />} />
+
+      {/* Auto-redirect after login */}
+      <Route path="/home" element={<RoleRedirect />} />
+
+      {/* ── User routes ── */}
+      <Route path="/dashboard"    element={<ProtectedRoute element={<UserHome />}    allowedRoles={['USER']} />} />
+      <Route path="/borrow-items" element={<ProtectedRoute element={<BorrowItems />} allowedRoles={['USER']} />} />
+      <Route path="/my-books"     element={<ProtectedRoute element={<MyBooks />}     allowedRoles={['USER']} />} />
+
+      {/* ── Librarian routes ── */}
+      <Route path="/librarian/dashboard"     element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/manage-books"  element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
+
+      {/* ── Admin routes ── */}
+      <Route path="/admin/dashboard"    element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/manage-users" element={<ProtectedRoute element={<ManageUsers />}    allowedRoles={['ADMIN']} />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   );
 }
 
 export default function App() {
-  console.log('App component rendering...');
-  
   return (
     <Router>
       <AuthProvider>

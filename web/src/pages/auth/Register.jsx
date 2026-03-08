@@ -1,9 +1,9 @@
 import './Register.css';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from './utils/validation';
+import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from '../../utils/validation';
 import axios from 'axios';
-import Alert from './components/Alert';
+import Alert from '../../components/Alert';
 
 export default function Register() {
   const [formData, setFormData] = useState({
