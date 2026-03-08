@@ -5,6 +5,9 @@ import Login from './Login.jsx';
 import Register from './Register.jsx';
 import Dashboard from './Dashboard.jsx';
 import HomeBooks from './HomeBooks.jsx';
+import UserHome from './pages/UserHome.jsx';
+import BorrowItems from './pages/BorrowItems.jsx';
+import MyBooks from './pages/MyBooks.jsx';
 
 function AppContent() {
   console.log('AppContent rendering...');
@@ -22,7 +25,15 @@ function AppContent() {
       <Route path="/register" element={<Register />} />
       <Route 
         path="/dashboard" 
-        element={isAuthenticated() ? <Dashboard /> : <Navigate to="/login" />} 
+        element={isAuthenticated() ? <UserHome /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/borrow-items" 
+        element={isAuthenticated() ? <BorrowItems /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/my-books" 
+        element={isAuthenticated() ? <MyBooks /> : <Navigate to="/login" />} 
       />
       <Route path="/home" element={<HomeBooks />} />
     </Routes>

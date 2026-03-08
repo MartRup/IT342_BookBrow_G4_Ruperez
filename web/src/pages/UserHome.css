@@ -1,0 +1,335 @@
+/* =====================================
+   UserHome.css – Home / Dashboard Page
+   ===================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.uh-wrapper {
+  min-height: 100vh;
+  background-color: #f4f5f7;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ────────── LOADING ────────── */
+.uh-loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 1rem;
+  color: #7a0027;
+}
+.uh-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #f3d5db;
+  border-top-color: #7a0027;
+  border-radius: 50%;
+  animation: uh-spin 0.8s linear infinite;
+}
+@keyframes uh-spin { to { transform: rotate(360deg); } }
+
+/* ────────── NAVBAR ────────── */
+.uh-nav {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+.uh-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+.uh-logo-circle {
+  width: 38px;
+  height: 38px;
+  background: #7a0027;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.uh-logo-circle svg { width: 20px; height: 20px; }
+.uh-brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #7a0027;
+}
+
+.uh-nav-links {
+  display: flex;
+  gap: 0.25rem;
+}
+.uh-nav-link {
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #444;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.uh-nav-link:hover { color: #7a0027; background: #fef0f3; }
+.uh-nav-active { color: #7a0027 !important; font-weight: 600; }
+
+.uh-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.uh-user-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+}
+.uh-user-icon svg { width: 22px; height: 22px; }
+.uh-user-info { display: flex; flex-direction: column; line-height: 1.3; }
+.uh-user-name  { font-size: 0.85rem; font-weight: 600; color: #222; }
+.uh-user-email { font-size: 0.75rem; color: #888; }
+
+.uh-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background: #7a0027;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.uh-logout-btn:hover { background: #5a0019; }
+.uh-logout-btn svg { width: 16px; height: 16px; }
+
+/* ────────── MAIN ────────── */
+.uh-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+
+/* ────────── HERO SECTION ────────── */
+.uh-hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.uh-hero-text { flex: 1; }
+
+.uh-hero-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+}
+.uh-hero-accent { color: #7a0027; }
+
+.uh-hero-subtitle {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 420px;
+}
+
+.uh-explore-btn {
+  display: inline-block;
+  padding: 0.75rem 1.7rem;
+  background: #7a0027;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.uh-explore-btn:hover { background: #5a0019; transform: translateY(-1px); }
+
+/* Right side of hero */
+.uh-hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5rem;
+  min-width: 300px;
+}
+
+.uh-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  width: 100%;
+}
+.uh-search-bar input {
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: #333;
+  outline: none;
+  flex: 1;
+}
+.uh-search-icon { width: 18px; height: 18px; color: #888; flex-shrink: 0; }
+
+.uh-hero-icon-circle {
+  width: 160px;
+  height: 160px;
+  background: #7a0027;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(122,0,39,0.25);
+}
+
+/* ────────── STATS ────────── */
+.uh-stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.uh-stat-card {
+  background: #e9e9e9;
+  border-radius: 14px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.uh-stat-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.uh-stat-number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #555;
+  line-height: 1;
+}
+.uh-stat-label {
+  font-size: 0.9rem;
+  color: #777;
+  font-weight: 500;
+}
+
+/* ────────── FEATURED BOOKS ────────── */
+.uh-featured-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+}
+
+.uh-books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.uh-book-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.uh-book-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.13); }
+
+.uh-book-cover {
+  height: 200px;
+  background: #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.uh-book-cover img { width: 100%; height: 100%; object-fit: cover; }
+.uh-book-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+}
+
+.uh-book-info { padding: 1rem 1.1rem 1.2rem; }
+
+.uh-book-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+.uh-book-author {
+  font-size: 0.82rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+}
+
+.uh-book-status {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+.uh-book-status.available { background: #d4f5e4; color: #156b40; }
+.uh-book-status.borrowed  { background: #ffe0e6; color: #8b001d; }
+
+.uh-borrow-btn {
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  background: #c8703a;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.uh-borrow-btn:hover:not(:disabled) { background: #a8562a; transform: translateY(-1px); }
+.uh-borrow-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ────────── RESPONSIVE ────────── */
+@media (max-width: 768px) {
+  .uh-hero-section { flex-direction: column; }
+  .uh-hero-right { align-items: stretch; min-width: unset; width: 100%; }
+  .uh-hero-icon-circle { display: none; }
+  .uh-stats-section { grid-template-columns: 1fr; }
+  .uh-nav-links { display: none; }
+}
