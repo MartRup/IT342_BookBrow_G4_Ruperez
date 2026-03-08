@@ -38,17 +38,8 @@ export default function BorrowItems() {
       setFilteredBooks(response.data);
     } catch (error) {
       console.error('Error fetching books:', error);
-      // Mock data
-      const mock = [
-        { id: 1, title: 'A Desolation Called Peace', author: 'Arkady Martine', coverUrl: null, status: 'Available' },
-        { id: 2, title: 'Avengers: Secret Wars', author: 'Stanley and Jack Kirby', coverUrl: null, status: 'Available' },
-        { id: 3, title: 'Harry Potter: The Chamber of Secrets', author: 'JK Rollings', coverUrl: null, status: 'Available' },
-        { id: 4, title: 'I Love You Since 1892', author: 'Binibining Mia', coverUrl: null, status: 'Available' },
-        { id: 5, title: 'Dragon Ball Super', author: 'Akira Toriyama', coverUrl: null, status: 'Available' },
-        { id: 6, title: 'Jojo Bizzare Adventure: Stone Ocean', author: 'Hirokiko Araki', coverUrl: null, status: 'Available' },
-      ];
-      setBooks(mock);
-      setFilteredBooks(mock);
+      setBooks([]);
+      setFilteredBooks([]);
     } finally {
       setLoading(false);
     }

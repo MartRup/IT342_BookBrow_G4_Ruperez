@@ -34,11 +34,7 @@ export default function UserHome() {
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setStats({ booksBorrowed: 0, dueSoon: 0, returned: 0 });
-      setFeaturedBooks([
-        { id: 1, title: 'Harry Potter', author: 'J.K Rowling', coverUrl: null, status: 'Available' },
-        { id: 2, title: 'Sunrise of the Reaping', author: 'Suzanne Collins', coverUrl: null, status: 'Available' },
-        { id: 3, title: 'A Desolation Called Peace', author: 'Arkady Martine', coverUrl: null, status: 'Available' },
-      ]);
+      setFeaturedBooks([]);
     } finally {
       setLoading(false);
     }

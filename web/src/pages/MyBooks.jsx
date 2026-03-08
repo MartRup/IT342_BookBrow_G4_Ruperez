@@ -36,9 +36,8 @@ export default function MyBooks() {
       });
     } catch (error) {
       console.error('Error fetching my books:', error);
-      // Mock placeholders
-      setCurrentBorrows([{ id: 1, book: null }, { id: 2, book: null }, { id: 3, book: null }]);
-      setBorrowHistory([{ id: 4, book: null }, { id: 5, book: null }]);
+      setCurrentBorrows([]);
+      setBorrowHistory([]);
       setStats({ currentlyBorrowing: 0, totalBorrowed: 0, readingDays: 0 });
     } finally {
       setLoading(false);
