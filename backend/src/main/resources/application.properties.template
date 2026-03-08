@@ -1,0 +1,31 @@
+spring.application.name=bookbrow
+
+# ============================================================
+# Database — Supabase Session Pooler
+# Copy this file to application.properties and fill in values
+# ============================================================
+spring.datasource.url=jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
+spring.datasource.username=postgres.<YOUR_SUPABASE_PROJECT_REF>
+spring.datasource.password=<YOUR_SUPABASE_DB_PASSWORD>
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# ============================================================
+# JPA / Hibernate
+# ============================================================
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# ============================================================
+# JWT Security
+# Generate a Base64-encoded 256-bit secret: https://generate.plus/en/base64
+# Expiration in milliseconds (3600000 = 1 hour)
+# ============================================================
+application.security.jwt.secret-key=<YOUR_BASE64_256BIT_SECRET>
+application.security.jwt.expiration=3600000
+
+# ============================================================
+# Server
+# ============================================================
+server.port=8080
