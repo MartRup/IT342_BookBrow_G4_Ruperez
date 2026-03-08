@@ -1,87 +1,120 @@
 package com.example.bookbrow.controller;
 
+import com.example.bookbrow.dto.ApiResponse;
 import com.example.bookbrow.entity.User;
+import com.example.bookbrow.repository.UserRepository;
 import com.example.bookbrow.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UserController {
-    
-    @Autowired
-    private UserService userService;
-    
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> request) {
-        String fullName = (String) request.get("fullName");
-        String email = (String) request.get("email");
-        String password = (String) request.get("password");
-        String roleStr = (String) request.getOrDefault("role", "USER");
-        
-        if (fullName == null || fullName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Full name is required"));
-        }
-        
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
-        }
-        
-        if (password == null || password.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Password is required"));
-        }
-        
-        User.UserRole role;
-        try {
-            role = User.UserRole.valueOf(roleStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            role = User.UserRole.USER;
-        }
-        
-        User user = userService.createUser(fullName, email, password, role);
-        
-        if (user != null) {
-            user.setPassword(null);
-            return ResponseEntity.ok(user);
-        }
-        return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
-    }
-    
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, Object> request) {
-        String email = (String) request.get("email");
-        String password = (String) request.get("password");
-        
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
-        }
-        
-        if (password == null || password.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Password is required"));
-        }
-        
-        Optional<User> userOpt = userService.findByEmail(email);
-        
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (userService.verifyPassword(password, user.getPassword())) {
-                user.setPassword(null);
-                return ResponseEntity.ok(Map.of("user", user, "message", "Login successful"));
+
+    private final UserRepository userRepository;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
+    /** GET /api/v1/users — ADMIN only */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "1")  int page,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false)    String role
+    ) {
+        var pageable = PageRequest.of(page - 1, limit);
+        Page<User> userPage;
+
+        if (role != null) {
+            try {
+                User.UserRole userRole = User.UserRole.valueOf(role.toUpperCase());
+                userPage = userRepository.findByRole(userRole, pageable);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("VALID-001", "Invalid role: " + role));
             }
+        } else {
+            userPage = userRepository.findAll(pageable);
         }
-        
-        return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of(
+                "users", userPage.getContent(),
+                "pagination", Map.of(
+                        "page", page, "limit", limit,
+                        "total", userPage.getTotalElements(),
+                        "pages", userPage.getTotalPages()
+                )
+        )));
     }
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        return user.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+
+    /** POST /api/v1/users/librarian — ADMIN creates a librarian */
+    @PostMapping("/librarian")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createLibrarian(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String password = body.get("password");
+
+        if (email == null || password == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("VALID-001", "Email and password are required"));
+        }
+        if (userRepository.existsByEmail(email)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("AUTH-004", "Email already registered"));
+        }
+
+        User librarian = userService.createUser("Librarian", email, password, User.UserRole.LIBRARIAN);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(Map.of("user", Map.of(
+                        "id", librarian.getId(),
+                        "email", librarian.getEmail(),
+                        "role", librarian.getRole().name()
+                ))));
+    }
+
+    /** PUT /api/v1/users/{id}/role — ADMIN */
+    @PutMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String role = body.get("role");
+        try {
+            User.UserRole userRole = User.UserRole.valueOf(role.toUpperCase());
+            User updated = userService.updateUser(id, null, null, userRole);
+            if (updated == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("USER-001", "User not found"));
+            }
+            return ResponseEntity.ok(ApiResponse.success(Map.of("user", Map.of(
+                    "id", updated.getId(),
+                    "email", updated.getEmail(),
+                    "role", updated.getRole().name()
+            ))));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("VALID-001", "Invalid role: " + role));
+        }
+    }
+
+    /** DELETE /api/v1/users/{id} — ADMIN */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("USER-001", "User not found"));
+        }
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("message", "User deleted successfully")));
     }
 }
