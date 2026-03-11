@@ -6,7 +6,11 @@ import com.example.bookbrow.dto.RegisterRequest;
 import com.example.bookbrow.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,5 +34,18 @@ public class AuthController {
         return response.isSuccess()
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.badRequest().body(response);
+    }
+
+    @GetMapping("/google/success")
+    public ResponseEntity<AuthResponse> googleLoginSuccess(OAuth2AuthenticationToken authentication) {
+        AuthResponse response = authService.authenticateWithGoogle(authentication);
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.badRequest().body(response);
+    }
+
+    @GetMapping("/google/failure")
+    public ResponseEntity<String> googleLoginFailure() {
+        return ResponseEntity.badRequest().body("Google authentication failed");
     }
 }
