@@ -1,9 +1,9 @@
 import './Login.css';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { validateEmail, sanitizeInput, rateLimit } from './utils/validation';
+import { validateEmail, sanitizeInput, rateLimit } from '../../utils/validation';
 import axios from 'axios';
-import Alert from './components/Alert';
+import Alert from '../../components/Alert';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -68,28 +68,32 @@ export default function Login() {
     }
 
     try {
-      const response = await axios.post('/api/users/login', {
+      const response = await axios.post('/api/v1/auth/login', {
         email: sanitizedEmail,
         password: sanitizedPassword,
       });
 
-      if (response.data.error) {
-        setError(response.data.error);
+      if (!response.data.success) {
+        setError(response.data.error?.message || 'Invalid email or password');
       } else {
         // Reset rate limit on successful login
         rateLimit.reset(clientIdentifier);
         
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        // Store user data + token in localStorage
+        const userData = response.data.data;
+        localStorage.setItem('user', JSON.stringify(userData));
+        if (userData.token) {
+          localStorage.setItem('token', userData.token);
+        }
         
         // Show success alert before navigating
         setAlertMessage('Successful login');
         setAlertType('success');
         setShowAlert(true);
         
-        // Navigate to dashboard after a short delay to allow user to see the alert
+        // Navigate to dashboard after a short delay
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/home');
         }, 1500);
       }
     } catch (err) {

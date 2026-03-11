@@ -1,9 +1,9 @@
 import './Register.css';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from './utils/validation';
+import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from '../../utils/validation';
 import axios from 'axios';
-import Alert from './components/Alert';
+import Alert from '../../components/Alert';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -71,27 +71,27 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/users/register', {
+      const response = await axios.post('/api/v1/auth/register', {
         fullName: sanitizedName,
         email: sanitizedEmail,
-        password: formData.password, // Don't sanitize password as it might affect validation
-        role: sanitizedRole,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
 
-      if (response.data.error) {
-        setError(response.data.error);
+      if (!response.data.success) {
+        setError(response.data.error?.message || 'Error creating account');
       } else {
         // Reset rate limit on successful registration
         rateLimit.reset(clientIdentifier);
         
         // Show success alert before navigating
-        setAlertMessage('Successful user registration');
+        setAlertMessage('Account created successfully! Please sign in.');
         setAlertType('success');
         setShowAlert(true);
         
-        // Navigate to login after a short delay to allow user to see the alert
+        // Navigate to login after a short delay
         setTimeout(() => {
-          navigate('/login');
+          navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
         }, 2000);
       }
     } catch (err) {

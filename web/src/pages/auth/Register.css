@@ -7,19 +7,21 @@
     rgba(0, 0, 0, 0.3),
     rgba(0, 0, 0, 0.3)
   ),
-  url('../img/Library.jpg') center/cover;
+  url('/img/Library.jpg') center/cover;
   background-attachment: fixed;
   padding: 1rem;
 }
 
-.auth-card {
+.register-card {
   background: rgba(212, 152, 140, 0.95);
   border-radius: 24px;
   padding: 2.5rem;
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.5s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 @keyframes slideUp {
@@ -68,7 +70,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
   margin: 1.5rem 0;
 }
 
@@ -96,7 +98,7 @@
 }
 
 .form-group input::placeholder,
-.form-group select {
+.form-group select::placeholder {
   color: #999;
 }
 
@@ -129,51 +131,39 @@
   font-family: inherit;
 }
 
-.signin-button {
+.register-button {
   background: #7a2a2a;
   color: white;
+  margin-top: 0.5rem;
 }
 
-.signin-button:hover:not(:disabled) {
+.register-button:hover:not(:disabled) {
   background: #5c1f1f;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(122, 42, 42, 0.3);
 }
 
-.signin-button:disabled {
+.register-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-.register-link {
-  background: white;
-  color: #7a2a2a;
-  font-weight: 700;
-  margin-top: 0.5rem;
-}
-
-.register-link:hover {
-  background: #f5f5f5;
-  transform: translateY(-2px);
-}
-
-.forgot-password-link {
-  text-align: center;
-  color: #f5f5f5;
-  text-decoration: none;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-  transition: color 0.3s ease;
-}
-
-.forgot-password-link:hover {
+.signin-link {
+  background: #7a2a2a;
   color: white;
-  text-decoration: underline;
+  margin-top: 0.5rem;
+}
+
+.signin-link:hover {
+  background: #5c1f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(122, 42, 42, 0.3);
 }
 
 @media (max-width: 480px) {
-  .auth-card {
+  .register-card {
     padding: 1.5rem;
+    max-height: 100vh;
   }
 
   .auth-card h1 {
@@ -182,5 +172,9 @@
 
   .auth-subtitle {
     font-size: 0.9rem;
+  }
+
+  .auth-form {
+    gap: 0.8rem;
   }
 }
