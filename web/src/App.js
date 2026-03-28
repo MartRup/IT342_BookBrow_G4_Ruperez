@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './AuthContext';
 
 // ── Auth ──────────────────────────────────────────────────
-import Login    from './pages/auth/Login.jsx';
-import Register from './pages/auth/Register.jsx';
+import Login       from './pages/auth/Login.jsx';
+import Register    from './pages/auth/Register.jsx';
+import AuthSuccess from './pages/auth/AuthSuccess.jsx';
 
 // ── User ─────────────────────────────────────────────────
 import UserHome    from './pages/user/UserHome.jsx';
@@ -46,9 +47,11 @@ function AppContent() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/"         element={<Navigate to="/login" />} />
-      <Route path="/login"    element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/"             element={<Navigate to="/login" />} />
+      <Route path="/login"        element={<Login />} />
+      <Route path="/register"     element={<Register />} />
+      {/* Google OAuth2 callback landing page */}
+      <Route path="/auth/success" element={<AuthSuccess />} />
 
       {/* Auto-redirect after login */}
       <Route path="/home" element={<RoleRedirect />} />

@@ -33,7 +33,15 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        // Embed role and fullName so the frontend can decode them from the JWT
+        if (userDetails instanceof com.example.bookbrow.entity.User appUser) {
+            extraClaims.put("role",     appUser.getRole().name());
+            extraClaims.put("fullName", appUser.getFullName());
+        }
+
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

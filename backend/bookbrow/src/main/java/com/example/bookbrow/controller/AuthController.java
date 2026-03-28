@@ -31,4 +31,9 @@ public class AuthController {
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.badRequest().body(response);
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Backend is running on port 8080");
+    }
 }
