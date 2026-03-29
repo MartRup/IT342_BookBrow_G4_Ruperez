@@ -15,7 +15,7 @@
 .auth-card {
   background: rgba(212, 152, 140, 0.95);
   border-radius: 24px;
-  padding: 2.5rem;
+  padding: 2rem;
   width: 100%;
   max-width: 420px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -33,21 +33,37 @@
   }
 }
 
-.auth-icon {
-  width: 60px;
-  height: 60px;
-  background: #7a2a2a;
-  border-radius: 50%;
-  margin: 0 auto 1.5rem;
+.auth-brand-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  gap: 0.65rem;
+  margin: 0 auto 1.5rem;
 }
 
-.auth-icon svg {
-  width: 32px;
-  height: 32px;
+.auth-logo-circle {
+  width: 42px;
+  height: 42px;
+  background: #7a0027;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.auth-logo-circle svg {
+  width: 22px;
+  height: 22px;
+}
+
+.auth-brand-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .auth-card h1 {
@@ -69,7 +85,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
-  margin: 1.5rem 0;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-group {
@@ -149,7 +166,7 @@
   background: white;
   color: #7a2a2a;
   font-weight: 700;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .register-link:hover {
@@ -158,11 +175,12 @@
 }
 
 .forgot-password-link {
+  display: block;
   text-align: center;
   color: #f5f5f5;
   text-decoration: none;
   font-size: 0.9rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   transition: color 0.3s ease;
 }
 
@@ -176,7 +194,7 @@
   align-items: center;
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
-  margin: 1rem 0;
+  margin: 0.3rem 0;
 }
 
 .auth-separator::before,
@@ -199,7 +217,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 .google-button:hover {

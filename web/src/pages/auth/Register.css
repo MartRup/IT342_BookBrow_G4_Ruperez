@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Prevent top cut-off on small screens */
   background: linear-gradient(
     rgba(0, 0, 0, 0.3),
     rgba(0, 0, 0, 0.3)
@@ -20,8 +20,7 @@
   max-width: 480px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.5s ease;
-  max-height: 90vh;
-  overflow-y: auto;
+  margin: auto; /* Re-center vertically since we removed align-items: center */
 }
 
 @keyframes slideUp {
@@ -35,21 +34,37 @@
   }
 }
 
-.auth-icon {
-  width: 60px;
-  height: 60px;
-  background: #7a2a2a;
-  border-radius: 50%;
-  margin: 0 auto 1.5rem;
+.auth-brand-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  gap: 0.65rem;
+  margin: 0 auto 1.5rem;
 }
 
-.auth-icon svg {
-  width: 32px;
-  height: 32px;
+.auth-logo-circle {
+  width: 42px;
+  height: 42px;
+  background: #7a0027;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.auth-logo-circle svg {
+  width: 22px;
+  height: 22px;
+}
+
+.auth-brand-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .auth-card h1 {
@@ -70,8 +85,8 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
+  gap: 0.6rem;
+  margin: 1.5rem 0 0.25rem 0;
 }
 
 .form-group {
@@ -117,6 +132,46 @@
   text-align: center;
 }
 
+/* Role info badge – shown instead of the role selector */
+.role-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.role-info-badge strong {
+  color: #ffd7b5;
+}
+
+/* Per-field error text */
+.field-error {
+  font-size: 0.82rem;
+  color: #ffe0d0;
+  margin-top: -0.25rem;
+}
+
+/* Red input border when field has an error */
+.form-group.has-error input,
+.form-group.has-error select {
+  outline: 2px solid rgba(255, 100, 100, 0.7);
+}
+
+/* Optional label suffix */
+.optional-label {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+
 .auth-button {
   padding: 0.85rem 1rem;
   border: none;
@@ -134,7 +189,7 @@
 .register-button {
   background: #7a2a2a;
   color: white;
-  margin-top: 0.5rem;
+  margin-top: 0.1rem;
 }
 
 .register-button:hover:not(:disabled) {
@@ -151,7 +206,7 @@
 .signin-link {
   background: #7a2a2a;
   color: white;
-  margin-top: 0.5rem;
+  margin-top: 0.1rem;
 }
 
 .signin-link:hover {
@@ -163,7 +218,6 @@
 @media (max-width: 480px) {
   .register-card {
     padding: 1.5rem;
-    max-height: 100vh;
   }
 
   .auth-card h1 {

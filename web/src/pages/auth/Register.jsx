@@ -1,19 +1,28 @@
 import './Register.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { validateEmail, validatePassword, validateName, validateRole, sanitizeInput, rateLimit } from '../../utils/validation';
+import { validateEmail, validatePassword, validateName, validatePhone, sanitizeInput, rateLimit } from '../../utils/validation';
 import axios from 'axios';
 import Alert from '../../components/Alert';
 
+/**
+ * Register – Borrower (USER/MEMBER) self-registration.
+ *
+ * Role rules enforced here:
+ *  - The role field is NOT shown to the user.
+ *  - The backend always assigns MEMBER upon /api/v1/auth/register.
+ *  - Librarian creation is an ADMIN-only action done from the admin dashboard.
+ */
 export default function Register() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
-    role: 'USER',
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
+  const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -22,49 +31,60 @@ export default function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const sanitizedValue = sanitizeInput(value);
-    
-    setFormData((prev) => ({
-      ...prev,
-      [name]: sanitizedValue,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: sanitizeInput(value) }));
+    // Clear field-level error on edit
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const fieldErrors = {};
+
+    const sanitizedName = validateName(formData.fullName);
+    if (!sanitizedName) {
+      fieldErrors.fullName = 'Please enter a valid name (letters, spaces, hyphens, apostrophes only)';
+    }
+
+    const sanitizedEmail = validateEmail(formData.email);
+    if (!sanitizedEmail) {
+      fieldErrors.email = 'Please enter a valid email address';
+    }
+
+    // Phone is optional; if provided it must be valid
+    if (formData.phone && !validatePhone(formData.phone)) {
+      fieldErrors.phone = 'Please enter a valid phone number';
+    }
+
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      fieldErrors.password = passwordValidation.errors.join(' ');
+    }
+
+    if (!formData.confirmPassword) {
+      fieldErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      fieldErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    return fieldErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setGlobalError('');
 
-    // Rate limiting check
+    // Rate limiting – max 3 attempts per 15 minutes
     const clientIdentifier = formData.email || 'anonymous';
     if (!rateLimit.isAllowed(clientIdentifier, 3, 15 * 60 * 1000)) {
-      setError('Too many registration attempts. Please try again later.');
+      setGlobalError('Too many registration attempts. Please try again in 15 minutes.');
       return;
     }
 
-    // Input validation and sanitization
-    const sanitizedEmail = validateEmail(formData.email);
-    const sanitizedName = validateName(formData.fullName);
-    const sanitizedRole = validateRole(formData.role);
-    
-    if (!sanitizedEmail) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    
-    if (!sanitizedName) {
-      setError('Please enter a valid name (letters, spaces, hyphens, and apostrophes only)');
-      return;
-    }
-
-    // Password validation
-    const passwordValidation = validatePassword(formData.password);
-    if (!passwordValidation.isValid) {
-      setError(passwordValidation.errors.join(' '));
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Field-level validation
+    const fieldErrors = validate();
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
       return;
     }
 
@@ -72,30 +92,32 @@ export default function Register() {
 
     try {
       const response = await axios.post('/api/v1/auth/register', {
-        fullName: sanitizedName,
-        email: sanitizedEmail,
+        fullName: validateName(formData.fullName),
+        email: validateEmail(formData.email),
         password: formData.password,
         confirmPassword: formData.confirmPassword,
+        phone: formData.phone || null,
+        // NOTE: role is intentionally NOT sent – backend always assigns MEMBER
       });
 
       if (!response.data.success) {
-        setError(response.data.error?.message || 'Error creating account');
+        setGlobalError(response.data.error?.message || 'Error creating account');
       } else {
-        // Reset rate limit on successful registration
         rateLimit.reset(clientIdentifier);
-        
-        // Show success alert before navigating
-        setAlertMessage('Account created successfully! Please sign in.');
+
+        const msg =
+          response.data.data?.message || 'Account created successfully! Please sign in.';
+        setAlertMessage(msg);
         setAlertType('success');
         setShowAlert(true);
-        
-        // Navigate to login after a short delay
+
         setTimeout(() => {
-          navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
+          navigate('/login', { state: { message: msg } });
         }, 2000);
       }
     } catch (err) {
-      setError('Error creating account. Please try again.');
+      const serverMsg = err.response?.data?.error?.message;
+      setGlobalError(serverMsg || 'Error creating account. Please try again.');
       console.error('Registration error:', err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -105,100 +127,115 @@ export default function Register() {
   return (
     <div className="auth-container">
       <div className="auth-card register-card">
-        <div className="auth-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-          </svg>
+        <div className="auth-brand-header">
+          <div className="auth-logo-circle">
+            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
+            </svg>
+          </div>
+          <span className="auth-brand-name">BookBrow</span>
         </div>
 
         <h1>Join BookBrow!</h1>
-        <p className="auth-subtitle">
-          Create your account and start borrowing books
-        </p>
+        <p className="auth-subtitle">Create your account and start borrowing books</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="role">Select a role</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="USER">Borrower</option>
-              <option value="LIBRARIAN">Librarian</option>
-            </select>
-          </div>
+        {/* Role info badge – informs user their role is fixed */}
+        <div className="role-info-badge">
+          <span>📚</span> You will be registered as a <strong>Borrower</strong>
+        </div>
 
-          <div className="form-group">
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
+          {/* Full Name */}
+          <div className={`form-group ${errors.fullName ? 'has-error' : ''}`}>
             <label htmlFor="fullName">Full Name</label>
             <input
               type="text"
               id="fullName"
               name="fullName"
-              placeholder="Enter your Full Name"
+              placeholder="Enter your full name"
               value={formData.fullName}
               onChange={handleChange}
               required
               autoComplete="name"
             />
+            {errors.fullName && <span className="field-error">{errors.fullName}</span>}
           </div>
 
-          <div className="form-group">
+          {/* Email */}
+          <div className={`form-group ${errors.email ? 'has-error' : ''}`}>
             <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="Enter your email address (john@example.com)"
+              placeholder="john@example.com"
               value={formData.email}
               onChange={handleChange}
               required
               autoComplete="email"
             />
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
-          <div className="form-group">
+          {/* Phone (optional) */}
+          <div className={`form-group ${errors.phone ? 'has-error' : ''}`}>
+            <label htmlFor="phone">
+              Phone Number <span className="optional-label">(optional)</span>
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="+63 912 345 6789"
+              value={formData.phone}
+              onChange={handleChange}
+              autoComplete="tel"
+            />
+            {errors.phone && <span className="field-error">{errors.phone}</span>}
+          </div>
+
+          {/* Password */}
+          <div className={`form-group ${errors.password ? 'has-error' : ''}`}>
             <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
               name="password"
-              placeholder="Enter your password"
+              placeholder="At least 8 characters"
               value={formData.password}
               onChange={handleChange}
               required
               autoComplete="new-password"
             />
+            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
-          <div className="form-group">
+          {/* Confirm Password */}
+          <div className={`form-group ${errors.confirmPassword ? 'has-error' : ''}`}>
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
-              placeholder="Confirm you password"
+              placeholder="Re-enter your password"
               value={formData.confirmPassword}
               onChange={handleChange}
               required
               autoComplete="new-password"
             />
+            {errors.confirmPassword && (
+              <span className="field-error">{errors.confirmPassword}</span>
+            )}
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {globalError && <div className="error-message">{globalError}</div>}
 
           <button
             type="submit"
             className="auth-button register-button"
             disabled={loading}
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
@@ -206,7 +243,7 @@ export default function Register() {
           Already have an account? Sign in
         </Link>
       </div>
-      
+
       {showAlert && (
         <Alert
           message={alertMessage}

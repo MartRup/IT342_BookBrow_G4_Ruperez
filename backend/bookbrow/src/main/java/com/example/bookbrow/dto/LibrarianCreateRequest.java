@@ -8,11 +8,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Used exclusively by ADMIN to create a Librarian account.
+ * Role is NOT user-supplied – it is hard-coded to LIBRARIAN in AuthService.
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequest {
+public class LibrarianCreateRequest {
 
     @NotBlank(message = "Full name is required")
     private String fullName;
@@ -24,10 +28,4 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
-
-    @NotBlank(message = "Confirm password is required")
-    private String confirmPassword;
-
-    // Optional – for borrower self-registration
-    private String phone;
 }
