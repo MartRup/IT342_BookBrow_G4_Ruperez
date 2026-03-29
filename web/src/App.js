@@ -18,8 +18,9 @@ import ManageBooks        from './pages/librarian/ManageBooks.jsx';
 import BorrowingRecords   from './pages/librarian/BorrowingRecords.jsx';
 
 // ── Admin ─────────────────────────────────────────────────
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
-import ManageUsers    from './pages/admin/ManageUsers.jsx';
+import AdminDashboard     from './pages/admin/AdminDashboard.jsx';
+import ManageUsers        from './pages/admin/ManageUsers.jsx';
+import AdminManageBooks   from './pages/admin/AdminManageBooks.jsx';
 
 // ── Helpers ───────────────────────────────────────────────
 const getUser = () => {
@@ -68,8 +69,9 @@ function AppContent() {
       <Route path="/librarian/borrowing-records" element={<ProtectedRoute element={<BorrowingRecords />}   allowedRoles={['LIBRARIAN']} />} />
 
       {/* ── Admin routes ── */}
-      <Route path="/admin/dashboard"    element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />} />
-      <Route path="/admin/manage-users" element={<ProtectedRoute element={<ManageUsers />}    allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/dashboard"    element={<ProtectedRoute element={<AdminDashboard />}   allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/manage-users" element={<ProtectedRoute element={<ManageUsers />}      allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/manage-books" element={<ProtectedRoute element={<AdminManageBooks />} allowedRoles={['ADMIN']} />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" />} />

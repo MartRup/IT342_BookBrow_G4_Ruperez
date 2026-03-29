@@ -1,43 +1,114 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-.ad-wrapper{min-height:100vh;background:#f4f5f7;font-family:'Inter',sans-serif}
-.ad-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:1rem;color:#7a0027}
-.ad-spinner{width:44px;height:44px;border:4px solid #f3d5db;border-top-color:#7a0027;border-radius:50%;animation:ad-spin .8s linear infinite}
-@keyframes ad-spin{to{transform:rotate(360deg)}}
-.ad-nav{background:#1a1a2e;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
-.ad-nav-brand{display:flex;align-items:center;gap:.6rem}
-.ad-logo-circle{width:38px;height:38px;background:#7a0027;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.ad-logo-circle svg{width:20px;height:20px}
-.ad-brand-name{font-size:1.2rem;font-weight:700;color:#fff}
-.ad-role-badge{background:rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-weight:700;padding:.2rem .65rem;border-radius:20px}
-.ad-nav-links{display:flex;gap:.25rem}
-.ad-nav-link{padding:.4rem .9rem;border-radius:6px;font-size:.9rem;font-weight:500;color:rgba(255,255,255,.75);cursor:pointer;text-decoration:none;transition:color .2s,background .2s}
-.ad-nav-link:hover,.ad-nav-active{color:#fff;background:rgba(255,255,255,.12)}
-.ad-nav-right{display:flex;align-items:center;gap:.75rem}
-.ad-username{font-size:.85rem;font-weight:600;color:rgba(255,255,255,.9)}
-.ad-logout-btn{padding:.4rem .9rem;border:1px solid rgba(255,255,255,.3);border-radius:8px;background:transparent;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s}
-.ad-logout-btn:hover{background:rgba(255,255,255,.1)}
-.ad-main{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 4rem}
-.ad-title{font-size:2rem;font-weight:800;color:#1a1a2e;margin-bottom:.25rem}
-.ad-sub{font-size:.95rem;color:#888;margin-bottom:2rem}
-.ad-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2.5rem}
-.ad-stat-card{background:#fff;border-radius:14px;padding:1.75rem 1.2rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;box-shadow:0 2px 10px rgba(0,0,0,.07);transition:transform .2s}
-.ad-stat-card:hover{transform:translateY(-4px)}
-.ad-stat-icon{font-size:1.8rem}
-.ad-stat-num{font-size:2.4rem;font-weight:800;line-height:1}
-.ad-stat-lbl{font-size:.82rem;color:#666;font-weight:500;text-align:center}
-.ad-section{background:#fff;border-radius:14px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-.ad-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.ad-section-title{font-size:1.1rem;font-weight:700;color:#1a1a2e}
-.ad-view-all{padding:.4rem .9rem;border:none;border-radius:7px;background:#fef0f3;color:#7a0027;font-size:.82rem;font-weight:600;cursor:pointer}
-.ad-table-wrap{overflow-x:auto}
-.ad-table{width:100%;border-collapse:collapse;font-size:.88rem}
-.ad-table th{text-align:left;padding:.75rem 1rem;background:#f8f8f8;color:#555;font-weight:600;border-bottom:2px solid #eee}
-.ad-table td{padding:.75rem 1rem;border-bottom:1px solid #f0f0f0;color:#333}
-.ad-table tr:hover td{background:#fafafa}
-.ad-role-pill{display:inline-block;padding:.2rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700}
-.ad-role-pill.user{background:#e3f2fd;color:#1565c0}
-.ad-role-pill.librarian{background:#fef0f3;color:#7a0027}
-.ad-role-pill.admin{background:#fce4ec;color:#880e4f}
-.ad-empty{text-align:center;padding:3rem;color:#bbb}
-@media(max-width:768px){.ad-stats-grid{grid-template-columns:repeat(2,1fr)}.ad-nav-links{display:none}}
+.ad-page {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+.ad-content {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ad-welcome-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 5px;
+}
+
+.ad-welcome-sub {
+  font-size: 18px;
+  color: #888;
+  margin-bottom: 40px;
+}
+
+.ad-stats-container {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 50px;
+}
+
+.ad-stat-card {
+  flex: 1;
+  background-color: #d8d8d8;
+  border-radius: 8px;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-stat-value {
+  font-size: 70px;
+  font-weight: 700;
+  color: #555;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.ad-stat-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+}
+
+.ad-recent-logs {
+  background-color: #d8d8d8;
+  border-radius: 8px;
+  padding: 30px;
+}
+
+.ad-logs-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 25px;
+}
+
+.ad-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ad-no-logs {
+  padding: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.ad-log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.ad-log-message {
+  font-size: 16px;
+  color: #666;
+}
+
+.ad-log-time {
+  font-size: 15px;
+  color: #777;
+}
+
+.ad-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.ad-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #800000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
