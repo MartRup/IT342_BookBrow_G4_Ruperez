@@ -117,6 +117,46 @@
   text-align: center;
 }
 
+/* Role info badge – shown instead of the role selector */
+.role-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.role-info-badge strong {
+  color: #ffd7b5;
+}
+
+/* Per-field error text */
+.field-error {
+  font-size: 0.82rem;
+  color: #ffe0d0;
+  margin-top: -0.25rem;
+}
+
+/* Red input border when field has an error */
+.form-group.has-error input,
+.form-group.has-error select {
+  outline: 2px solid rgba(255, 100, 100, 0.7);
+}
+
+/* Optional label suffix */
+.optional-label {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+
 .auth-button {
   padding: 0.85rem 1rem;
   border: none;

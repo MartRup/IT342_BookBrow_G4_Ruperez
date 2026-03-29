@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -23,7 +22,6 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     /** GET /api/v1/users — ADMIN only */
     @GetMapping
@@ -56,31 +54,6 @@ public class UserController {
                         "pages", userPage.getTotalPages()
                 )
         )));
-    }
-
-    /** POST /api/v1/users/librarian — ADMIN creates a librarian */
-    @PostMapping("/librarian")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createLibrarian(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String password = body.get("password");
-
-        if (email == null || password == null) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("VALID-001", "Email and password are required"));
-        }
-        if (userRepository.existsByEmail(email)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error("AUTH-004", "Email already registered"));
-        }
-
-        User librarian = userService.createUser("Librarian", email, password, User.UserRole.LIBRARIAN);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(Map.of("user", Map.of(
-                        "id", librarian.getId(),
-                        "email", librarian.getEmail(),
-                        "role", librarian.getRole().name()
-                ))));
     }
 
     /** PUT /api/v1/users/{id}/role — ADMIN */
