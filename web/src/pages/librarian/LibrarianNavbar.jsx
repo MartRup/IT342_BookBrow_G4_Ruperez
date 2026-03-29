@@ -57,12 +57,10 @@ export default function LibrarianNavbar() {
           </div>
         </div>
         <button className="lib-logout-btn" onClick={handleLogout}>
-          <span style={{ fontWeight: 600, color: '#800000' }}>Logout</span>
-          <div className="lib-logout-icon">
-            <svg viewBox="0 0 24 24" fill="white" width="18" height="18">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5z"/>
-            </svg>
-          </div>
+          Logout
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
         </button>
       </div>
     </nav>

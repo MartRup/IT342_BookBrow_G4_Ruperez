@@ -106,18 +106,23 @@
 .adm-logout-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: none;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
   border: none;
+  border-radius: 8px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.adm-logout-icon {
-  width: 25px;
-  height: 25px;
-  background-color: #800000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
+.adm-logout-btn:hover {
+  background: #5a0019;
+}
+
+.adm-logout-btn svg {
+  width: 16px;
+  height: 16px;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import UserNavbar from './UserNavbar';
 import './UserHome.css';
 
 export default function UserHome() {
@@ -77,40 +78,7 @@ export default function UserHome() {
   return (
     <div className="uh-wrapper">
       {/* ── NAVBAR ── */}
-      <nav className="uh-nav">
-        <div className="uh-nav-brand">
-          <div className="uh-logo-circle">
-            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
-            </svg>
-          </div>
-          <span className="uh-brand-name">BookBrow</span>
-        </div>
-
-        <div className="uh-nav-links">
-          <a href="#" className="uh-nav-link uh-nav-active" onClick={() => navigate('/dashboard')}>Home</a>
-          <a href="#" className="uh-nav-link" onClick={() => navigate('/borrow-items')}>Borrow Items</a>
-          <a href="#" className="uh-nav-link" onClick={() => navigate('/my-books')}>My Books</a>
-        </div>
-
-        <div className="uh-nav-right">
-          <div className="uh-user-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-          </div>
-          <div className="uh-user-info">
-            <span className="uh-user-name">{user?.fullName || user?.name || 'user'}</span>
-            <span className="uh-user-email">{user?.email || 'user@example.com'}</span>
-          </div>
-          <button className="uh-logout-btn" onClick={handleLogout}>
-            Logout
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-          </button>
-        </div>
-      </nav>
+      <UserNavbar />
 
       {/* ── MAIN ── */}
       <main className="uh-main">

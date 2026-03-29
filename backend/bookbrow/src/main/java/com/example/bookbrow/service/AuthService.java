@@ -2,6 +2,7 @@ package com.example.bookbrow.service;
 
 import com.example.bookbrow.dto.AuthResponse;
 import com.example.bookbrow.dto.LibrarianCreateRequest;
+import com.example.bookbrow.dto.PrivilegedUserCreateRequest;
 import com.example.bookbrow.dto.LoginRequest;
 import com.example.bookbrow.dto.RegisterRequest;
 import com.example.bookbrow.entity.User;
@@ -146,6 +147,72 @@ public class AuthService {
                 .fullName(saved.getFullName())
                 .role(saved.getRole().name())
                 .message("Librarian created successfully")
+                .build());
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Case 3: Admin creates a Privileged account (Admin or Librarian)
+    // ──────────────────────────────────────────────────────────────────
+    public AuthResponse createPrivilegedUser(PrivilegedUserCreateRequest request) {
+
+        // Required-field check
+        if (isBlank(request.getFullName())) {
+            return AuthResponse.error("AUTH-010", "Full name is required");
+        }
+        if (isBlank(request.getEmail())) {
+            return AuthResponse.error("AUTH-011", "Email is required");
+        }
+        if (isBlank(request.getPassword())) {
+            return AuthResponse.error("AUTH-012", "Password is required");
+        }
+        if (isBlank(request.getRole())) {
+            return AuthResponse.error("AUTH-014", "Role is required");
+        }
+
+        // Email format
+        if (!isValidEmail(request.getEmail())) {
+            return AuthResponse.error("AUTH-013", "Email format is invalid");
+        }
+
+        // Password strength
+        if (request.getPassword().length() < 8) {
+            return AuthResponse.error("AUTH-003", "Password must be at least 8 characters");
+        }
+
+        // Email uniqueness
+        if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
+            return AuthResponse.error("AUTH-001", "Email is already registered");
+        }
+
+        // Validate Role (must be LIBRARIAN or ADMIN)
+        User.UserRole designatedRole;
+        try {
+            designatedRole = User.UserRole.valueOf(request.getRole().toUpperCase());
+            if (designatedRole == User.UserRole.USER) {
+                return AuthResponse.error("AUTH-015", "Cannot create standard users via this endpoint");
+            }
+        } catch (IllegalArgumentException e) {
+            return AuthResponse.error("AUTH-016", "Invalid role specified");
+        }
+
+        // Build and save
+        User privUser = User.builder()
+                .fullName(request.getFullName().trim())
+                .email(request.getEmail().toLowerCase().trim())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(designatedRole)
+                .isActive(true)
+                .build();
+
+        User saved = userRepository.save(privUser);
+        log.info("Privileged account created by admin: {} with role: {}", saved.getEmail(), designatedRole);
+
+        return AuthResponse.success(AuthResponse.UserData.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .fullName(saved.getFullName())
+                .role(saved.getRole().name())
+                .message(designatedRole + " account created successfully")
                 .build());
     }
 

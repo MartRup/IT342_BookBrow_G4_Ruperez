@@ -4,14 +4,25 @@ import axios from 'axios';
 import AdminNavbar from './AdminNavbar';
 import './ManageUsers.css';
 
+const EMPTY_ADD_FORM = { fullName: '', email: '', password: '', role: 'LIBRARIAN' };
+
 export default function ManageUsers() {
   const [user, setUser] = useState({});
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Edit State
   const [editUser, setEditUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [roleForm, setRoleForm] = useState('USER');
+
+  // Add State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
+  const [addingError, setAddingError] = useState('');
+  const [adding, setAdding] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,14 +46,15 @@ export default function ManageUsers() {
     }
   };
 
+  // --- EDIT ROLE ---
   const openEdit = (u) => {
     setEditUser(u);
     setRoleForm(u.role || 'USER');
-    setShowModal(true);
+    setShowEditModal(true);
   };
 
-  const closeModal = () => {
-    setShowModal(false);
+  const closeEditModal = () => {
+    setShowEditModal(false);
     setEditUser(null);
   };
 
@@ -52,16 +64,45 @@ export default function ManageUsers() {
     try {
       await axios.put(`/api/v1/users/${editUser.id}/role`, { role: roleForm });
       fetchUsers();
-      closeModal();
+      closeEditModal();
     } catch (e) { console.error(e); }
   };
 
+  // --- DELETE ---
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this user?')) return;
     try { 
       await axios.delete(`/api/v1/users/${id}`); 
       fetchUsers(); 
     } catch (e) { console.error(e); }
+  };
+
+  // --- ADD PRIVILEGED USER ---
+  const openAdd = () => {
+    setAddForm(EMPTY_ADD_FORM);
+    setAddingError('');
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setAddingError('');
+  };
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    setAddingError('');
+    setAdding(true);
+    try {
+      // POST the request exactly mapped to PrivilegedUserCreateRequest
+      await axios.post('/api/v1/auth/privileged', addForm);
+      fetchUsers();
+      closeAddModal();
+    } catch (err) {
+      setAddingError(err.response?.data?.message || 'Failed to create user.');
+    } finally {
+      setAdding(false);
+    }
   };
 
   const filtered = users.filter(u => {
@@ -80,16 +121,31 @@ export default function ManageUsers() {
         <h1 className="mu-title">Members and User</h1>
         <p className="mu-sub">Manage Library Members and User</p>
 
-        <div className="mu-search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" width="24" height="24">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input 
-            type="text" 
-            placeholder="Search by member name, book title, or email..." 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-          />
+        <div className="mu-action-wrap" style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+          <div className="mu-search-box" style={{ flex: 1, marginBottom: 0 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" width="24" height="24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search by member name, book title, or email..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+            />
+          </div>
+          <button 
+            onClick={openAdd}
+            style={{
+              padding: '0 25px', borderRadius: '12px', background: '#800000', color: 'white', 
+              fontSize: '16px', fontWeight: 'bold', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '10px'
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="white" width="20" height="20">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Member
+          </button>
         </div>
 
         <div className="mu-table-container">
@@ -133,9 +189,9 @@ export default function ManageUsers() {
         </div>
       </main>
 
-      {/* Modal for editing role */}
-      {showModal && (
-        <div className="mu-overlay" onClick={closeModal}>
+      {/* MODAL: EDIT ROLE */}
+      {showEditModal && (
+        <div className="mu-overlay" onClick={closeEditModal}>
           <div className="mu-modal" onClick={e => e.stopPropagation()}>
             <h2 className="mu-modal-title">Edit User Role</h2>
             <p className="mu-modal-sub">Change role for {editUser?.fullName || editUser?.email}</p>
@@ -149,10 +205,74 @@ export default function ManageUsers() {
                 </select>
               </div>
               <div className="mu-modal-actions">
-                <button type="button" className="mu-cancel-btn" onClick={closeModal}>Cancel</button>
+                <button type="button" className="mu-cancel-btn" onClick={closeEditModal}>Cancel</button>
                 <button type="submit" className="mu-save-btn">Save Role</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD PRIVILEGED USER */}
+      {showAddModal && (
+        <div className="mu-overlay" onClick={closeAddModal}>
+          <div className="mu-modal" onClick={e => e.stopPropagation()}>
+             <h2 className="mu-modal-title">Add Privileged User</h2>
+             <p className="mu-modal-sub">Create a new Librarian or Admin account directly.</p>
+             
+             {addingError && <div style={{color: 'red', marginBottom: '15px'}}>{addingError}</div>}
+             
+             <form onSubmit={handleAddSubmit} className="mu-form">
+               <div className="mu-form-group">
+                 <label>Full Name</label>
+                 <input 
+                   type="text" 
+                   value={addForm.fullName} 
+                   onChange={e => setAddForm(p => ({...p, fullName: e.target.value}))} 
+                   required 
+                   style={{width: '100%', padding:'10px', borderRadius:'4px', border:'1px solid #ddd'}}
+                 />
+               </div>
+               <div className="mu-form-group">
+                 <label>Email Address</label>
+                 <input 
+                   type="email" 
+                   value={addForm.email} 
+                   onChange={e => setAddForm(p => ({...p, email: e.target.value}))} 
+                   required 
+                   style={{width: '100%', padding:'10px', borderRadius:'4px', border:'1px solid #ddd'}}
+                 />
+               </div>
+               <div className="mu-form-group">
+                 <label>Temporary Password (Min: 8)</label>
+                 <input 
+                   type="password" 
+                   value={addForm.password} 
+                   onChange={e => setAddForm(p => ({...p, password: e.target.value}))} 
+                   required
+                   minLength={8}
+                   style={{width: '100%', padding:'10px', borderRadius:'4px', border:'1px solid #ddd'}}
+                 />
+               </div>
+               <div className="mu-form-group">
+                 <label>Assign Role</label>
+                 <select 
+                   value={addForm.role} 
+                   onChange={e => setAddForm(p => ({...p, role: e.target.value}))}
+                   style={{width: '100%', padding:'10px', borderRadius:'4px', border:'1px solid #ddd'}}
+                 >
+                   <option value="LIBRARIAN">Librarian</option>
+                   <option value="ADMIN">Admin</option>
+                 </select>
+               </div>
+
+               <div className="mu-modal-actions">
+                 <button type="button" className="mu-cancel-btn" onClick={closeAddModal} disabled={adding}>Cancel</button>
+                 <button type="submit" className="mu-save-btn" disabled={adding}>
+                   {adding ? 'Creating...' : 'Create Account'}
+                 </button>
+               </div>
+             </form>
           </div>
         </div>
       )}
