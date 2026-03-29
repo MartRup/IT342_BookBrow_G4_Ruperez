@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AdminNavbar from './AdminNavbar';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const [user, setUser]   = useState(null);
-  const [stats, setStats] = useState({ totalUsers: 0, totalBooks: 0, totalBorrowed: 0, totalLibrarians: 0 });
-  const [recentUsers, setRecentUsers] = useState([]);
+  const [user, setUser] = useState({});
+  const [stats, setStats] = useState({ totalUsers: 0, totalBooks: 0, activeLoans: 0, overDue: 0 });
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -21,81 +22,72 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes] = await Promise.all([
+      const [statsRes, logsRes] = await Promise.all([
         axios.get('/api/v1/admin/stats'),
-        axios.get('/api/v1/users?limit=5'),
+        axios.get('/api/v1/admin/logs') // Hypothetical endpoint for logs
       ]);
-      setStats(statsRes.data?.data || statsRes.data || {});
-      setRecentUsers(usersRes.data?.data?.users || usersRes.data?.users || []);
+      const data = statsRes.data?.data || statsRes.data || {};
+      setStats({
+        totalUsers: data.totalUsers || 0,
+        totalBooks: data.totalBooks || 0,
+        activeLoans: data.activeLoans || data.totalBorrowed || 0,
+        overDue: data.overDue || 0
+      });
+      setLogs(logsRes.data?.data || logsRes.data || []);
     } catch (e) {
-      console.error(e);
-    } finally { setLoading(false); }
+      console.error('Error fetching admin data:', e);
+      // Fallback
+      setStats({ totalUsers: 0, totalBooks: 0, activeLoans: 0, overDue: 0 });
+      setLogs([]); 
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogout = () => { localStorage.removeItem('user'); localStorage.removeItem('token'); navigate('/login'); };
-
-  if (loading) return <div className="ad-loading"><div className="ad-spinner" /><p>Loading...</p></div>;
+  if (loading) return <div className="ad-loading"><div className="ad-spinner" /><p>Loading dashboard...</p></div>;
 
   return (
-    <div className="ad-wrapper">
-      <nav className="ad-nav">
-        <div className="ad-nav-brand">
-          <div className="ad-logo-circle"><svg viewBox="0 0 24 24" fill="white"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg></div>
-          <span className="ad-brand-name">BookBrow</span>
-          <span className="ad-role-badge">Admin</span>
-        </div>
-        <div className="ad-nav-links">
-          <a className="ad-nav-link ad-nav-active" onClick={() => navigate('/admin/dashboard')}>Dashboard</a>
-          <a className="ad-nav-link" onClick={() => navigate('/admin/manage-users')}>Manage Users</a>
-        </div>
-        <div className="ad-nav-right">
-          <span className="ad-username">{user?.fullName || 'Admin'}</span>
-          <button className="ad-logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
-      </nav>
+    <div className="ad-page">
+      <AdminNavbar />
 
-      <main className="ad-main">
-        <h1 className="ad-title">Admin Dashboard</h1>
-        <p className="ad-sub">System overview and management</p>
+      <main className="ad-content">
+        <h1 className="ad-welcome-title">System Dashboard</h1>
+        <p className="ad-welcome-sub">Welcome back, {user.fullName || 'Admin'}. Here's your system overview.</p>
 
-        <div className="ad-stats-grid">
-          {[
-            { label: 'Total Users',      value: stats.totalUsers      ?? 0, icon: '👤', color: '#7a0027' },
-            { label: 'Total Books',      value: stats.totalBooks      ?? 0, icon: '📚', color: '#c8703a' },
-            { label: 'Total Borrowed',   value: stats.totalBorrowed   ?? 0, icon: '📖', color: '#1565c0' },
-            { label: 'Total Librarians', value: stats.totalLibrarians ?? 0, icon: '🏛️', color: '#2e7d32' },
-          ].map(s => (
-            <div key={s.label} className="ad-stat-card">
-              <span className="ad-stat-icon">{s.icon}</span>
-              <span className="ad-stat-num" style={{ color: s.color }}>{s.value}</span>
-              <span className="ad-stat-lbl">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="ad-section">
-          <div className="ad-section-header">
-            <h2 className="ad-section-title">Recent Users</h2>
-            <button className="ad-view-all" onClick={() => navigate('/admin/manage-users')}>View All</button>
+        <div className="ad-stats-container">
+          <div className="ad-stat-card">
+            <div className="ad-stat-value">{stats.totalUsers}</div>
+            <div className="ad-stat-label">Total Users</div>
           </div>
-          {recentUsers.length === 0 ? (
-            <div className="ad-empty">No users found</div>
-          ) : (
-            <div className="ad-table-wrap">
-              <table className="ad-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
-                <tbody>
-                  {recentUsers.map(u => (
-                    <tr key={u.id}>
-                      <td>{u.fullName || '—'}</td>
-                      <td>{u.email}</td>
-                      <td><span className={`ad-role-pill ${u.role?.toLowerCase()}`}>{u.role}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="ad-stat-card">
+            <div className="ad-stat-value">{stats.totalBooks}</div>
+            <div className="ad-stat-label">Total Books</div>
+          </div>
+          <div className="ad-stat-card">
+            <div className="ad-stat-value">{stats.activeLoans}</div>
+            <div className="ad-stat-label">Active Loans</div>
+          </div>
+          <div className="ad-stat-card">
+            <div className="ad-stat-value">{stats.overDue}</div>
+            <div className="ad-stat-label">OverDue</div>
+          </div>
+        </div>
+
+        <div className="ad-recent-logs">
+          <h2 className="ad-logs-title">Recent System Logs</h2>
+          
+          <div className="ad-logs-list">
+            {logs.length === 0 ? (
+              <div className="ad-no-logs">No recent system logs available.</div>
+            ) : (
+              logs.map((log, index) => (
+                <div key={log.id || index} className="ad-log-item">
+                  <div className="ad-log-message">{log.message || 'System action performed'}</div>
+                  <div className="ad-log-time">{log.timeAgo || 'Just now'}</div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </main>
     </div>

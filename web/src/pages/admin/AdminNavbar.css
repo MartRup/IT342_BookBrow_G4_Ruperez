@@ -1,0 +1,123 @@
+.adm-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 40px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.adm-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adm-logo-circle {
+  width: 50px;
+  height: 50px;
+  background-color: #800000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #800000;
+  line-height: 1.2;
+}
+
+.adm-role-badge {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.2;
+}
+
+.adm-nav-links {
+  display: flex;
+  gap: 40px;
+  height: 100%;
+}
+
+.adm-nav-link {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #800000;
+  cursor: pointer;
+  padding: 15px 5px;
+  border-bottom: 3px solid transparent;
+  transition: border-bottom 0.2s ease, opacity 0.2s ease;
+}
+
+.adm-nav-link:hover {
+  opacity: 0.8;
+}
+
+.adm-nav-link.active {
+  border-bottom: 3px solid #800000;
+}
+
+.adm-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.adm-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-user-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-username {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+}
+
+.adm-email {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.2;
+}
+
+.adm-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.adm-logout-icon {
+  width: 25px;
+  height: 25px;
+  background-color: #800000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
