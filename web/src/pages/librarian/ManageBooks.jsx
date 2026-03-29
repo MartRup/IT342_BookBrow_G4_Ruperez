@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import LibrarianNavbar from './LibrarianNavbar';
 import './ManageBooks.css';
 
-const EMPTY_FORM = { title: '', author: '', isbn: '', genre: '', description: '', coverUrl: '' };
+const EMPTY_FORM = { title: '', author: '', isbn: '', genre: '', description: '', coverUrl: '', totalCopies: 1, availableCopies: 1 };
 
 export default function ManageBooks() {
-  const [user, setUser]         = useState(null);
-  const [books, setBooks]       = useState([]);
-  const [search, setSearch]     = useState('');
+  const [user, setUser] = useState({});
+  const [books, setBooks] = useState([]);
+  const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [editBook, setEditBook]   = useState(null);
-  const [form, setForm]           = useState(EMPTY_FORM);
-  const [loading, setLoading]   = useState(true);
-  const [saving, setSaving]     = useState(false);
+  const [editBook, setEditBook] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,9 +36,22 @@ export default function ManageBooks() {
     } finally { setLoading(false); }
   };
 
-  const openAdd  = ()     => { setEditBook(null); setForm(EMPTY_FORM); setShowModal(true); };
-  const openEdit = (book) => { setEditBook(book); setForm({ title: book.title, author: book.author, isbn: book.isbn || '', genre: book.genre || '', description: book.description || '', coverUrl: book.coverUrl || '' }); setShowModal(true); };
-  const closeModal = ()   => { setShowModal(false); setEditBook(null); setForm(EMPTY_FORM); };
+  const openAdd = () => { setEditBook(null); setForm(EMPTY_FORM); setShowModal(true); };
+  const openEdit = (book) => { 
+    setEditBook(book); 
+    setForm({ 
+      title: book.title, 
+      author: book.author, 
+      isbn: book.isbn || '', 
+      genre: book.genre || '', 
+      description: book.description || '', 
+      coverUrl: book.coverUrl || '',
+      totalCopies: book.totalCopies || 1,
+      availableCopies: book.availableCopies || 1
+    }); 
+    setShowModal(true); 
+  };
+  const closeModal = () => { setShowModal(false); setEditBook(null); setForm(EMPTY_FORM); };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -60,97 +74,116 @@ export default function ManageBooks() {
     catch (e) { console.error(e); }
   };
 
-  const handleLogout = () => { localStorage.removeItem('user'); localStorage.removeItem('token'); navigate('/login'); };
-
   const filtered = books.filter(b =>
     b.title?.toLowerCase().includes(search.toLowerCase()) ||
-    b.author?.toLowerCase().includes(search.toLowerCase())
+    b.author?.toLowerCase().includes(search.toLowerCase()) ||
+    b.isbn?.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="mb2-loading"><div className="mb2-spinner" /><p>Loading books...</p></div>;
+  if (loading) return <div className="mb-loading"><div className="mb-spinner" /><p>Loading books...</p></div>;
 
   return (
-    <div className="mb2-wrapper">
-      <nav className="mb2-nav">
-        <div className="mb2-nav-brand">
-          <div className="mb2-logo-circle"><svg viewBox="0 0 24 24" fill="white"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg></div>
-          <span className="mb2-brand-name">BookBrow</span>
-          <span className="mb2-role-badge">Librarian</span>
-        </div>
-        <div className="mb2-nav-links">
-          <a className="mb2-nav-link" onClick={() => navigate('/librarian/dashboard')}>Dashboard</a>
-          <a className="mb2-nav-link mb2-nav-active" onClick={() => navigate('/librarian/manage-books')}>Manage Books</a>
-          <a className="mb2-nav-link" onClick={() => navigate('/librarian/borrow-requests')}>Borrow Requests</a>
-        </div>
-        <div className="mb2-nav-right">
-          <span className="mb2-username">{user?.fullName || 'Librarian'}</span>
-          <button className="mb2-logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
-      </nav>
+    <div className="mb-page">
+      <LibrarianNavbar />
 
-      <main className="mb2-main">
-        <div className="mb2-header-row">
-          <div>
-            <h1 className="mb2-title">Manage Books</h1>
-            <p className="mb2-sub">Add, edit or remove books from the library</p>
+      <main className="mb-content">
+        <h1 className="mb-title">Books Management</h1>
+        <p className="mb-sub">Manage Library inventory and book information</p>
+
+        <div className="mb-action-bar">
+          <div className="mb-search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" width="24" height="24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search Books by title or author..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+            />
           </div>
-          <button className="mb2-add-btn" onClick={openAdd}>+ Add Book</button>
+          <button className="mb-add-btn" onClick={openAdd}>
+            <svg viewBox="0 0 24 24" fill="black" width="24" height="24" style={{marginRight: '8px'}}>
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Book
+          </button>
         </div>
 
-        <div className="mb2-search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search by title or author..." value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-
-        <div className="mb2-table-wrap">
-          <table className="mb2-table">
-            <thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Genre</th><th>Status</th><th>Actions</th></tr></thead>
+        <div className="mb-table-container">
+          <table className="mb-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+                <th>Category</th>
+                <th>Total</th>
+                <th>Available</th>
+                <th className="mb-center-text">Actions</th>
+              </tr>
+            </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="mb2-empty">No books found</td></tr>
-              ) : filtered.map(b => (
-                <tr key={b.id}>
-                  <td className="mb2-book-title">{b.title}</td>
+                <tr><td colSpan={7} className="mb-empty">No books found</td></tr>
+              ) : filtered.map((b, i) => (
+                <tr key={b.id || i}>
+                  <td>{b.title}</td>
                   <td>{b.author}</td>
                   <td>{b.isbn || '—'}</td>
                   <td>{b.genre || '—'}</td>
-                  <td><span className={`mb2-status ${(b.status || 'available').toLowerCase()}`}>{b.status || 'Available'}</span></td>
-                  <td className="mb2-row-actions">
-                    <button className="mb2-edit-btn" onClick={() => openEdit(b)}>Edit</button>
-                    <button className="mb2-del-btn"  onClick={() => handleDelete(b.id)}>Delete</button>
+                  <td>{b.totalCopies || 0}</td>
+                  <td>{b.availableCopies || 0}</td>
+                  <td className="mb-actions-cell">
+                    <button className="mb-icon-btn" onClick={() => openEdit(b)} title="Edit">
+                      <svg viewBox="0 0 24 24" fill="#111" width="20" height="20">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                    </button>
+                    <button className="mb-icon-btn mb-del-icon" onClick={() => handleDelete(b.id)} title="Delete">
+                      <svg viewBox="0 0 24 24" fill="#a52a2a" width="20" height="20">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                      </svg>
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        
+        <div className="mb-footer-text">
+          Showing {filtered.length} of {books.length} books
+        </div>
       </main>
 
       {/* Modal */}
       {showModal && (
-        <div className="mb2-overlay" onClick={closeModal}>
-          <div className="mb2-modal" onClick={e => e.stopPropagation()}>
-            <h2 className="mb2-modal-title">{editBook ? 'Edit Book' : 'Add New Book'}</h2>
-            <form onSubmit={handleSave} className="mb2-form">
+        <div className="mb-overlay" onClick={closeModal}>
+          <div className="mb-modal" onClick={e => e.stopPropagation()}>
+            <h2 className="mb-modal-title">{editBook ? 'Edit Book' : 'Add New Book'}</h2>
+            <form onSubmit={handleSave} className="mb-form">
               {[
-                { name: 'title',       label: 'Title',       required: true },
-                { name: 'author',      label: 'Author',      required: true },
-                { name: 'isbn',        label: 'ISBN',        required: false },
-                { name: 'genre',       label: 'Genre',       required: false },
-                { name: 'coverUrl',    label: 'Cover URL',   required: false },
+                { name: 'title',       label: 'Title',       required: true,  type: 'text' },
+                { name: 'author',      label: 'Author',      required: true,  type: 'text' },
+                { name: 'isbn',        label: 'ISBN',        required: false, type: 'text' },
+                { name: 'genre',       label: 'Category',    required: false, type: 'text' },
+                { name: 'totalCopies', label: 'Total Copies', required: false, type: 'number' },
+                { name: 'availableCopies', label: 'Available Copies', required: false, type: 'number' },
+                { name: 'coverUrl',    label: 'Cover URL',   required: false, type: 'text' },
               ].map(f => (
-                <div key={f.name} className="mb2-form-group">
+                <div key={f.name} className="mb-form-group">
                   <label>{f.label}</label>
-                  <input type="text" value={form[f.name]} onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))} required={f.required} />
+                  <input type={f.type} value={form[f.name]} onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))} required={f.required} />
                 </div>
               ))}
-              <div className="mb2-form-group">
+              <div className="mb-form-group">
                 <label>Description</label>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} />
               </div>
-              <div className="mb2-modal-actions">
-                <button type="button" className="mb2-cancel-btn" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="mb2-save-btn" disabled={saving}>{saving ? 'Saving...' : 'Save Book'}</button>
+              <div className="mb-modal-actions">
+                <button type="button" className="mb-cancel-btn" onClick={closeModal}>Cancel</button>
+                <button type="submit" className="mb-save-btn" disabled={saving}>{saving ? 'Saving...' : 'Save Book'}</button>
               </div>
             </form>
           </div>

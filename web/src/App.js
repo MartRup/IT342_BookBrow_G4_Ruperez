@@ -15,6 +15,7 @@ import MyBooks     from './pages/user/MyBooks.jsx';
 // ── Librarian ─────────────────────────────────────────────
 import LibrarianDashboard from './pages/librarian/LibrarianDashboard.jsx';
 import ManageBooks        from './pages/librarian/ManageBooks.jsx';
+import BorrowingRecords   from './pages/librarian/BorrowingRecords.jsx';
 
 // ── Admin ─────────────────────────────────────────────────
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
@@ -62,8 +63,9 @@ function AppContent() {
       <Route path="/my-books"     element={<ProtectedRoute element={<MyBooks />}     allowedRoles={['USER']} />} />
 
       {/* ── Librarian routes ── */}
-      <Route path="/librarian/dashboard"     element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
-      <Route path="/librarian/manage-books"  element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/dashboard"         element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/manage-books"      element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/borrowing-records" element={<ProtectedRoute element={<BorrowingRecords />}   allowedRoles={['LIBRARIAN']} />} />
 
       {/* ── Admin routes ── */}
       <Route path="/admin/dashboard"    element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />} />
