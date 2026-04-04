@@ -23,6 +23,9 @@ import ManageUsers           from './pages/admin/ManageUsers.jsx';
 import AdminManageBooks      from './pages/admin/AdminManageBooks.jsx';
 import AdminBorrowingRecords from './pages/admin/AdminBorrowingRecords.jsx';
 
+// ── Shared ────────────────────────────────────────────────
+import Settings from './components/Settings.jsx';
+
 // ── Helpers ───────────────────────────────────────────────
 const getUser = () => {
   try { return JSON.parse(localStorage.getItem('user')); }
@@ -63,17 +66,20 @@ function AppContent() {
       <Route path="/dashboard"    element={<ProtectedRoute element={<UserHome />}    allowedRoles={['USER']} />} />
       <Route path="/borrow-items" element={<ProtectedRoute element={<BorrowItems />} allowedRoles={['USER']} />} />
       <Route path="/my-books"     element={<ProtectedRoute element={<MyBooks />}     allowedRoles={['USER']} />} />
+      <Route path="/settings"     element={<ProtectedRoute element={<Settings />}    allowedRoles={['USER']} />} />
 
       {/* ── Librarian routes ── */}
       <Route path="/librarian/dashboard"         element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/manage-books"      element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/borrowing-records" element={<ProtectedRoute element={<BorrowingRecords />}   allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/settings"          element={<ProtectedRoute element={<Settings />}           allowedRoles={['LIBRARIAN']} />} />
 
       {/* ── Admin routes ── */}
       <Route path="/admin/dashboard"         element={<ProtectedRoute element={<AdminDashboard />}   allowedRoles={['ADMIN']} />} />
       <Route path="/admin/manage-users"      element={<ProtectedRoute element={<ManageUsers />}      allowedRoles={['ADMIN']} />} />
       <Route path="/admin/manage-books"      element={<ProtectedRoute element={<AdminManageBooks />} allowedRoles={['ADMIN']} />} />
       <Route path="/admin/borrowing-records" element={<ProtectedRoute element={<AdminBorrowingRecords />} allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/settings"          element={<ProtectedRoute element={<Settings />}       allowedRoles={['ADMIN']} />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" />} />

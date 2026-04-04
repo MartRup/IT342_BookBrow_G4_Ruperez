@@ -1,0 +1,573 @@
+/* =====================================
+   Settings.css – Shared Settings Page
+   ===================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.st-wrapper {
+  min-height: 100vh;
+  background-color: #f4f5f7;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ────────── LOADING ────────── */
+.st-loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 1rem;
+  color: #7a0027;
+}
+.st-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #f3d5db;
+  border-top-color: #7a0027;
+  border-radius: 50%;
+  animation: st-spin 0.8s linear infinite;
+}
+@keyframes st-spin { to { transform: rotate(360deg); } }
+
+/* ────────── NAVBAR — USER ────────── */
+.st-nav {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* ── NAVBAR — ADMIN (dark) ── */
+.st-nav.st-nav--admin {
+  background: #1a1a2e;
+  border-bottom: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.st-nav--admin .st-brand-name { color: #fff; }
+.st-nav--admin .st-role-badge {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-color: transparent;
+}
+.st-nav--admin .st-nav-link {
+  color: rgba(255,255,255,0.75);
+}
+.st-nav--admin .st-nav-link:hover,
+.st-nav--admin .st-nav-active {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+.st-nav--admin .st-username { color: rgba(255,255,255,0.9); }
+.st-nav--admin .st-logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+}
+.st-nav--admin .st-logout-btn:hover { background: rgba(255,255,255,0.1); }
+.st-nav--admin .st-profile-btn {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+.st-nav--admin .st-profile-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* ── NAVBAR — LIBRARIAN ── */
+.st-nav.st-nav--librarian {
+  background: #fff;
+}
+
+/* ── NAVBAR — USER ── */
+.st-nav.st-nav--user {
+  background: #fff;
+}
+
+.st-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+.st-logo-circle {
+  width: 38px;
+  height: 38px;
+  background: #7a0027;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.st-logo-circle svg { width: 20px; height: 20px; }
+.st-brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #7a0027;
+}
+.st-role-badge {
+  background: #fef0f3;
+  color: #7a0027;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid #f5c6d0;
+}
+
+.st-nav-links {
+  display: flex;
+  gap: 0.25rem;
+}
+.st-nav-link {
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #444;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.st-nav-link:hover { color: #7a0027; background: #fef0f3; }
+.st-nav-active { color: #7a0027 !important; font-weight: 600; }
+
+.st-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.st-username {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ── Profile button (clickable avatar) ── */
+.st-profile-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fef0f3;
+  border: 2px solid #7a0027;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a0027;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.st-profile-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 10px rgba(122,0,39,0.25);
+}
+.st-profile-btn svg { width: 20px; height: 20px; }
+
+.st-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background: #7a0027;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.st-logout-btn:hover { background: #5a0019; }
+.st-logout-btn svg { width: 16px; height: 16px; }
+
+/* ────────── MAIN CONTENT ────────── */
+.st-main {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+
+.st-page-header {
+  margin-bottom: 2rem;
+}
+.st-page-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.3rem;
+}
+.st-page-subtitle {
+  font-size: 0.95rem;
+  color: #888;
+}
+
+/* ────────── TAB BAR ────────── */
+.st-tabs {
+  display: flex;
+  gap: 0;
+  background: #eaeaec;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 2rem;
+}
+.st-tab {
+  flex: 1;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.st-tab:hover {
+  color: #7a0027;
+}
+.st-tab.st-tab--active {
+  background: #7a0027;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(122,0,39,0.3);
+}
+
+/* ────────── SECTION CARD ────────── */
+.st-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 1.5rem;
+  animation: st-fadeIn 0.35s ease;
+}
+@keyframes st-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.st-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.st-card-title svg {
+  width: 22px;
+  height: 22px;
+  color: #7a0027;
+}
+
+/* ────────── AVATAR SECTION ────────── */
+.st-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f2;
+}
+.st-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5c6d0 0%, #e8a0b0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(122,0,39,0.15);
+  position: relative;
+}
+.st-avatar svg {
+  width: 44px;
+  height: 44px;
+  color: #7a0027;
+}
+.st-avatar-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.2rem;
+}
+.st-avatar-info p {
+  font-size: 0.85rem;
+  color: #888;
+}
+.st-avatar-role {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.st-avatar-role.role-user      { background: #e3f2fd; color: #1565c0; }
+.st-avatar-role.role-librarian { background: #fef0f3; color: #7a0027; }
+.st-avatar-role.role-admin     { background: #fce4ec; color: #880e4f; }
+
+/* ────────── FORM ROWS ────────── */
+.st-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.st-form-row.st-form-row--full {
+  grid-template-columns: 1fr;
+}
+.st-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.st-form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+  letter-spacing: 0.01em;
+}
+.st-form-group input,
+.st-form-group textarea {
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #e0e0e4;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #333;
+  outline: none;
+  background: #fafafa;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.st-form-group input:focus,
+.st-form-group textarea:focus {
+  border-color: #7a0027;
+  box-shadow: 0 0 0 3px rgba(122,0,39,0.08);
+  background: #fff;
+}
+.st-form-group input:disabled {
+  background: #f0f0f2;
+  color: #999;
+  cursor: not-allowed;
+}
+.st-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ────────── BUTTONS ────────── */
+.st-btn-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.st-btn {
+  padding: 0.7rem 1.6rem;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.st-btn--primary {
+  background: #7a0027;
+  color: #fff;
+}
+.st-btn--primary:hover {
+  background: #5a0019;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(122,0,39,0.3);
+}
+.st-btn--primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.st-btn--secondary {
+  background: #f0f0f2;
+  color: #555;
+}
+.st-btn--secondary:hover {
+  background: #e0e0e4;
+}
+.st-btn--danger {
+  background: #fff;
+  color: #c62828;
+  border: 1.5px solid #ffcdd2;
+}
+.st-btn--danger:hover {
+  background: #ffebee;
+  border-color: #ef9a9a;
+  transform: translateY(-1px);
+}
+
+/* ────────── PASSWORD STRENGTH ────────── */
+.st-password-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: 0.4rem;
+}
+.st-strength-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: #e0e0e4;
+  transition: background 0.3s;
+}
+.st-strength-bar.active.weak     { background: #ef5350; }
+.st-strength-bar.active.fair     { background: #ffa726; }
+.st-strength-bar.active.good     { background: #66bb6a; }
+.st-strength-bar.active.strong   { background: #2e7d32; }
+.st-strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+.st-strength-label.weak   { color: #ef5350; }
+.st-strength-label.fair   { color: #ffa726; }
+.st-strength-label.good   { color: #66bb6a; }
+.st-strength-label.strong { color: #2e7d32; }
+
+/* ────────── DELETE ACCOUNT ────────── */
+.st-danger-zone {
+  border: 1.5px solid #ffcdd2;
+  background: #fffafa;
+}
+.st-danger-zone .st-card-title {
+  color: #c62828;
+}
+.st-danger-zone .st-card-title svg {
+  color: #c62828;
+}
+.st-danger-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.st-danger-text h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+.st-danger-text p {
+  font-size: 0.85rem;
+  color: #888;
+}
+.st-delete-btn {
+  padding: 0.65rem 1.6rem;
+  border: 1.5px solid #ef9a9a;
+  border-radius: 10px;
+  background: #fff;
+  color: #c62828;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.st-delete-btn:hover {
+  background: #c62828;
+  color: #fff;
+  border-color: #c62828;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(198,40,40,0.3);
+}
+
+/* ────────── TOAST / ALERT ────────── */
+.st-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  animation: st-slideUp 0.3s ease, st-fadeOut 0.3s ease 2.7s;
+  z-index: 1000;
+}
+.st-toast--success { background: #2e7d32; }
+.st-toast--error   { background: #c62828; }
+@keyframes st-slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes st-fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ────────── DELETE CONFIRMATION MODAL ────────── */
+.st-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: st-fadeIn 0.2s ease;
+}
+.st-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 2.2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: st-modalPop 0.3s ease;
+}
+@keyframes st-modalPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.st-modal h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #c62828;
+  margin-bottom: 0.6rem;
+}
+.st-modal p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+.st-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* ────────── RESPONSIVE ────────── */
+@media (max-width: 768px) {
+  .st-nav-links { display: none; }
+  .st-main { padding: 1.5rem 1rem 3rem; }
+  .st-form-row { grid-template-columns: 1fr; }
+  .st-avatar-section { flex-direction: column; text-align: center; }
+  .st-danger-info { flex-direction: column; text-align: center; }
+  .st-tabs { flex-direction: column; gap: 4px; }
+}

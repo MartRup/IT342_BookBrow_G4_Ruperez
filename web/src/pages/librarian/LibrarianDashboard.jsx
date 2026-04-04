@@ -66,6 +66,7 @@ export default function LibrarianDashboard() {
             <div className="ld-stat-value">{stats.returned}</div>
             <div className="ld-stat-label">Returned</div>
           </div>
+
         </div>
 
         <div className="ld-recent-activity">

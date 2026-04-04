@@ -49,14 +49,14 @@ export default function AdminNavbar() {
       </div>
 
       <div className="adm-nav-right">
-        <div className="adm-user-info">
+        <div className="adm-user-info" onClick={() => navigate('/admin/settings')} style={{ cursor: 'pointer' }} title="Settings">
           <div className="adm-user-icon">
             <svg viewBox="0 0 24 24" fill="#800000" width="36" height="36">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
           <div className="adm-user-text">
-            <span className="adm-username">Admin</span>
+            <span className="adm-username">{user.fullName || 'Admin'}</span>
             <span className="adm-email">{user.email || 'adm@example.com'}</span>
           </div>
         </div>
