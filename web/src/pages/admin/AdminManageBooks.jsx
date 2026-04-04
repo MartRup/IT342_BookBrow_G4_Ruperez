@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import LibrarianNavbar from './LibrarianNavbar';
-import './ManageBooks.css';
+import AdminNavbar from './AdminNavbar';
+import '../librarian/ManageBooks.css'; // Reusing librarian's CSS
 
 const EMPTY_FORM = { title: '', author: '', isbn: '', genre: '', description: '', coverUrl: '', totalCopies: 1, availableCopies: 1 };
 
-export default function ManageBooks() {
+export default function AdminManageBooks() {
   const [user, setUser] = useState({});
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState('');
@@ -20,7 +20,7 @@ export default function ManageBooks() {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData) { navigate('/login'); return; }
-    if (userData.role !== 'LIBRARIAN') { navigate('/dashboard'); return; }
+    if (userData.role !== 'ADMIN') { navigate('/dashboard'); return; }
     setUser(userData);
     fetchBooks();
   }, [navigate]);
@@ -84,7 +84,7 @@ export default function ManageBooks() {
 
   return (
     <div className="mb-page">
-      <LibrarianNavbar />
+      <AdminNavbar />
 
       <main className="mb-content">
         <h1 className="mb-title">Books Management</h1>

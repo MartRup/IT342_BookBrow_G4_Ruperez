@@ -2,6 +2,7 @@ package com.example.bookbrow.controller;
 
 import com.example.bookbrow.dto.AuthResponse;
 import com.example.bookbrow.dto.LibrarianCreateRequest;
+import com.example.bookbrow.dto.PrivilegedUserCreateRequest;
 import com.example.bookbrow.dto.LoginRequest;
 import com.example.bookbrow.dto.RegisterRequest;
 import com.example.bookbrow.service.AuthService;
@@ -48,6 +49,19 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AuthResponse> createLibrarian(@Valid @RequestBody LibrarianCreateRequest request) {
         AuthResponse response = authService.createLibrarian(request);
+        return response.isSuccess()
+                ? ResponseEntity.status(HttpStatus.CREATED).body(response)
+                : ResponseEntity.badRequest().body(response);
+    }
+
+    /**
+     * Case 3: Admin creates a Privileged Account (Librarian or Admin).
+     * Secured by @PreAuthorize – only ADMIN JWT tokens are allowed.
+     */
+    @PostMapping("/privileged")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AuthResponse> createPrivilegedUser(@Valid @RequestBody PrivilegedUserCreateRequest request) {
+        AuthResponse response = authService.createPrivilegedUser(request);
         return response.isSuccess()
                 ? ResponseEntity.status(HttpStatus.CREATED).body(response)
                 : ResponseEntity.badRequest().body(response);

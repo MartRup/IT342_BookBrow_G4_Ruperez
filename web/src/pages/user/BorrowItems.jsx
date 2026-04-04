@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import UserNavbar from './UserNavbar';
 import './BorrowItems.css';
 
 export default function BorrowItems() {
@@ -92,40 +93,7 @@ export default function BorrowItems() {
   return (
     <div className="bi-wrapper">
       {/* ── NAVBAR ── */}
-      <nav className="bi-nav">
-        <div className="bi-nav-brand">
-          <div className="bi-logo-circle">
-            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
-            </svg>
-          </div>
-          <span className="bi-brand-name">BookBrow</span>
-        </div>
-
-        <div className="bi-nav-links">
-          <a href="#" className="bi-nav-link" onClick={() => navigate('/dashboard')}>Home</a>
-          <a href="#" className="bi-nav-link bi-nav-active" onClick={() => navigate('/borrow-items')}>Borrow Items</a>
-          <a href="#" className="bi-nav-link" onClick={() => navigate('/my-books')}>My Books</a>
-        </div>
-
-        <div className="bi-nav-right">
-          <div className="bi-user-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-          </div>
-          <div className="bi-user-info">
-            <span className="bi-user-name">{user?.fullName || user?.name || 'user'}</span>
-            <span className="bi-user-email">{user?.email || 'user@example.com'}</span>
-          </div>
-          <button className="bi-logout-btn" onClick={handleLogout}>
-            Logout
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-          </button>
-        </div>
-      </nav>
+      <UserNavbar />
 
       {/* ── MAIN ── */}
       <main className="bi-main">
