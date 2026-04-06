@@ -6,23 +6,21 @@ import com.example.bookbrow.dto.PrivilegedUserCreateRequest;
 import com.example.bookbrow.dto.LoginRequest;
 import com.example.bookbrow.dto.RegisterRequest;
 import com.example.bookbrow.entity.User;
+import com.example.bookbrow.factory.UserFactory;
 import com.example.bookbrow.repository.UserRepository;
 import com.example.bookbrow.security.JwtService;
+import com.example.bookbrow.validation.LibrarianCreationValidator;
+import com.example.bookbrow.validation.PrivilegedUserValidator;
+import com.example.bookbrow.validation.RegistrationValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * AuthService – handles all registration and login flows.
- *
- * Role assignment rules enforced here:
- *  - Self-registration always assigns MEMBER (USER).
- *  - Only ADMIN may create LIBRARIAN accounts (via createLibrarian).
- *  - ADMIN accounts are never created through any API endpoint.
+ * Service handling all registration, login, and account creation flows.
  */
 @Slf4j
 @Service
@@ -30,56 +28,33 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    // ── Design Pattern: Factory Method ──
+    private final UserFactory userFactory;
+
+    // ── Design Pattern: Strategy ──
+    private final RegistrationValidator registrationValidator;
+    private final LibrarianCreationValidator librarianValidator;
+    private final PrivilegedUserValidator privilegedValidator;
+
     // ──────────────────────────────────────────────────────────────────
     // Case 1: User (Borrower) self-registration
-    //  - Role is hard-coded to MEMBER; users cannot choose their role.
     // ──────────────────────────────────────────────────────────────────
     public AuthResponse register(RegisterRequest request) {
 
-        // Required-field check
-        if (isBlank(request.getFullName())) {
-            return AuthResponse.error("AUTH-010", "Full name is required");
-        }
-        if (isBlank(request.getEmail())) {
-            return AuthResponse.error("AUTH-011", "Email is required");
-        }
-        if (isBlank(request.getPassword())) {
-            return AuthResponse.error("AUTH-012", "Password is required");
-        }
+        // Strategy Pattern: delegate validation to RegistrationValidator
+        AuthResponse validationError = registrationValidator.validate(request);
+        if (validationError != null) return validationError;
 
-        // Email format
-        if (!isValidEmail(request.getEmail())) {
-            return AuthResponse.error("AUTH-013", "Email format is invalid");
-        }
-
-        // Password strength – minimum 8 characters
-        if (request.getPassword().length() < 8) {
-            return AuthResponse.error("AUTH-003", "Password must be at least 8 characters");
-        }
-
-        // Passwords must match
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return AuthResponse.error("AUTH-002", "Passwords do not match");
-        }
-
-        // Email uniqueness
-        if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
-            return AuthResponse.error("AUTH-001", "Email is already registered");
-        }
-
-        // Build and save the user – role is always MEMBER (USER)
-        User user = User.builder()
-                .fullName(request.getFullName().trim())
-                .email(request.getEmail().toLowerCase().trim())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone() != null ? request.getPhone().trim() : null)
-                .role(User.UserRole.USER)   // ← MEMBER; never user-supplied
-                .isActive(true)
-                .build();
+        // Factory Method: delegate user creation to UserFactory
+        User user = userFactory.createMember(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getPhone()
+        );
 
         User saved = userRepository.save(user);
         log.info("New borrower registered: {}", saved.getEmail());
@@ -98,45 +73,19 @@ public class AuthService {
 
     // ──────────────────────────────────────────────────────────────────
     // Case 2: Admin creates a Librarian account
-    //  - The calling controller already enforces @PreAuthorize("hasRole('ADMIN')")
-    //  - Role is hard-coded to LIBRARIAN here.
     // ──────────────────────────────────────────────────────────────────
     public AuthResponse createLibrarian(LibrarianCreateRequest request) {
 
-        // Required-field check
-        if (isBlank(request.getFullName())) {
-            return AuthResponse.error("AUTH-010", "Full name is required");
-        }
-        if (isBlank(request.getEmail())) {
-            return AuthResponse.error("AUTH-011", "Email is required");
-        }
-        if (isBlank(request.getPassword())) {
-            return AuthResponse.error("AUTH-012", "Password is required");
-        }
+        // Strategy Pattern: delegate validation to LibrarianCreationValidator
+        AuthResponse validationError = librarianValidator.validate(request);
+        if (validationError != null) return validationError;
 
-        // Email format
-        if (!isValidEmail(request.getEmail())) {
-            return AuthResponse.error("AUTH-013", "Email format is invalid");
-        }
-
-        // Password strength
-        if (request.getPassword().length() < 8) {
-            return AuthResponse.error("AUTH-003", "Password must be at least 8 characters");
-        }
-
-        // Email uniqueness
-        if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
-            return AuthResponse.error("AUTH-001", "Email is already registered");
-        }
-
-        // Build and save – role is always LIBRARIAN
-        User librarian = User.builder()
-                .fullName(request.getFullName().trim())
-                .email(request.getEmail().toLowerCase().trim())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(User.UserRole.LIBRARIAN)  // ← always LIBRARIAN
-                .isActive(true)
-                .build();
+        // Factory Method: delegate user creation to UserFactory
+        User librarian = userFactory.createLibrarian(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPassword()
+        );
 
         User saved = userRepository.save(librarian);
         log.info("Librarian account created by admin: {}", saved.getEmail());
@@ -155,54 +104,20 @@ public class AuthService {
     // ──────────────────────────────────────────────────────────────────
     public AuthResponse createPrivilegedUser(PrivilegedUserCreateRequest request) {
 
-        // Required-field check
-        if (isBlank(request.getFullName())) {
-            return AuthResponse.error("AUTH-010", "Full name is required");
-        }
-        if (isBlank(request.getEmail())) {
-            return AuthResponse.error("AUTH-011", "Email is required");
-        }
-        if (isBlank(request.getPassword())) {
-            return AuthResponse.error("AUTH-012", "Password is required");
-        }
-        if (isBlank(request.getRole())) {
-            return AuthResponse.error("AUTH-014", "Role is required");
-        }
+        // Strategy Pattern: delegate validation to PrivilegedUserValidator
+        AuthResponse validationError = privilegedValidator.validate(request);
+        if (validationError != null) return validationError;
 
-        // Email format
-        if (!isValidEmail(request.getEmail())) {
-            return AuthResponse.error("AUTH-013", "Email format is invalid");
-        }
+        User.UserRole designatedRole = User.UserRole.valueOf(request.getRole().toUpperCase());
 
-        // Password strength
-        if (request.getPassword().length() < 8) {
-            return AuthResponse.error("AUTH-003", "Password must be at least 8 characters");
-        }
-
-        // Email uniqueness
-        if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
-            return AuthResponse.error("AUTH-001", "Email is already registered");
-        }
-
-        // Validate Role (must be LIBRARIAN or ADMIN)
-        User.UserRole designatedRole;
-        try {
-            designatedRole = User.UserRole.valueOf(request.getRole().toUpperCase());
-            if (designatedRole == User.UserRole.USER) {
-                return AuthResponse.error("AUTH-015", "Cannot create standard users via this endpoint");
-            }
-        } catch (IllegalArgumentException e) {
-            return AuthResponse.error("AUTH-016", "Invalid role specified");
-        }
-
-        // Build and save
-        User privUser = User.builder()
-                .fullName(request.getFullName().trim())
-                .email(request.getEmail().toLowerCase().trim())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(designatedRole)
-                .isActive(true)
-                .build();
+        // Factory Method: delegate user creation to UserFactory
+        User privUser = userFactory.createUser(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPassword(),
+                null,
+                designatedRole
+        );
 
         User saved = userRepository.save(privUser);
         log.info("Privileged account created by admin: {} with role: {}", saved.getEmail(), designatedRole);
@@ -217,7 +132,7 @@ public class AuthService {
     }
 
     // ──────────────────────────────────────────────────────────────────
-    // Login
+    // Login (unchanged — no duplication issue here)
     // ──────────────────────────────────────────────────────────────────
     public AuthResponse login(LoginRequest request) {
         try {
@@ -247,16 +162,5 @@ public class AuthService {
                 .role(user.getRole().name())
                 .token(token)
                 .build());
-    }
-
-    // ──────────────────────────────────────────────────────────────────
-    // Helpers
-    // ──────────────────────────────────────────────────────────────────
-    private static boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
-
-    private static boolean isValidEmail(String email) {
-        return email != null && email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
 import './BorrowItems.css';
 
@@ -31,12 +31,11 @@ export default function BorrowItems() {
   const fetchBooks = async (q = '') => {
     try {
       setLoading(true);
-      const url = q
-        ? `http://localhost:8080/api/books/search?query=${encodeURIComponent(q)}`
-        : 'http://localhost:8080/api/books';
-      const response = await axios.get(url);
-      setBooks(response.data);
-      setFilteredBooks(response.data);
+      // Fetch all books matching search query
+      const response = await ApiService.books.getAll({ search: q || undefined });
+      const booksData = response.data?.data?.books || response.data || [];
+      setBooks(booksData);
+      setFilteredBooks(booksData);
     } catch (error) {
       console.error('Error fetching books:', error);
       setBooks([]);
@@ -68,11 +67,8 @@ export default function BorrowItems() {
   const handleBorrow = async (bookId) => {
     try {
       setBorrowingBookId(bookId);
-      const userData = JSON.parse(localStorage.getItem('user'));
-      await axios.post('http://localhost:8080/api/borrow', {
-        bookId,
-        userEmail: userData?.email,
-      });
+      // Request to borrow book
+      await ApiService.borrow.create(bookId);
       fetchBooks(searchQuery);
     } catch (error) {
       console.error('Error borrowing book:', error);

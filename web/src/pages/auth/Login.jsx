@@ -6,7 +6,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 import { validateEmail, sanitizeInput, rateLimit } from '../../utils/validation';
 
-import axios from 'axios';
+import ApiService from '../../services/ApiService';
 
 import Alert from '../../components/Alert';
 
@@ -138,13 +138,9 @@ export default function Login() {
 
     try {
 
-      const response = await axios.post('/api/v1/auth/login', {
+      // Authenticate with backend
 
-        email: sanitizedEmail,
-
-        password: sanitizedPassword,
-
-      });
+      const response = await ApiService.auth.login(sanitizedEmail, sanitizedPassword);
 
 
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import ApiService from '../services/ApiService';
 import AdminNavbar from '../pages/admin/AdminNavbar';
 import LibrarianNavbar from '../pages/librarian/LibrarianNavbar';
 import UserNavbar from '../pages/user/UserNavbar';
@@ -103,12 +103,11 @@ export default function Settings() {
     setSaving(true);
     try {
       const fullName = `${firstName} ${lastName}`.trim();
-      await axios.put('/api/v1/users/profile', {
+      // Save profile changes
+      await ApiService.users.updateProfile({
         fullName,
         phone,
         about,
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
       // Update localStorage
@@ -137,11 +136,10 @@ export default function Settings() {
     }
     setSaving(true);
     try {
-      await axios.put('/api/v1/users/password', {
+      // Update password
+      await ApiService.users.changePassword({
         currentPassword,
         newPassword,
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setCurrentPassword('');
       setNewPassword('');
@@ -157,9 +155,8 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete('/api/v1/users/account', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
+      // Request account deletion
+      await ApiService.users.deleteAccount();
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       navigate('/login');

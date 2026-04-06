@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
 import './UserHome.css';
 
@@ -25,12 +25,11 @@ export default function UserHome() {
   const fetchDashboardData = async (userData) => {
     try {
       setLoading(true);
-      const statsResponse = await axios.get(
-        `http://localhost:8080/api/dashboard/stats/by-email?email=${userData.email}`
-      );
+      // Fetch dashbord stats using the service client
+      const statsResponse = await ApiService.dashboard.getStats(userData.email);
       setStats(statsResponse.data);
 
-      const booksResponse = await axios.get('http://localhost:8080/api/books/featured');
+      const booksResponse = await ApiService.dashboard.getFeaturedBooks();
       setFeaturedBooks(booksResponse.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -48,11 +47,8 @@ export default function UserHome() {
 
   const handleBorrowBook = async (bookId) => {
     try {
-      const userData = JSON.parse(localStorage.getItem('user'));
-      await axios.post(`http://localhost:8080/api/borrow`, {
-        bookId,
-        userEmail: userData?.email,
-      });
+      // Refresh user's borrow records
+      await ApiService.borrow.create(bookId);
       fetchDashboardData(user);
     } catch (error) {
       console.error('Error borrowing book:', error);

@@ -1,7 +1,7 @@
 package com.example.bookbrow.service;
 
-import com.example.bookbrow.dto.ApiResponse;
 import com.example.bookbrow.dto.BookRequest;
+import com.example.bookbrow.dto.ResponseBuilder;
 import com.example.bookbrow.entity.Book;
 import com.example.bookbrow.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+/**
+ * Service managing book catalog operations (CRUD).
+ */
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -38,14 +40,15 @@ public class BookService {
                         "pages", bookPage.getTotalPages()
                 )
         );
-        return ResponseEntity.ok(ApiResponse.success(data));
+        // Adapter Pattern: ResponseBuilder for consistent response construction
+        return ResponseBuilder.ok(data);
     }
 
     public ResponseEntity<?> getBookById(Long id) {
         return bookRepository.findById(id)
-                .<ResponseEntity<?>>map(book -> ResponseEntity.ok(ApiResponse.success(Map.of("book", book))))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("BOOK-001", "Book with given ID does not exist")));
+                .<ResponseEntity<?>>map(book ->
+                        ResponseBuilder.okWith("book", book))
+                .orElse(ResponseBuilder.notFound("BOOK-001", "Book with given ID does not exist"));
     }
 
     public ResponseEntity<?> createBook(BookRequest request) {
@@ -57,8 +60,8 @@ public class BookService {
                 .build();
 
         Book saved = bookRepository.save(book);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(Map.of("book", saved)));
+        // Adapter Pattern: ResponseBuilder for CREATED status
+        return ResponseBuilder.createdWith("book", saved);
     }
 
     public ResponseEntity<?> updateBook(Long id, BookRequest request) {
@@ -69,18 +72,16 @@ public class BookService {
                     if (request.getDescription() != null) book.setDescription(request.getDescription());
                     if (request.getAvailable() != null)   book.setAvailable(request.getAvailable());
                     Book updated = bookRepository.save(book);
-                    return ResponseEntity.ok(ApiResponse.success(Map.of("book", updated)));
+                    return ResponseBuilder.okWith("book", updated);
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("BOOK-001", "Book not found")));
+                .orElse(ResponseBuilder.notFound("BOOK-001", "Book not found"));
     }
 
     public ResponseEntity<?> deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("BOOK-001", "Book not found"));
+            return ResponseBuilder.notFound("BOOK-001", "Book not found");
         }
         bookRepository.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("message", "Book deleted successfully")));
+        return ResponseBuilder.okWith("message", "Book deleted successfully");
     }
 }

@@ -1,6 +1,7 @@
 package com.example.bookbrow.config;
 
 import com.example.bookbrow.entity.User;
+import com.example.bookbrow.factory.UserFactory;
 import com.example.bookbrow.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,15 +9,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Command line runner that seeds the initial default admin account if it does not exist.
+ */
 @Component
 public class AdminSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserFactory userFactory;
 
-    public AdminSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AdminSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder, UserFactory userFactory) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userFactory = userFactory;
     }
 
     @Override
@@ -27,13 +33,8 @@ public class AdminSeeder implements CommandLineRunner {
         Optional<User> existingAdmin = userRepository.findByEmail(adminEmail);
         
         if (existingAdmin.isEmpty()) {
-            User admin = User.builder()
-                .fullName("System Administrator")
-                .email(adminEmail)
-                .password(passwordEncoder.encode(adminPassword))
-                .role(User.UserRole.ADMIN)
-                .isActive(true)
-                .build();
+            // Factory Method Pattern: delegate user creation to UserFactory
+            User admin = userFactory.createAdmin("System Administrator", adminEmail, adminPassword);
             userRepository.save(admin);
             System.out.println("✅ DEFAULT ADMIN CREATED successfully.");
         } else {
