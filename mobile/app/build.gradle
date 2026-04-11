@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.bookbrow'
+    namespace 'edu.ruperez.bookbrow'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.bookbrow"
+        applicationId "edu.ruperez.bookbrow"
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -16,7 +16,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // Build config field for base URL – change to your backend IP/host
+        // Build config field for base URL â€“ change to your backend IP/host
         buildConfigField "String", "BASE_URL", "\"http://10.0.2.2:8080/api/v1/\""
     }
 

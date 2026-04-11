@@ -1,6 +1,6 @@
 # Add project specific ProGuard rules here.
 # Keep data model classes for Gson serialization
--keep class com.example.bookbrow.data.remote.model.** { *; }
+-keep class edu.ruperez.bookbrow.data.remote.model.** { *; }
 -keepattributes Signature
 -keepattributes *Annotation*
 # Retain Retrofit & OkHttp
