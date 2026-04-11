@@ -56,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
 
                 is UiState.Success -> {
                     setLoading(false)
+                    Toast.makeText(applicationContext, "Login successful!", Toast.LENGTH_SHORT).show()
                     val authResponse = state.data
                     val userData = authResponse.data
 

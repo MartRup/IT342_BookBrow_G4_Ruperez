@@ -50,19 +50,16 @@
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">0.02</item>
         <item name="cornerRadius">12dp</item>
-        <item name="android:paddingTop">14dp</item>
-        <item name="android:paddingBottom">14dp</item>
     </style>
 
     <!-- Secondary outlined button -->
     <style name="Widget.BookBrow.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
         <item name="strokeColor">@color/btn_secondary_stroke</item>
         <item name="strokeWidth">1.5dp</item>
         <item name="cornerRadius">12dp</item>
-        <item name="android:paddingTop">14dp</item>
-        <item name="android:paddingBottom">14dp</item>
     </style>
 </resources>

@@ -58,7 +58,7 @@ class RegisterActivity : AppCompatActivity() {
 
                 is UiState.Success -> {
                     setLoading(false)
-                    Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_LONG).show()
+                    Toast.makeText(applicationContext, getString(R.string.register_success), Toast.LENGTH_LONG).show()
                     // Navigate back to login
                     val intent = Intent(this, LoginActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
