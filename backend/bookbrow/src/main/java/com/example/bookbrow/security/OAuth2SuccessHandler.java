@@ -30,9 +30,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             Authentication authentication
     ) throws IOException, ServletException {
 
+        log.info("[OAuth2] Authentication success callback triggered");
+
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
+        log.info("[OAuth2] OAuth2User principal: {}", oauthUser);
+
+        // Log all available attributes for debugging
+        log.info("[OAuth2] User attributes: {}", oauthUser.getAttributes());
+
         String email    = oauthUser.getAttribute("email");
         String fullName = oauthUser.getAttribute("name");
+
+        log.info("[OAuth2] Extracted email: {}, fullName: {}", email, fullName);
 
         // Guard: email is required
         if (email == null) {

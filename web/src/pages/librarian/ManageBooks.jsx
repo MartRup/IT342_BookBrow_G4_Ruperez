@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import ApiService from '../../services/ApiService';
 import LibrarianNavbar from './LibrarianNavbar';
 import './ManageBooks.css';
 
@@ -22,16 +22,50 @@ export default function ManageBooks() {
     if (!userData) { navigate('/login'); return; }
     if (userData.role !== 'LIBRARIAN') { navigate('/dashboard'); return; }
     setUser(userData);
+    
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    console.log('Theme initialized to:', savedTheme);
+    
     fetchBooks();
   }, [navigate]);
 
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/v1/books');
-      setBooks(res.data?.data || res.data || []);
+      const res = await ApiService.books.getAll({ limit: 200 });
+      
+      console.log('=== LIBRARIAN MANAGE BOOKS - API Response ===');
+      console.log('Full response:', res);
+      console.log('res.data:', res.data);
+      console.log('res.data.data:', res.data?.data);
+      console.log('res.data.data.books:', res.data?.data?.books);
+      
+      // Try multiple paths to extract books array
+      let booksData = [];
+      if (res.data?.data?.books && Array.isArray(res.data.data.books)) {
+        booksData = res.data.data.books;
+        console.log('✅ Found books at: res.data.data.books');
+      } else if (res.data?.books && Array.isArray(res.data.books)) {
+        booksData = res.data.books;
+        console.log('✅ Found books at: res.data.books');
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        booksData = res.data.data;
+        console.log('✅ Found books at: res.data.data');
+      } else if (Array.isArray(res.data)) {
+        booksData = res.data;
+        console.log('✅ Found books at: res.data');
+      }
+      
+      console.log('Extracted books array:', booksData);
+      console.log('Number of books:', booksData.length);
+      
+      setBooks(booksData);
     } catch (e) {
-      console.error(e);
+      console.error('❌ Error fetching books:', e);
+      console.error('Error details:', e.response?.data || e.message);
       setBooks([]);
     } finally { setLoading(false); }
   };
@@ -58,9 +92,9 @@ export default function ManageBooks() {
     try {
       setSaving(true);
       if (editBook) {
-        await axios.put(`/api/v1/books/${editBook.id}`, form);
+        await ApiService.books.update(editBook.id, form);
       } else {
-        await axios.post('/api/v1/books', form);
+        await ApiService.books.create(form);
       }
       closeModal();
       fetchBooks();
@@ -70,7 +104,7 @@ export default function ManageBooks() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this book?')) return;
-    try { await axios.delete(`/api/v1/books/${id}`); fetchBooks(); }
+    try { await ApiService.books.delete(id); fetchBooks(); }
     catch (e) { console.error(e); }
   };
 
@@ -87,13 +121,18 @@ export default function ManageBooks() {
       <LibrarianNavbar />
 
       <main className="mb-content">
-        <h1 className="mb-title">Books Management</h1>
-        <p className="mb-sub">Manage Library inventory and book information</p>
+        <div className="mb-header">
+          <div className="mb-header-content">
+            <h1 className="mb-title">Books Management</h1>
+            <p className="mb-sub">Manage Library inventory and book information</p>
+          </div>
+        </div>
 
         <div className="mb-action-bar">
           <div className="mb-search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" width="24" height="24">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input 
               type="text" 
@@ -103,7 +142,7 @@ export default function ManageBooks() {
             />
           </div>
           <button className="mb-add-btn" onClick={openAdd}>
-            <svg viewBox="0 0 24 24" fill="black" width="24" height="24" style={{marginRight: '8px'}}>
+            <svg viewBox="0 0 24 24" fill="white" width="20" height="20">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
             Add Book
@@ -125,7 +164,18 @@ export default function ManageBooks() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="mb-empty">No books found</td></tr>
+                <tr>
+                  <td colSpan={7}>
+                    <div className="mb-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                      </svg>
+                      <h3>No books found</h3>
+                      <p>There are currently no books in the library. Add your first book to get started.</p>
+                    </div>
+                  </td>
+                </tr>
               ) : filtered.map((b, i) => (
                 <tr key={b.id || i}>
                   <td>{b.title}</td>
@@ -136,12 +186,12 @@ export default function ManageBooks() {
                   <td>{b.availableCopies || 0}</td>
                   <td className="mb-actions-cell">
                     <button className="mb-icon-btn" onClick={() => openEdit(b)} title="Edit">
-                      <svg viewBox="0 0 24 24" fill="#111" width="20" height="20">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                       </svg>
                     </button>
                     <button className="mb-icon-btn mb-del-icon" onClick={() => handleDelete(b.id)} title="Delete">
-                      <svg viewBox="0 0 24 24" fill="#a52a2a" width="20" height="20">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                       </svg>
                     </button>
