@@ -34,23 +34,23 @@ public class BookController {
         return bookService.getBookById(id);
     }
 
-    /** POST /api/v1/books — ADMIN only */
+    /** POST /api/v1/books — ADMIN or LIBRARIAN */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<?> createBook(@RequestBody BookRequest request) {
         return bookService.createBook(request);
     }
 
-    /** PUT /api/v1/books/{id} — ADMIN only */
+    /** PUT /api/v1/books/{id} — ADMIN or LIBRARIAN */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody BookRequest request) {
         return bookService.updateBook(id, request);
     }
 
-    /** DELETE /api/v1/books/{id} — ADMIN only */
+    /** DELETE /api/v1/books/{id} — ADMIN or LIBRARIAN */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         return bookService.deleteBook(id);
     }

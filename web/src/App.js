@@ -6,6 +6,7 @@ import { AuthProvider } from './AuthContext';
 import Login       from './pages/auth/Login.jsx';
 import Register    from './pages/auth/Register.jsx';
 import AuthSuccess from './pages/auth/AuthSuccess.jsx';
+import OAuthTest   from './pages/auth/OAuthTest.jsx';
 
 // ── User ─────────────────────────────────────────────────
 import UserHome    from './pages/user/UserHome.jsx';
@@ -16,12 +17,14 @@ import MyBooks     from './pages/user/MyBooks.jsx';
 import LibrarianDashboard from './pages/librarian/LibrarianDashboard.jsx';
 import ManageBooks        from './pages/librarian/ManageBooks.jsx';
 import BorrowingRecords   from './pages/librarian/BorrowingRecords.jsx';
+import BookBorrowTest    from './pages/librarian/BookBorrowTest.jsx';
 
 // ── Admin ─────────────────────────────────────────────────
 import AdminDashboard        from './pages/admin/AdminDashboard.jsx';
 import ManageUsers           from './pages/admin/ManageUsers.jsx';
 import AdminManageBooks      from './pages/admin/AdminManageBooks.jsx';
 import AdminBorrowingRecords from './pages/admin/AdminBorrowingRecords.jsx';
+import TestData             from './pages/admin/TestData.jsx';
 
 // ── Shared ────────────────────────────────────────────────
 import Settings from './components/Settings.jsx';
@@ -58,6 +61,8 @@ function AppContent() {
       <Route path="/register"     element={<Register />} />
       {/* Google OAuth2 callback landing page */}
       <Route path="/auth/success" element={<AuthSuccess />} />
+      {/* OAuth debugging tool */}
+      <Route path="/oauth-test"    element={<OAuthTest />} />
 
       {/* Auto-redirect after login */}
       <Route path="/home" element={<RoleRedirect />} />
@@ -72,6 +77,7 @@ function AppContent() {
       <Route path="/librarian/dashboard"         element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/manage-books"      element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/borrowing-records" element={<ProtectedRoute element={<BorrowingRecords />}   allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/borrow-test"        element={<ProtectedRoute element={<BookBorrowTest />}    allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/settings"          element={<ProtectedRoute element={<Settings />}           allowedRoles={['LIBRARIAN']} />} />
 
       {/* ── Admin routes ── */}
@@ -79,6 +85,7 @@ function AppContent() {
       <Route path="/admin/manage-users"      element={<ProtectedRoute element={<ManageUsers />}      allowedRoles={['ADMIN']} />} />
       <Route path="/admin/manage-books"      element={<ProtectedRoute element={<AdminManageBooks />} allowedRoles={['ADMIN']} />} />
       <Route path="/admin/borrowing-records" element={<ProtectedRoute element={<AdminBorrowingRecords />} allowedRoles={['ADMIN']} />} />
+      <Route path="/admin/test-data"        element={<ProtectedRoute element={<TestData />}           allowedRoles={['ADMIN']} />} />
       <Route path="/admin/settings"          element={<ProtectedRoute element={<Settings />}       allowedRoles={['ADMIN']} />} />
 
       {/* Fallback */}

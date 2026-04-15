@@ -19,8 +19,13 @@ export default function AuthSuccess() {
   const location  = useLocation();
 
   useEffect(() => {
+    console.log('[AuthSuccess] Component mounted, checking URL:', window.location.href);
+    
     const params = new URLSearchParams(location.search);
     const token  = params.get('token');
+    
+    console.log('[AuthSuccess] Token from URL:', token);
+    console.log('[AuthSuccess] All URL params:', Object.fromEntries(params.entries()));
 
     if (!token) {
       console.error('[AuthSuccess] No token in redirect URL');

@@ -73,6 +73,35 @@
   gap: 25px;
 }
 
+.adm-theme-toggle {
+  background: transparent;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.adm-theme-toggle:hover {
+  background: #f5f5f5;
+  color: #800000;
+  transform: scale(1.05);
+}
+
+.adm-theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.adm-theme-toggle:hover svg {
+  transform: rotate(180deg);
+}
+
 .adm-user-info {
   display: flex;
   align-items: center;
@@ -125,4 +154,101 @@
 .adm-logout-btn svg {
   width: 16px;
   height: 16px;
+}
+
+/* Logout Confirmation Popup */
+.adm-logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.adm-logout-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.adm-logout-icon {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.adm-logout-modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.adm-logout-modal p {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+.adm-logout-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.adm-logout-cancel-btn {
+  padding: 10px 20px;
+  border: 2px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adm-logout-cancel-btn:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.adm-logout-confirm-btn {
+  padding: 10px 20px;
+  border: none;
+  background: #dc3545;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adm-logout-confirm-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
 }

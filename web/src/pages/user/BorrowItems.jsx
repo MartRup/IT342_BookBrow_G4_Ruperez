@@ -33,11 +33,45 @@ export default function BorrowItems() {
       setLoading(true);
       // Fetch all books matching search query
       const response = await ApiService.books.getAll({ search: q || undefined });
-      const booksData = response.data?.data?.books || response.data || [];
-      setBooks(booksData);
-      setFilteredBooks(booksData);
+      
+      console.log('=== BORROW ITEMS - API Response ===');
+      console.log('Full response:', response);
+      console.log('response.data:', response.data);
+      console.log('response.data.data:', response.data?.data);
+      console.log('response.data.data.books:', response.data?.data?.books);
+      
+      // Try multiple paths to extract books array
+      let booksData = [];
+      if (response.data?.data?.books && Array.isArray(response.data.data.books)) {
+        booksData = response.data.data.books;
+        console.log('✅ Found books at: response.data.data.books');
+      } else if (response.data?.books && Array.isArray(response.data.books)) {
+        booksData = response.data.books;
+        console.log('✅ Found books at: response.data.books');
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        booksData = response.data.data;
+        console.log('✅ Found books at: response.data.data');
+      } else if (Array.isArray(response.data)) {
+        booksData = response.data;
+        console.log('✅ Found books at: response.data');
+      }
+      
+      console.log('Extracted books array:', booksData);
+      console.log('Number of books:', booksData.length);
+      
+      // Map the 'available' field to 'status' for display
+      const mappedBooks = booksData.map(book => ({
+        ...book,
+        status: book.available ? 'Available' : 'Borrowed'
+      }));
+      
+      console.log('Mapped books:', mappedBooks);
+      
+      setBooks(mappedBooks);
+      setFilteredBooks(mappedBooks);
     } catch (error) {
-      console.error('Error fetching books:', error);
+      console.error('❌ Error fetching books:', error);
+      console.error('Error details:', error.response?.data || error.message);
       setBooks([]);
       setFilteredBooks([]);
     } finally {
