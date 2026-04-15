@@ -1,15 +1,17 @@
 package com.example.bookbrow.service;
 
-import com.example.bookbrow.dto.ApiResponse;
+import com.example.bookbrow.dto.ResponseBuilder;
 import com.example.bookbrow.entity.BorrowRecord;
 import com.example.bookbrow.entity.User;
+import com.example.bookbrow.event.BookBorrowedEvent;
+import com.example.bookbrow.event.BookReturnedEvent;
 import com.example.bookbrow.repository.BookRepository;
 import com.example.bookbrow.repository.BorrowRecordRepository;
 import com.example.bookbrow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service handling book borrowing and returning processes.
+ */
 @Service
 @RequiredArgsConstructor
 public class BorrowService {
@@ -26,6 +31,9 @@ public class BorrowService {
     private final BorrowRecordRepository borrowRecordRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+
+    // ── Observer Pattern: Spring event publisher ──
+    private final ApplicationEventPublisher eventPublisher;
 
     /** USER: borrow a book */
     @Transactional
@@ -35,8 +43,7 @@ public class BorrowService {
         return bookRepository.findById(bookId)
                 .<ResponseEntity<?>>map(book -> {
                     if (!book.getAvailable()) {
-                        return ResponseEntity.badRequest()
-                                .body(ApiResponse.error("BOOK-002", "Book is not available for borrowing"));
+                        return ResponseBuilder.badRequest("BOOK-002", "Book is not available for borrowing");
                     }
 
                     book.setAvailable(false);
@@ -50,17 +57,18 @@ public class BorrowService {
 
                     BorrowRecord saved = borrowRecordRepository.save(record);
 
-                    return ResponseEntity.status(HttpStatus.CREATED)
-                            .body(ApiResponse.success(Map.of("borrowRecord", Map.of(
-                                    "id", saved.getId(),
-                                    "bookId", book.getId(),
-                                    "bookTitle", book.getTitle(),
-                                    "userId", user.getId(),
-                                    "borrowDate", saved.getBorrowDate()
-                            ))));
+                    // Observer Pattern: publish event for side-effects
+                    eventPublisher.publishEvent(new BookBorrowedEvent(this, saved, user, book));
+
+                    return ResponseBuilder.created(Map.of("borrowRecord", Map.of(
+                            "id", saved.getId(),
+                            "bookId", book.getId(),
+                            "bookTitle", book.getTitle(),
+                            "userId", user.getId(),
+                            "borrowDate", saved.getBorrowDate()
+                    )));
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("BOOK-001", "Book not found")));
+                .orElse(ResponseBuilder.notFound("BOOK-001", "Book not found"));
     }
 
     /** USER: get own borrow records */
@@ -76,7 +84,7 @@ public class BorrowService {
             records = borrowRecordRepository.findByUser(user);
         }
 
-        return ResponseEntity.ok(ApiResponse.success(Map.of("borrowRecords", records)));
+        return ResponseBuilder.ok(Map.of("borrowRecords", records));
     }
 
     /** LIBRARIAN/ADMIN: get all borrow records */
@@ -92,14 +100,14 @@ public class BorrowService {
             recordPage = borrowRecordRepository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(ApiResponse.success(Map.of(
+        return ResponseBuilder.ok(Map.of(
                 "borrowRecords", recordPage.getContent(),
                 "pagination", Map.of(
                         "page", page, "limit", limit,
                         "total", recordPage.getTotalElements(),
                         "pages", recordPage.getTotalPages()
                 )
-        )));
+        ));
     }
 
     /** LIBRARIAN/ADMIN: process a return */
@@ -110,8 +118,7 @@ public class BorrowService {
         return borrowRecordRepository.findById(borrowId)
                 .<ResponseEntity<?>>map(record -> {
                     if (record.getReturnDate() != null) {
-                        return ResponseEntity.badRequest()
-                                .body(ApiResponse.error("BORROW-001", "This book has already been returned"));
+                        return ResponseBuilder.badRequest("BORROW-001", "This book has already been returned");
                     }
 
                     record.setReturnDate(LocalDateTime.now());
@@ -121,10 +128,12 @@ public class BorrowService {
                     record.getBook().setAvailable(true);
                     bookRepository.save(record.getBook());
 
-                    return ResponseEntity.ok(ApiResponse.success(
-                            Map.of("message", "Book returned successfully")));
+                    // Observer Pattern: publish return event for side-effects
+                    eventPublisher.publishEvent(
+                            new BookReturnedEvent(this, record, librarian, record.getBook()));
+
+                    return ResponseBuilder.ok(Map.of("message", "Book returned successfully"));
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("BORROW-002", "Borrow record not found")));
+                .orElse(ResponseBuilder.notFound("BORROW-002", "Borrow record not found"));
     }
 }
