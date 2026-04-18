@@ -65,6 +65,31 @@ public class UserService {
         return null;
     }
     
+    public User updateProfile(Long id, String fullName, String phone, String about) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (fullName != null) user.setFullName(fullName);
+            if (phone != null) user.setPhone(phone);
+            if (about != null) user.setAbout(about);
+            return userRepository.save(user);
+        }
+        return null;
+    }
+    
+    public boolean changePassword(Long id, String currentPassword, String newPassword) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (verifyPassword(currentPassword, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public void deleteUser(Long id) {
         userRepository.findById(id).ifPresent(user -> {
             user.setIsActive(false);

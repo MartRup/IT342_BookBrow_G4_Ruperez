@@ -44,6 +44,9 @@ public class User implements UserDetails {
     @Column(name = "phone")
     private String phone;
 
+    @Column(name = "about", length = 500)
+    private String about;
+
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
