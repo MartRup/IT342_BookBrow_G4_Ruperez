@@ -56,6 +56,11 @@ public class BookService {
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .description(request.getDescription())
+                .isbn(request.getIsbn())
+                .genre(request.getGenre())
+                .coverUrl(request.getCoverUrl())
+                .totalCopies(request.getTotalCopies() != null ? request.getTotalCopies() : 1)
+                .availableCopies(request.getAvailableCopies() != null ? request.getAvailableCopies() : 1)
                 .available(request.getAvailable() != null ? request.getAvailable() : true)
                 .build();
 
@@ -67,10 +72,15 @@ public class BookService {
     public ResponseEntity<?> updateBook(Long id, BookRequest request) {
         return bookRepository.findById(id)
                 .<ResponseEntity<?>>map(book -> {
-                    if (request.getTitle() != null)       book.setTitle(request.getTitle());
-                    if (request.getAuthor() != null)      book.setAuthor(request.getAuthor());
-                    if (request.getDescription() != null) book.setDescription(request.getDescription());
-                    if (request.getAvailable() != null)   book.setAvailable(request.getAvailable());
+                    if (request.getTitle() != null)          book.setTitle(request.getTitle());
+                    if (request.getAuthor() != null)         book.setAuthor(request.getAuthor());
+                    if (request.getDescription() != null)    book.setDescription(request.getDescription());
+                    if (request.getAvailable() != null)      book.setAvailable(request.getAvailable());
+                    if (request.getIsbn() != null)           book.setIsbn(request.getIsbn());
+                    if (request.getGenre() != null)          book.setGenre(request.getGenre());
+                    if (request.getCoverUrl() != null)       book.setCoverUrl(request.getCoverUrl());
+                    if (request.getTotalCopies() != null)    book.setTotalCopies(request.getTotalCopies());
+                    if (request.getAvailableCopies() != null) book.setAvailableCopies(request.getAvailableCopies());
                     Book updated = bookRepository.save(book);
                     return ResponseBuilder.okWith("book", updated);
                 })

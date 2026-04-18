@@ -36,36 +36,10 @@ export default function ManageBooks() {
     try {
       setLoading(true);
       const res = await ApiService.books.getAll({ limit: 200 });
-      
-      console.log('=== LIBRARIAN MANAGE BOOKS - API Response ===');
-      console.log('Full response:', res);
-      console.log('res.data:', res.data);
-      console.log('res.data.data:', res.data?.data);
-      console.log('res.data.data.books:', res.data?.data?.books);
-      
-      // Try multiple paths to extract books array
-      let booksData = [];
-      if (res.data?.data?.books && Array.isArray(res.data.data.books)) {
-        booksData = res.data.data.books;
-        console.log('✅ Found books at: res.data.data.books');
-      } else if (res.data?.books && Array.isArray(res.data.books)) {
-        booksData = res.data.books;
-        console.log('✅ Found books at: res.data.books');
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
-        booksData = res.data.data;
-        console.log('✅ Found books at: res.data.data');
-      } else if (Array.isArray(res.data)) {
-        booksData = res.data;
-        console.log('✅ Found books at: res.data');
-      }
-      
-      console.log('Extracted books array:', booksData);
-      console.log('Number of books:', booksData.length);
-      
-      setBooks(booksData);
+      const booksData = res.data?.data?.books ?? res.data?.books ?? res.data?.data ?? [];
+      setBooks(Array.isArray(booksData) ? booksData : []);
     } catch (e) {
-      console.error('❌ Error fetching books:', e);
-      console.error('Error details:', e.response?.data || e.message);
+      console.error('Error fetching books:', e);
       setBooks([]);
     } finally { setLoading(false); }
   };
