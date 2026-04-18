@@ -117,14 +117,16 @@ export default function AdminBorrowingRecords() {
         </div>
 
         <div className="br-search-filter-wrap">
-          <div className="br-search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input 
-              type="text" 
-              placeholder="Search by member name, book title, or email..." 
-              value={search} 
-              onChange={e => setSearch(e.target.value)} 
-            />
+          <div className="br-search-section">
+            <div className="br-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input 
+                type="text" 
+                placeholder="Search by member name, book title, or email..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+              />
+            </div>
           </div>
           <div className="br-filters">
             {['All Records', 'Active', 'Overdue', 'Returned'].map(f => (
