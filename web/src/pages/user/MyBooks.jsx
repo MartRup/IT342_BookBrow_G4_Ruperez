@@ -11,6 +11,8 @@ export default function MyBooks() {
   const [borrowHistory, setBorrowHistory] = useState([]);
   const [stats, setStats] = useState({ currentlyBorrowing: 0, totalBorrowed: 0, readingDays: 0 });
   const [loading, setLoading] = useState(true);
+  const [returningId, setReturningId] = useState(null);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,12 +49,22 @@ export default function MyBooks() {
     }
   };
 
-  const handleReturn = async (borrowId) => {
+  const showToast = (type, msg) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleReturn = async (borrowId, bookTitle) => {
     try {
+      setReturningId(borrowId);
       await ApiService.borrow.returnBook(borrowId);
+      showToast('success', `"${bookTitle}" returned successfully!`);
       fetchMyBooks();
     } catch (error) {
-      console.error('Error returning book:', error);
+      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to return book.';
+      showToast('error', msg);
+    } finally {
+      setReturningId(null);
     }
   };
 
@@ -74,6 +86,13 @@ export default function MyBooks() {
 
   return (
     <div className="mb-wrapper">
+      {/* ── Toast ── */}
+      {toast && (
+        <div className={`mb-toast mb-toast-${toast.type}`}>
+          {toast.type === 'success' ? '✅' : '❌'} {toast.msg}
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <UserNavbar />
 
@@ -146,15 +165,19 @@ export default function MyBooks() {
                   </div>
 
                 {/* Actions */}
-                {activeTab === 'current' && record.bookId && (
+                {activeTab === 'current' && (
                   <div className="mb-book-actions">
-                    <button className="mb-return-btn" onClick={() => handleReturn(record.id)}>
-                      Return
+                    <button
+                      className="mb-return-btn"
+                      onClick={() => handleReturn(record.id, record.bookTitle)}
+                      disabled={returningId === record.id}
+                    >
+                      {returningId === record.id ? 'Returning...' : 'Return'}
                     </button>
+                    <span className={`mb-status-pill ${(record.status || 'active').toLowerCase()}`}>
+                      {record.status === 'OVERDUE' ? '⚠️ Overdue' : record.status === 'ACTIVE' ? 'Borrowing' : record.status}
+                    </span>
                   </div>
-                )}
-                {activeTab === 'current' && !record.book && (
-                  <span className="mb-status-pill current">Borrowing</span>
                 )}
                 {activeTab === 'history' && (
                   <span className="mb-status-pill returned">Returned</span>
