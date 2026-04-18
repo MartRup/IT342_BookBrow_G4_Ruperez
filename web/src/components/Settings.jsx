@@ -118,7 +118,8 @@ export default function Settings() {
       showToast('Profile updated successfully!');
     } catch (err) {
       console.error('Error updating profile:', err);
-      showToast('Failed to update profile.', 'error');
+      const errorMsg = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to update profile.';
+      showToast(errorMsg, 'error');
     } finally {
       setSaving(false);
     }
@@ -147,7 +148,8 @@ export default function Settings() {
       showToast('Password changed successfully!');
     } catch (err) {
       console.error('Error changing password:', err);
-      showToast(err.response?.data?.message || 'Failed to change password.', 'error');
+      const errorMsg = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to change password.';
+      showToast(errorMsg, 'error');
     } finally {
       setSaving(false);
     }
