@@ -15,6 +15,7 @@ export default function AdminManageBooks() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,11 +36,13 @@ export default function AdminManageBooks() {
   const fetchBooks = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await ApiService.books.getAll({ limit: 200 });
       const booksData = res.data?.data?.books ?? res.data?.books ?? res.data?.data ?? [];
       setBooks(Array.isArray(booksData) ? booksData : []);
     } catch (e) {
       console.error('Error fetching books:', e);
+      setError(e.response?.data?.error?.message || e.response?.data?.message || e.message || 'Failed to load books.');
       setBooks([]);
     } finally { setLoading(false); }
   };
@@ -89,6 +92,7 @@ export default function AdminManageBooks() {
   );
 
   if (loading) return <div className="mb-loading"><div className="mb-spinner" /><p>Loading books...</p></div>;
+  if (error) return <div className="mb-page"><AdminNavbar /><main className="mb-content"><div className="mb-empty" style={{marginTop:'4rem'}}><h3>⚠️ Failed to load books</h3><p style={{color:'#c0392b'}}>{error}</p><button className="mb-add-btn" onClick={fetchBooks} style={{marginTop:'1rem'}}>Retry</button></div></main></div>;
 
   return (
     <div className="mb-page">
