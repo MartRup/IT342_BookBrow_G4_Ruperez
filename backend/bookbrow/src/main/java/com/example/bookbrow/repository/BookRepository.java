@@ -14,11 +14,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findAll(Pageable pageable);
 
     @Query("SELECT b FROM Book b WHERE " +
-           "(:search IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "(:pattern IS NULL OR LOWER(b.title) LIKE :pattern OR LOWER(b.author) LIKE :pattern) " +
            "AND (:available IS NULL OR b.available = :available)")
     Page<Book> findAllWithFilters(
-            @Param("search") String search,
+            @Param("pattern") String pattern,
             @Param("available") Boolean available,
             Pageable pageable
     );

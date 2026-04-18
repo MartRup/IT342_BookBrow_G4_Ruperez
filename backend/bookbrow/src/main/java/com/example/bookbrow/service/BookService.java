@@ -25,8 +25,11 @@ public class BookService {
 
     public ResponseEntity<?> getAllBooks(int page, int limit, String search, Boolean available) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+        // Build the LIKE pattern here to avoid passing null into LOWER() in PostgreSQL
+        String pattern = (search != null && !search.isBlank())
+                ? "%" + search.toLowerCase() + "%" : null;
         Page<Book> bookPage = bookRepository.findAllWithFilters(
-                (search != null && !search.isBlank()) ? search : null,
+                pattern,
                 available,
                 pageable
         );
