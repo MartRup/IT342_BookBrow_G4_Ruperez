@@ -1,5 +1,6 @@
 package com.example.bookbrow.service;
 
+import com.example.bookbrow.dto.BorrowRecordDto;
 import com.example.bookbrow.dto.ResponseBuilder;
 import com.example.bookbrow.entity.BorrowRecord;
 import com.example.bookbrow.entity.User;
@@ -84,7 +85,8 @@ public class BorrowService {
             records = borrowRecordRepository.findByUser(user);
         }
 
-        return ResponseBuilder.ok(Map.of("borrowRecords", records));
+        List<BorrowRecordDto> dtos = records.stream().map(BorrowRecordDto::from).toList();
+        return ResponseBuilder.ok(Map.of("borrowRecords", dtos));
     }
 
     /** LIBRARIAN/ADMIN: get all borrow records */
@@ -100,8 +102,9 @@ public class BorrowService {
             recordPage = borrowRecordRepository.findAll(pageable);
         }
 
+        List<BorrowRecordDto> dtos = recordPage.getContent().stream().map(BorrowRecordDto::from).toList();
         return ResponseBuilder.ok(Map.of(
-                "borrowRecords", recordPage.getContent(),
+                "borrowRecords", dtos,
                 "pagination", Map.of(
                         "page", page, "limit", limit,
                         "total", recordPage.getTotalElements(),

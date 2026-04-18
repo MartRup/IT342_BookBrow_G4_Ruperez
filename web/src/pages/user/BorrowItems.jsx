@@ -13,6 +13,7 @@ export default function BorrowItems() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [borrowingBookId, setBorrowingBookId] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,7 +22,6 @@ export default function BorrowItems() {
     if (!userData) { navigate('/login'); return; }
     setUser(userData);
 
-    // Pre-fill search from query param (?search=...)
     const params = new URLSearchParams(location.search);
     const q = params.get('search') || '';
     setSearchQuery(q);
@@ -31,47 +31,16 @@ export default function BorrowItems() {
   const fetchBooks = async (q = '') => {
     try {
       setLoading(true);
-      // Fetch all books matching search query
       const response = await ApiService.books.getAll({ search: q || undefined });
-      
-      console.log('=== BORROW ITEMS - API Response ===');
-      console.log('Full response:', response);
-      console.log('response.data:', response.data);
-      console.log('response.data.data:', response.data?.data);
-      console.log('response.data.data.books:', response.data?.data?.books);
-      
-      // Try multiple paths to extract books array
-      let booksData = [];
-      if (response.data?.data?.books && Array.isArray(response.data.data.books)) {
-        booksData = response.data.data.books;
-        console.log('✅ Found books at: response.data.data.books');
-      } else if (response.data?.books && Array.isArray(response.data.books)) {
-        booksData = response.data.books;
-        console.log('✅ Found books at: response.data.books');
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
-        booksData = response.data.data;
-        console.log('✅ Found books at: response.data.data');
-      } else if (Array.isArray(response.data)) {
-        booksData = response.data;
-        console.log('✅ Found books at: response.data');
-      }
-      
-      console.log('Extracted books array:', booksData);
-      console.log('Number of books:', booksData.length);
-      
-      // Map the 'available' field to 'status' for display
-      const mappedBooks = booksData.map(book => ({
+      const booksData = response.data?.data?.books ?? response.data?.books ?? response.data?.data ?? [];
+      const mappedBooks = (Array.isArray(booksData) ? booksData : []).map(book => ({
         ...book,
         status: book.available ? 'Available' : 'Borrowed'
       }));
-      
-      console.log('Mapped books:', mappedBooks);
-      
       setBooks(mappedBooks);
       setFilteredBooks(mappedBooks);
     } catch (error) {
-      console.error('❌ Error fetching books:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      console.error('Error fetching books:', error);
       setBooks([]);
       setFilteredBooks([]);
     } finally {
@@ -93,19 +62,20 @@ export default function BorrowItems() {
     setFilteredBooks(result);
   }, [searchQuery, statusFilter, books]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
   };
 
-  const handleBorrow = async (bookId) => {
+  const handleBorrow = async (book) => {
     try {
-      setBorrowingBookId(bookId);
-      // Request to borrow book
-      await ApiService.borrow.create(bookId);
+      setBorrowingBookId(book.id);
+      await ApiService.borrow.create(book.id);
+      showToast('success', `"${book.title}" borrowed successfully! Due in 14 days.`);
       fetchBooks(searchQuery);
     } catch (error) {
-      console.error('Error borrowing book:', error);
+      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to borrow book. Please try again.';
+      showToast('error', msg);
     } finally {
       setBorrowingBookId(null);
     }
@@ -122,6 +92,14 @@ export default function BorrowItems() {
 
   return (
     <div className="bi-wrapper">
+      {/* ── Toast Notification ── */}
+      {toast && (
+        <div className={`bi-toast bi-toast-${toast.type}`}>
+          <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+          {toast.message}
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <UserNavbar />
 
@@ -156,18 +134,12 @@ export default function BorrowItems() {
             </button>
             {showFilters && (
               <div className="bi-filter-dropdown">
-                <label className={statusFilter === 'all' ? 'bi-filter-option active' : 'bi-filter-option'}>
-                  <input type="radio" name="status" value="all" checked={statusFilter === 'all'} onChange={() => setStatusFilter('all')} />
-                  All
-                </label>
-                <label className={statusFilter === 'available' ? 'bi-filter-option active' : 'bi-filter-option'}>
-                  <input type="radio" name="status" value="available" checked={statusFilter === 'available'} onChange={() => setStatusFilter('available')} />
-                  Available
-                </label>
-                <label className={statusFilter === 'borrowed' ? 'bi-filter-option active' : 'bi-filter-option'}>
-                  <input type="radio" name="status" value="borrowed" checked={statusFilter === 'borrowed'} onChange={() => setStatusFilter('borrowed')} />
-                  Borrowed
-                </label>
+                {['all', 'available', 'borrowed'].map(val => (
+                  <label key={val} className={statusFilter === val ? 'bi-filter-option active' : 'bi-filter-option'}>
+                    <input type="radio" name="status" value={val} checked={statusFilter === val} onChange={() => setStatusFilter(val)} />
+                    {val === 'all' ? 'All' : val.charAt(0).toUpperCase() + val.slice(1)}
+                  </label>
+                ))}
               </div>
             )}
           </div>
@@ -201,12 +173,13 @@ export default function BorrowItems() {
                 <div className="bi-book-info">
                   <h3 className="bi-book-title">{book.title}</h3>
                   <p className="bi-book-author">{book.author}</p>
+                  {book.genre && <p className="bi-book-genre">{book.genre}</p>}
                   <span className={`bi-status-badge ${(book.status || 'available').toLowerCase()}`}>
                     {book.status || 'Available'}
                   </span>
                   <button
                     className="bi-borrow-btn"
-                    onClick={() => handleBorrow(book.id)}
+                    onClick={() => handleBorrow(book)}
                     disabled={book.status?.toLowerCase() === 'borrowed' || borrowingBookId === book.id}
                   >
                     {borrowingBookId === book.id ? 'Borrowing...' : 'Borrow Now'}

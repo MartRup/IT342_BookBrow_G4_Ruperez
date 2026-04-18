@@ -24,9 +24,11 @@ export default function AdminBorrowingRecords() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/v1/borrow/all');
-      const data = res.data?.data || res.data || [];
-      setRecords(data);
+      const res = await axios.get('/api/v1/borrow/all', {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      const data = res.data?.data?.borrowRecords ?? res.data?.borrowRecords ?? [];
+      setRecords(Array.isArray(data) ? data : []);
 
       let active = 0, overdue = 0, returned = 0;
       data.forEach(r => {
