@@ -14,6 +14,4 @@ public class BookRequest {
     private String isbn;
     private String genre;
     private String coverUrl;
-    private Integer totalCopies;
-    private Integer availableCopies;
 }

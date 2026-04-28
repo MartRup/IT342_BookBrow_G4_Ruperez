@@ -4,6 +4,7 @@ import com.example.bookbrow.dto.BookRequest;
 import com.example.bookbrow.dto.ResponseBuilder;
 import com.example.bookbrow.entity.Book;
 import com.example.bookbrow.repository.BookRepository;
+import com.example.bookbrow.repository.BorrowRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -22,14 +24,12 @@ import java.util.Map;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BorrowRecordRepository borrowRecordRepository;
 
     public ResponseEntity<?> getAllBooks(int page, int limit, String search, Boolean available) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
-        // Build the LIKE pattern here to avoid passing null into LOWER() in PostgreSQL
-        String pattern = (search != null && !search.isBlank())
-                ? "%" + search.toLowerCase() + "%" : null;
         Page<Book> bookPage = bookRepository.findAllWithFilters(
-                pattern,
+                (search != null && !search.isBlank()) ? search : null,
                 available,
                 pageable
         );
@@ -59,12 +59,10 @@ public class BookService {
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .description(request.getDescription())
+                .available(request.getAvailable() != null ? request.getAvailable() : true)
                 .isbn(request.getIsbn())
                 .genre(request.getGenre())
                 .coverUrl(request.getCoverUrl())
-                .totalCopies(request.getTotalCopies() != null ? request.getTotalCopies() : 1)
-                .availableCopies(request.getAvailableCopies() != null ? request.getAvailableCopies() : 1)
-                .available(request.getAvailable() != null ? request.getAvailable() : true)
                 .build();
 
         Book saved = bookRepository.save(book);
@@ -75,25 +73,26 @@ public class BookService {
     public ResponseEntity<?> updateBook(Long id, BookRequest request) {
         return bookRepository.findById(id)
                 .<ResponseEntity<?>>map(book -> {
-                    if (request.getTitle() != null)          book.setTitle(request.getTitle());
-                    if (request.getAuthor() != null)         book.setAuthor(request.getAuthor());
-                    if (request.getDescription() != null)    book.setDescription(request.getDescription());
-                    if (request.getAvailable() != null)      book.setAvailable(request.getAvailable());
-                    if (request.getIsbn() != null)           book.setIsbn(request.getIsbn());
-                    if (request.getGenre() != null)          book.setGenre(request.getGenre());
-                    if (request.getCoverUrl() != null)       book.setCoverUrl(request.getCoverUrl());
-                    if (request.getTotalCopies() != null)    book.setTotalCopies(request.getTotalCopies());
-                    if (request.getAvailableCopies() != null) book.setAvailableCopies(request.getAvailableCopies());
+                    if (request.getTitle() != null)       book.setTitle(request.getTitle());
+                    if (request.getAuthor() != null)      book.setAuthor(request.getAuthor());
+                    if (request.getDescription() != null) book.setDescription(request.getDescription());
+                    if (request.getAvailable() != null)   book.setAvailable(request.getAvailable());
+                    if (request.getIsbn() != null)        book.setIsbn(request.getIsbn());
+                    if (request.getGenre() != null)       book.setGenre(request.getGenre());
+                    if (request.getCoverUrl() != null)    book.setCoverUrl(request.getCoverUrl());
                     Book updated = bookRepository.save(book);
                     return ResponseBuilder.okWith("book", updated);
                 })
                 .orElse(ResponseBuilder.notFound("BOOK-001", "Book not found"));
     }
 
+    @Transactional
     public ResponseEntity<?> deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
             return ResponseBuilder.notFound("BOOK-001", "Book not found");
         }
+        // Delete all associated borrow records first to avoid FK constraint violation
+        borrowRecordRepository.deleteByBookId(id);
         bookRepository.deleteById(id);
         return ResponseBuilder.okWith("message", "Book deleted successfully");
     }

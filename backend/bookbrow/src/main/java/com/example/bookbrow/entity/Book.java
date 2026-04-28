@@ -31,26 +31,18 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean available = true;
+
     @Column
     private String isbn;
 
     @Column
     private String genre;
 
-    @Column(name = "cover_url")
+    @Column(columnDefinition = "TEXT")
     private String coverUrl;
-
-    @Column(name = "total_copies")
-    @Builder.Default
-    private Integer totalCopies = 1;
-
-    @Column(name = "available_copies")
-    @Builder.Default
-    private Integer availableCopies = 1;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean available = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
