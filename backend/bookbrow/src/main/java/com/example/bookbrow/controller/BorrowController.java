@@ -47,9 +47,9 @@ public class BorrowController {
         return borrowService.borrowBook(request.getBookId(), authentication);
     }
 
-    /** PUT /api/v1/borrow/{id}/return — LIBRARIAN, ADMIN */
+    /** PUT /api/v1/borrow/{id}/return — USER (own records), LIBRARIAN, ADMIN */
     @PutMapping("/{id}/return")
-    @PreAuthorize("hasAnyRole('LIBRARIAN','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','LIBRARIAN','ADMIN')")
     public ResponseEntity<?> returnBook(
             @PathVariable Long id,
             Authentication authentication

@@ -33,6 +33,32 @@
 }
 @keyframes bi-spin { to { transform: rotate(360deg); } }
 
+/* ────────── TOAST ────────── */
+.bi-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 9999;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  animation: bi-toast-in 0.3s ease;
+  white-space: nowrap;
+}
+.bi-toast-success { background: #d4f5e4; color: #156b40; border: 1.5px solid #a3e6c2; }
+.bi-toast-error   { background: #ffe0e6; color: #8b001d; border: 1.5px solid #f5a3b3; }
+@keyframes bi-toast-in { from { opacity: 0; top: 60px; } to { opacity: 1; top: 80px; } }
+
+/* ────────── GENRE ────────── */
+.bi-book-genre { font-size: 0.75rem; color: #aaa; margin-bottom: 0.5rem; font-style: italic; }
+
+
 /* ────────── NAVBAR ────────── */
 .bi-nav {
   background: #fff;

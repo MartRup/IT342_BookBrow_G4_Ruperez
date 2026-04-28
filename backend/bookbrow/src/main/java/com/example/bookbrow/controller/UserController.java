@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -89,5 +90,54 @@ public class UserController {
         }
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(Map.of("message", "User deleted successfully")));
+    }
+
+    /** PUT /api/v1/users/profile — Authenticated */
+    @PutMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> body, Principal principal) {
+        String email = principal.getName();
+        return userRepository.findByEmail(email).map(user -> {
+            userService.updateProfile(
+                user.getId(), 
+                body.get("fullName"), 
+                body.get("phone"), 
+                body.get("about")
+            );
+            return ResponseEntity.ok(ApiResponse.success(Map.of("message", "Profile updated successfully")));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("USER-001", "User not found")));
+    }
+
+    /** PUT /api/v1/users/password — Authenticated */
+    @PutMapping("/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body, Principal principal) {
+        String email = principal.getName();
+        return userRepository.findByEmail(email).map(user -> {
+            boolean success = userService.changePassword(
+                user.getId(), 
+                body.get("currentPassword"), 
+                body.get("newPassword")
+            );
+            if (success) {
+                return ResponseEntity.ok(ApiResponse.success(Map.of("message", "Password changed successfully")));
+            } else {
+                return ResponseEntity.badRequest().body(ApiResponse.error("AUTH-001", "Incorrect current password"));
+            }
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("USER-001", "User not found")));
+    }
+    
+    /** DELETE /api/v1/users/account — Authenticated (Self Delete) */
+    @DeleteMapping("/account")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteAccount(Principal principal) {
+        String email = principal.getName();
+        return userRepository.findByEmail(email).map(user -> {
+            userService.deleteUser(user.getId());
+            return ResponseEntity.ok(ApiResponse.success(Map.of("message", "Account deleted successfully")));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("USER-001", "User not found")));
     }
 }

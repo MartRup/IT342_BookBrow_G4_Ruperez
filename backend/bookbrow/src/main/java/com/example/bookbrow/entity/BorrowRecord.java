@@ -32,6 +32,9 @@ public class BorrowRecord {
     @Column(name = "borrow_date", nullable = false)
     private LocalDateTime borrowDate;
 
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
+
     @Column(name = "return_date")
     private LocalDateTime returnDate;
 
@@ -47,6 +50,7 @@ public class BorrowRecord {
     @PrePersist
     protected void onCreate() {
         if (borrowDate == null) borrowDate = LocalDateTime.now();
+        if (dueDate == null)   dueDate = borrowDate.plusDays(14);
     }
 
     public boolean isActive() {

@@ -1,5 +1,6 @@
 package com.example.bookbrow.service;
 
+import com.example.bookbrow.dto.BorrowRecordDto;
 import com.example.bookbrow.dto.ResponseBuilder;
 import com.example.bookbrow.entity.BorrowRecord;
 import com.example.bookbrow.entity.User;
@@ -84,7 +85,8 @@ public class BorrowService {
             records = borrowRecordRepository.findByUser(user);
         }
 
-        return ResponseBuilder.ok(Map.of("borrowRecords", records));
+        List<BorrowRecordDto> dtos = records.stream().map(BorrowRecordDto::from).toList();
+        return ResponseBuilder.ok(Map.of("borrowRecords", dtos));
     }
 
     /** LIBRARIAN/ADMIN: get all borrow records */
@@ -100,8 +102,9 @@ public class BorrowService {
             recordPage = borrowRecordRepository.findAll(pageable);
         }
 
+        List<BorrowRecordDto> dtos = recordPage.getContent().stream().map(BorrowRecordDto::from).toList();
         return ResponseBuilder.ok(Map.of(
-                "borrowRecords", recordPage.getContent(),
+                "borrowRecords", dtos,
                 "pagination", Map.of(
                         "page", page, "limit", limit,
                         "total", recordPage.getTotalElements(),
@@ -110,19 +113,28 @@ public class BorrowService {
         ));
     }
 
-    /** LIBRARIAN/ADMIN: process a return */
+    /** USER (own) / LIBRARIAN / ADMIN: process a return */
     @Transactional
     public ResponseEntity<?> returnBook(Long borrowId, Authentication auth) {
-        User librarian = (User) auth.getPrincipal();
+        User caller = (User) auth.getPrincipal();
 
         return borrowRecordRepository.findById(borrowId)
                 .<ResponseEntity<?>>map(record -> {
+                    // Users can only return their own borrowed books
+                    if (caller.getRole() == User.UserRole.USER
+                            && !record.getUser().getId().equals(caller.getId())) {
+                        return ResponseBuilder.badRequest("BORROW-003", "You can only return your own borrowed books");
+                    }
+
                     if (record.getReturnDate() != null) {
                         return ResponseBuilder.badRequest("BORROW-001", "This book has already been returned");
                     }
 
                     record.setReturnDate(LocalDateTime.now());
-                    record.setProcessedBy(librarian);
+                    // Only set processedBy for staff; leave null for self-returns
+                    if (caller.getRole() != User.UserRole.USER) {
+                        record.setProcessedBy(caller);
+                    }
                     borrowRecordRepository.save(record);
 
                     record.getBook().setAvailable(true);
@@ -130,7 +142,7 @@ public class BorrowService {
 
                     // Observer Pattern: publish return event for side-effects
                     eventPublisher.publishEvent(
-                            new BookReturnedEvent(this, record, librarian, record.getBook()));
+                            new BookReturnedEvent(this, record, caller, record.getBook()));
 
                     return ResponseBuilder.ok(Map.of("message", "Book returned successfully"));
                 })

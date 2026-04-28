@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
 import './MyBooks.css';
 
@@ -11,29 +11,33 @@ export default function MyBooks() {
   const [borrowHistory, setBorrowHistory] = useState([]);
   const [stats, setStats] = useState({ currentlyBorrowing: 0, totalBorrowed: 0, readingDays: 0 });
   const [loading, setLoading] = useState(true);
+  const [returningId, setReturningId] = useState(null);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
     if (!userData) { navigate('/login'); return; }
     setUser(userData);
-    fetchMyBooks(userData);
+    fetchMyBooks();
   }, [navigate]);
 
-  const fetchMyBooks = async (userData) => {
+  const fetchMyBooks = async () => {
     try {
       setLoading(true);
-      const [currentRes, historyRes, statsRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/borrow/current?email=${userData.email}`),
-        axios.get(`http://localhost:8080/api/borrow/history?email=${userData.email}`),
-        axios.get(`http://localhost:8080/api/dashboard/stats/by-email?email=${userData.email}`),
-      ]);
-      setCurrentBorrows(currentRes.data);
-      setBorrowHistory(historyRes.data);
+      // Fetch all user borrow records from the correct endpoint
+      const res = await ApiService.borrow.getUserBorrows();
+      const allRecords = res.data?.data?.borrowRecords ?? res.data?.borrowRecords ?? [];
+
+      const current = allRecords.filter(r => r.status !== 'RETURNED');
+      const history = allRecords.filter(r => r.status === 'RETURNED');
+
+      setCurrentBorrows(current);
+      setBorrowHistory(history);
       setStats({
-        currentlyBorrowing: statsRes.data.booksBorrowed || 0,
-        totalBorrowed: statsRes.data.totalBorrowed || (currentRes.data.length + historyRes.data.length),
-        readingDays: statsRes.data.readingDays || 0,
+        currentlyBorrowing: current.length,
+        totalBorrowed: allRecords.length,
+        readingDays: 0,
       });
     } catch (error) {
       console.error('Error fetching my books:', error);
@@ -45,12 +49,22 @@ export default function MyBooks() {
     }
   };
 
-  const handleReturn = async (borrowId) => {
+  const showToast = (type, msg) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleReturn = async (borrowId, bookTitle) => {
     try {
-      await axios.put(`http://localhost:8080/api/borrow/${borrowId}/return`);
-      fetchMyBooks(user);
+      setReturningId(borrowId);
+      await ApiService.borrow.returnBook(borrowId);
+      showToast('success', `"${bookTitle}" returned successfully!`);
+      fetchMyBooks();
     } catch (error) {
-      console.error('Error returning book:', error);
+      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to return book.';
+      showToast('error', msg);
+    } finally {
+      setReturningId(null);
     }
   };
 
@@ -72,6 +86,13 @@ export default function MyBooks() {
 
   return (
     <div className="mb-wrapper">
+      {/* ── Toast ── */}
+      {toast && (
+        <div className={`mb-toast mb-toast-${toast.type}`}>
+          {toast.type === 'success' ? '✅' : '❌'} {toast.msg}
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <UserNavbar />
 
@@ -110,57 +131,53 @@ export default function MyBooks() {
               )}
             </div>
           ) : (
-            displayList.map((record) => (
-              <div key={record.id} className="mb-book-row">
-                {/* Cover thumbnail */}
-                <div className="mb-book-thumb">
-                  {record.book?.coverUrl ? (
-                    <img src={record.book.coverUrl} alt={record.book?.title || 'Book'} />
-                  ) : (
-                    <div className="mb-thumb-placeholder"></div>
-                  )}
-                </div>
+              displayList.map((record) => (
+                <div key={record.id} className="mb-book-row">
+                  {/* Cover thumbnail */}
+                  <div className="mb-book-thumb">
+                    {record.bookCoverUrl ? (
+                      <img src={record.bookCoverUrl} alt={record.bookTitle || 'Book'} />
+                    ) : (
+                      <div className="mb-thumb-placeholder"></div>
+                    )}
+                  </div>
 
-                {/* Book details */}
-                <div className="mb-book-details">
-                  {record.book ? (
-                    <>
-                      <h3 className="mb-book-title">{record.book.title}</h3>
-                      <p className="mb-book-author">{record.book.author}</p>
-                      {record.borrowDate && (
-                        <p className="mb-borrow-date">
-                          Borrowed: {new Date(record.borrowDate).toLocaleDateString()}
-                        </p>
-                      )}
-                      {record.dueDate && (
-                        <p className={`mb-due-date ${new Date(record.dueDate) < new Date() ? 'overdue' : ''}`}>
-                          Due: {new Date(record.dueDate).toLocaleDateString()}
-                        </p>
-                      )}
-                      {record.returnDate && (
-                        <p className="mb-return-date">
-                          Returned: {new Date(record.returnDate).toLocaleDateString()}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <div className="mb-placeholder-lines">
-                      <div className="mb-placeholder-line long"></div>
-                      <div className="mb-placeholder-line short"></div>
-                    </div>
-                  )}
-                </div>
+                  {/* Book details */}
+                  <div className="mb-book-details">
+                    <h3 className="mb-book-title">{record.bookTitle || '—'}</h3>
+                    <p className="mb-book-author">{record.bookAuthor || ''}</p>
+                    {record.borrowDate && (
+                      <p className="mb-borrow-date">
+                        Borrowed: {new Date(record.borrowDate).toLocaleDateString()}
+                      </p>
+                    )}
+                    {record.dueDate && record.status !== 'RETURNED' && (
+                      <p className={`mb-due-date ${record.status === 'OVERDUE' ? 'overdue' : ''}`}>
+                        Due: {new Date(record.dueDate).toLocaleDateString()}
+                        {record.status === 'OVERDUE' && ' ⚠️ Overdue'}
+                      </p>
+                    )}
+                    {record.returnDate && (
+                      <p className="mb-return-date">
+                        Returned: {new Date(record.returnDate).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
 
                 {/* Actions */}
-                {activeTab === 'current' && record.book && (
+                {activeTab === 'current' && (
                   <div className="mb-book-actions">
-                    <button className="mb-return-btn" onClick={() => handleReturn(record.id)}>
-                      Return
+                    <button
+                      className="mb-return-btn"
+                      onClick={() => handleReturn(record.id, record.bookTitle)}
+                      disabled={returningId === record.id}
+                    >
+                      {returningId === record.id ? 'Returning...' : 'Return'}
                     </button>
+                    <span className={`mb-status-pill ${(record.status || 'active').toLowerCase()}`}>
+                      {record.status === 'OVERDUE' ? '⚠️ Overdue' : record.status === 'ACTIVE' ? 'Borrowing' : record.status}
+                    </span>
                   </div>
-                )}
-                {activeTab === 'current' && !record.book && (
-                  <span className="mb-status-pill current">Borrowing</span>
                 )}
                 {activeTab === 'history' && (
                   <span className="mb-status-pill returned">Returned</span>

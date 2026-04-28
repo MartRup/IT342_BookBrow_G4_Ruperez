@@ -24,10 +24,12 @@ export default function AdminBorrowingRecords() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/v1/borrow/all'); // Standard endpoint
-      const data = res.data?.data || res.data || [];
-      setRecords(data);
-      
+      const res = await axios.get('/api/v1/borrow/all', {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      const data = res.data?.data?.borrowRecords ?? res.data?.borrowRecords ?? [];
+      setRecords(Array.isArray(data) ? data : []);
+
       let active = 0, overdue = 0, returned = 0;
       data.forEach(r => {
         if (r.status === 'RETURNED') returned++;
@@ -52,16 +54,14 @@ export default function AdminBorrowingRecords() {
   const getFilteredRecords = () => {
     return records.filter(r => {
       const q = search.toLowerCase();
-      const matchSearch = (r.userEmail || '').toLowerCase().includes(q) || 
-                          (r.userFullName || '').toLowerCase().includes(q) || 
+      const matchSearch = (r.userEmail || '').toLowerCase().includes(q) ||
+                          (r.userFullName || '').toLowerCase().includes(q) ||
                           (r.bookTitle || '').toLowerCase().includes(q);
-                          
       if (!matchSearch) return false;
-      
       if (filter === 'Active') return r.status === 'ACTIVE' || r.status === 'PENDING';
       if (filter === 'Overdue') return r.status === 'OVERDUE';
       if (filter === 'Returned') return r.status === 'RETURNED';
-      return true; // All Records
+      return true;
     });
   };
 
@@ -74,8 +74,10 @@ export default function AdminBorrowingRecords() {
       <AdminNavbar />
 
       <main className="br-content">
-        <h1 className="br-title">Borrowing Records</h1>
-        <p className="br-sub">Track all book borrowing and return activities</p>
+        <div className="br-header">
+          <h1 className="br-title">Borrowing Records</h1>
+          <p className="br-sub">Track all book borrowing and return activities</p>
+        </div>
 
         <div className="br-stats-container">
           <div className="br-stat-card">
@@ -92,7 +94,7 @@ export default function AdminBorrowingRecords() {
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19h16v2H4v-2zm16-4H4v2h16v-2zm-8-4H4v2h8v-2zm8-6H5C3.9 5 3 5.9 3 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>
             </div>
             <div className="br-stat-info">
-              <div className="br-stat-label">Active Borrower</div>
+              <div className="br-stat-label">Active Borrowers</div>
               <div className="br-stat-value">{stats.active}</div>
             </div>
           </div>
@@ -117,18 +119,23 @@ export default function AdminBorrowingRecords() {
         </div>
 
         <div className="br-search-filter-wrap">
-          <div className="br-search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input 
-              type="text" 
-              placeholder="Search by member name, book title, or email..." 
-              value={search} 
-              onChange={e => setSearch(e.target.value)} 
-            />
+          <div className="br-search-section">
+            <div className="br-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by member name, book title, or email..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
           </div>
           <div className="br-filters">
             {['All Records', 'Active', 'Overdue', 'Returned'].map(f => (
-              <button 
+              <button
                 key={f}
                 className={`br-filter-btn ${filter === f ? 'active' : ''}`}
                 onClick={() => setFilter(f)}
@@ -154,14 +161,32 @@ export default function AdminBorrowingRecords() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="br-empty">No borrowing records found.</td></tr>
+                <tr>
+                  <td colSpan={7}>
+                    <div className="br-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                      </svg>
+                      <h3>No borrowing records found</h3>
+                      <p>There are currently no borrowing records matching your search criteria.</p>
+                    </div>
+                  </td>
+                </tr>
               ) : filtered.map((r, i) => (
                 <tr key={r.id || i}>
                   <td>{r.userFullName || r.userEmail || '—'}</td>
                   <td>{r.bookTitle || '—'}</td>
                   <td>{r.borrowDate ? new Date(r.borrowDate).toLocaleDateString() : '—'}</td>
                   <td>{r.dueDate ? new Date(r.dueDate).toLocaleDateString() : '—'}</td>
-                  <td>{r.status || 'Active'}</td>
+                  <td>
+                    <span className={`br-status-badge br-status-${(r.status || 'active').toLowerCase()}`}>
+                      {r.status || 'Active'}
+                    </span>
+                  </td>
                   <td>{r.daysLeft || 0}</td>
                   <td className="br-actions-cell">
                     {r.status !== 'RETURNED' && (

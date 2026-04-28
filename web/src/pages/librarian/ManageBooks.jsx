@@ -15,6 +15,7 @@ export default function ManageBooks() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,37 +36,13 @@ export default function ManageBooks() {
   const fetchBooks = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await ApiService.books.getAll({ limit: 200 });
-      
-      console.log('=== LIBRARIAN MANAGE BOOKS - API Response ===');
-      console.log('Full response:', res);
-      console.log('res.data:', res.data);
-      console.log('res.data.data:', res.data?.data);
-      console.log('res.data.data.books:', res.data?.data?.books);
-      
-      // Try multiple paths to extract books array
-      let booksData = [];
-      if (res.data?.data?.books && Array.isArray(res.data.data.books)) {
-        booksData = res.data.data.books;
-        console.log('✅ Found books at: res.data.data.books');
-      } else if (res.data?.books && Array.isArray(res.data.books)) {
-        booksData = res.data.books;
-        console.log('✅ Found books at: res.data.books');
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
-        booksData = res.data.data;
-        console.log('✅ Found books at: res.data.data');
-      } else if (Array.isArray(res.data)) {
-        booksData = res.data;
-        console.log('✅ Found books at: res.data');
-      }
-      
-      console.log('Extracted books array:', booksData);
-      console.log('Number of books:', booksData.length);
-      
-      setBooks(booksData);
+      const booksData = res.data?.data?.books ?? res.data?.books ?? res.data?.data ?? [];
+      setBooks(Array.isArray(booksData) ? booksData : []);
     } catch (e) {
-      console.error('❌ Error fetching books:', e);
-      console.error('Error details:', e.response?.data || e.message);
+      console.error('Error fetching books:', e);
+      setError(e.response?.data?.error?.message || e.response?.data?.message || e.message || 'Failed to load books.');
       setBooks([]);
     } finally { setLoading(false); }
   };
@@ -115,6 +92,7 @@ export default function ManageBooks() {
   );
 
   if (loading) return <div className="mb-loading"><div className="mb-spinner" /><p>Loading books...</p></div>;
+  if (error) return <div className="mb-page"><LibrarianNavbar /><main className="mb-content"><div className="mb-empty" style={{marginTop:'4rem'}}><h3>⚠️ Failed to load books</h3><p style={{color:'#c0392b'}}>{error}</p><button className="mb-add-btn" onClick={fetchBooks} style={{marginTop:'1rem'}}>Retry</button></div></main></div>;
 
   return (
     <div className="mb-page">
