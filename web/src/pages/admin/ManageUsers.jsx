@@ -132,6 +132,8 @@ export default function ManageUsers() {
       await axios.put(`/api/v1/users/${editUser.id}/role`, { role: roleForm });
       fetchUsers();
       closeEditModal();
+      // Trigger dashboard refresh
+      window.dispatchEvent(new CustomEvent('dashboardRefresh'));
     } catch (e) { console.error(e); }
   };
 
@@ -141,6 +143,8 @@ export default function ManageUsers() {
     try { 
       await axios.delete(`/api/v1/users/${id}`); 
       fetchUsers(); 
+      // Trigger dashboard refresh
+      window.dispatchEvent(new CustomEvent('dashboardRefresh'));
     } catch (e) { console.error(e); }
   };
 
@@ -223,6 +227,9 @@ export default function ManageUsers() {
       
       // Refresh users list immediately for real-time reflection
       await fetchUsers();
+      
+      // Trigger dashboard refresh
+      window.dispatchEvent(new CustomEvent('dashboardRefresh'));
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);

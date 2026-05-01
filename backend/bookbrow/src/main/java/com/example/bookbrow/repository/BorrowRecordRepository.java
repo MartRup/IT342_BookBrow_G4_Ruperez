@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -28,6 +29,16 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     // All returned borrows
     Page<BorrowRecord> findByReturnDateIsNotNull(Pageable pageable);
+
+    // Count active borrows (returnDate IS NULL)
+    long countByReturnDateIsNull();
+
+    // Count returned borrows (returnDate IS NOT NULL)
+    long countByReturnDateIsNotNull();
+
+    // Count overdue books (dueDate < now AND returnDate IS NULL)
+    @Query("SELECT COUNT(br) FROM BorrowRecord br WHERE br.dueDate < :now AND br.returnDate IS NULL")
+    long countOverdueBooks(@Param("now") LocalDateTime now);
 
     // Count active borrows for a specific book
     @Query("SELECT COUNT(br) FROM BorrowRecord br WHERE br.book.id = :bookId AND br.returnDate IS NULL")

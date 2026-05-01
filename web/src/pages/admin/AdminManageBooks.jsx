@@ -173,6 +173,8 @@ export default function AdminManageBooks() {
       }
       closeModal();
       fetchBooks();
+      // Trigger dashboard refresh
+      window.dispatchEvent(new CustomEvent('dashboardRefresh'));
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   };
@@ -183,6 +185,8 @@ export default function AdminManageBooks() {
       await ApiService.books.delete(id); 
       setBookToDelete(null);
       fetchBooks(); 
+      // Trigger dashboard refresh
+      window.dispatchEvent(new CustomEvent('dashboardRefresh'));
     }
     catch (e) { 
       console.error(e);

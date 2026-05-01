@@ -61,4 +61,11 @@ public class BookController {
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         return bookService.deleteBook(id);
     }
+
+    /** GET /api/books/featured — Public endpoint for featured books */
+    @GetMapping("/featured")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getFeaturedBooks() {
+        return bookService.getFeaturedBooks();
+    }
 }

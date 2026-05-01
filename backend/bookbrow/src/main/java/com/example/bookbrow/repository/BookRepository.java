@@ -21,4 +21,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             @Param("available") Boolean available,
             Pageable pageable
     );
+
+    // Count available books
+    long countByAvailableTrue();
+
+    // Count borrowed books (not available)
+    long countByAvailableFalse();
 }
