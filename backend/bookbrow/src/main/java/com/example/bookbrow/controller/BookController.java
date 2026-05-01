@@ -27,6 +27,13 @@ public class BookController {
         return bookService.getAllBooks(page, limit, search, available);
     }
 
+    /** GET /api/v1/books/search/external — ADMIN or LIBRARIAN */
+    @GetMapping("/search/external")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<?> searchExternalBooks(@RequestParam("q") String query) {
+        return bookService.searchExternalBooks(query);
+    }
+
     /** GET /api/v1/books/{id} */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','LIBRARIAN','ADMIN')")

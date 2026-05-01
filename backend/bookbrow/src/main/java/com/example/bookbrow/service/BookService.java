@@ -47,6 +47,45 @@ public class BookService {
         return ResponseBuilder.ok(data);
     }
 
+    public ResponseEntity<?> searchExternalBooks(String query) {
+        try {
+            // Add maxResults parameter to limit API calls
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" + 
+                        java.net.URLEncoder.encode(query, "UTF-8") + 
+                        "&maxResults=10";
+            
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            
+            // Set timeout to avoid hanging requests
+            restTemplate.setRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
+                setConnectTimeout(5000); // 5 seconds
+                setReadTimeout(10000);   // 10 seconds
+            }});
+            
+            java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+            
+            // Log successful search
+            System.out.println("✅ Google Books search successful for: " + query);
+            
+            return ResponseEntity.ok(response);
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            // Handle HTTP errors (429 = rate limit, 400 = bad request, etc.)
+            if (e.getStatusCode().value() == 429) {
+                System.err.println("❌ Google Books API rate limit exceeded");
+                return ResponseBuilder.badRequest("GOOGLE-001", 
+                    "Google Books API quota exceeded. Please wait a few minutes and try again.");
+            }
+            System.err.println("❌ Google Books API error: " + e.getStatusCode() + " - " + e.getMessage());
+            return ResponseBuilder.badRequest("GOOGLE-001", 
+                "Google Books API error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching from Google Books API: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseBuilder.badRequest("GOOGLE-001", 
+                "Error fetching from Google Books API: " + e.getMessage());
+        }
+    }
+
     public ResponseEntity<?> getBookById(Long id) {
         return bookRepository.findById(id)
                 .<ResponseEntity<?>>map(book ->

@@ -102,21 +102,45 @@ export default function AdminManageBooks() {
     if (!googleQuery.trim()) return;
     setSearchingGoogle(true);
     setGoogleError('');
+    setGoogleResults([]);
     try {
+      console.log('🔍 Searching Google Books for:', googleQuery);
+      // Use backend as proxy to avoid CORS issues
       const res = await fetch(`http://localhost:8080/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
-      if (!res.ok) throw new Error('API Error: ' + res.status);
+        
+      console.log('📡 Backend response status:', res.status);
+        
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('❌ Backend error:', res.status, errorData);
+          
+        // Check for rate limit
+        if (res.status === 429 || (errorData.error && errorData.error.code === 'GOOGLE-001')) {
+          throw new Error(errorData.error?.message || 'Google Books API quota exceeded. Please wait a few minutes and try again.');
+        }
+          
+        throw new Error(errorData.error?.message || `Backend error: ${res.status}`);
+      }
+        
       const data = await res.json();
+      console.log('✅ Google Books response:', data);
+        
       if (!data.items || data.items.length === 0) {
-        setGoogleError('No results found for your search.');
+        setGoogleError('No results found for your search. Try a different term.');
         setGoogleResults([]);
       } else {
+        console.log(`📚 Found ${data.items.length} book(s)`);
         setGoogleResults(data.items);
       }
     } catch (e) {
-      console.error('Error fetching from backend proxy', e);
-      setGoogleError('Network error. Check if backend is running.');
+      console.error('❌ Google Books search failed:', e);
+      if (e.message.includes('Failed to fetch') || e.name === 'TypeError') {
+        setGoogleError('Cannot connect to backend. Please ensure the server is running on http://localhost:8080');
+      } else {
+        setGoogleError(e.message || 'Failed to search Google Books.');
+      }
       setGoogleResults([]);
     } finally {
       setSearchingGoogle(false);
