@@ -32,4 +32,9 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     // Count active borrows for a specific book
     @Query("SELECT COUNT(br) FROM BorrowRecord br WHERE br.book.id = :bookId AND br.returnDate IS NULL")
     long countActiveBorrowsByBookId(@Param("bookId") Long bookId);
+
+    // Delete all borrow records for a specific book
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM BorrowRecord br WHERE br.book.id = :bookId")
+    void deleteByBookId(@Param("bookId") Long bookId);
 }

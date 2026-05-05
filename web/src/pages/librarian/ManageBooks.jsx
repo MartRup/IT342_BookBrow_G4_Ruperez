@@ -4,7 +4,7 @@ import ApiService from '../../services/ApiService';
 import LibrarianNavbar from './LibrarianNavbar';
 import './ManageBooks.css';
 
-const EMPTY_FORM = { title: '', author: '', isbn: '', genre: '', description: '', coverUrl: '', totalCopies: 1, availableCopies: 1 };
+const EMPTY_FORM = { title: '', author: '', isbn: '', genre: '', description: '', coverUrl: '', available: true };
 
 export default function ManageBooks() {
   const [user, setUser] = useState({});
@@ -15,7 +15,12 @@ export default function ManageBooks() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [googleQuery, setGoogleQuery] = useState('');
+  const [googleResults, setGoogleResults] = useState([]);
+  const [searchingGoogle, setSearchingGoogle] = useState(false);
+  const [googleError, setGoogleError] = useState('');
+  const [bookToDelete, setBookToDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,13 +41,37 @@ export default function ManageBooks() {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      setError(null);
       const res = await ApiService.books.getAll({ limit: 200 });
-      const booksData = res.data?.data?.books ?? res.data?.books ?? res.data?.data ?? [];
-      setBooks(Array.isArray(booksData) ? booksData : []);
+      
+      console.log('=== LIBRARIAN MANAGE BOOKS - API Response ===');
+      console.log('Full response:', res);
+      console.log('res.data:', res.data);
+      console.log('res.data.data:', res.data?.data);
+      console.log('res.data.data.books:', res.data?.data?.books);
+      
+      // Try multiple paths to extract books array
+      let booksData = [];
+      if (res.data?.data?.books && Array.isArray(res.data.data.books)) {
+        booksData = res.data.data.books;
+        console.log('✅ Found books at: res.data.data.books');
+      } else if (res.data?.books && Array.isArray(res.data.books)) {
+        booksData = res.data.books;
+        console.log('✅ Found books at: res.data.books');
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        booksData = res.data.data;
+        console.log('✅ Found books at: res.data.data');
+      } else if (Array.isArray(res.data)) {
+        booksData = res.data;
+        console.log('✅ Found books at: res.data');
+      }
+      
+      console.log('Extracted books array:', booksData);
+      console.log('Number of books:', booksData.length);
+      
+      setBooks(booksData);
     } catch (e) {
-      console.error('Error fetching books:', e);
-      setError(e.response?.data?.error?.message || e.response?.data?.message || e.message || 'Failed to load books.');
+      console.error('❌ Error fetching books:', e);
+      console.error('Error details:', e.response?.data || e.message);
       setBooks([]);
     } finally { setLoading(false); }
   };
@@ -57,12 +86,57 @@ export default function ManageBooks() {
       genre: book.genre || '', 
       description: book.description || '', 
       coverUrl: book.coverUrl || '',
-      totalCopies: book.totalCopies || 1,
-      availableCopies: book.availableCopies || 1
+      available: book.available !== false
     }); 
     setShowModal(true); 
   };
-  const closeModal = () => { setShowModal(false); setEditBook(null); setForm(EMPTY_FORM); };
+  const closeModal = () => { 
+    setShowModal(false); 
+    setEditBook(null); 
+    setForm(EMPTY_FORM); 
+    setGoogleQuery('');
+    setGoogleResults([]);
+  };
+
+  const searchGoogleBooks = async () => {
+    if (!googleQuery.trim()) return;
+    setSearchingGoogle(true);
+    setGoogleError('');
+    try {
+      const res = await fetch(`http://localhost:8080/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`, {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      if (!res.ok) throw new Error('API Error: ' + res.status);
+      const data = await res.json();
+      if (!data.items || data.items.length === 0) {
+        setGoogleError('No results found for your search.');
+        setGoogleResults([]);
+      } else {
+        setGoogleResults(data.items);
+      }
+    } catch (e) {
+      console.error('Error fetching from backend proxy', e);
+      setGoogleError('Network error. Check if backend is running.');
+      setGoogleResults([]);
+    } finally {
+      setSearchingGoogle(false);
+    }
+  };
+
+  const selectGoogleBook = (bookItem) => {
+    const info = bookItem.volumeInfo;
+    setForm(prev => ({
+      ...prev,
+      title: info.title || '',
+      author: info.authors ? info.authors.join(', ') : '',
+      isbn: info.industryIdentifiers ? info.industryIdentifiers.find(id => id.type === 'ISBN_13' || id.type === 'ISBN_10')?.identifier || '' : '',
+      genre: info.categories ? info.categories[0] : '',
+      description: info.description || '',
+      coverUrl: info.imageLinks?.thumbnail?.replace('http:', 'https:') || ''
+    }));
+    setGoogleResults([]);
+    setGoogleQuery('');
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -80,9 +154,16 @@ export default function ManageBooks() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this book?')) return;
-    try { await ApiService.books.delete(id); fetchBooks(); }
-    catch (e) { console.error(e); }
+    setDeleteError('');
+    try { 
+      await ApiService.books.delete(id); 
+      setBookToDelete(null);
+      fetchBooks(); 
+    }
+    catch (e) { 
+      console.error(e);
+      setDeleteError('Failed to delete. ' + (e.response?.data?.message || 'Please try again.'));
+    }
   };
 
   const filtered = books.filter(b =>
@@ -92,7 +173,6 @@ export default function ManageBooks() {
   );
 
   if (loading) return <div className="mb-loading"><div className="mb-spinner" /><p>Loading books...</p></div>;
-  if (error) return <div className="mb-page"><LibrarianNavbar /><main className="mb-content"><div className="mb-empty" style={{marginTop:'4rem'}}><h3>⚠️ Failed to load books</h3><p style={{color:'#c0392b'}}>{error}</p><button className="mb-add-btn" onClick={fetchBooks} style={{marginTop:'1rem'}}>Retry</button></div></main></div>;
 
   return (
     <div className="mb-page">
@@ -135,8 +215,7 @@ export default function ManageBooks() {
                 <th>Author</th>
                 <th>ISBN</th>
                 <th>Category</th>
-                <th>Total</th>
-                <th>Available</th>
+                <th>Status</th>
                 <th className="mb-center-text">Actions</th>
               </tr>
             </thead>
@@ -160,15 +239,25 @@ export default function ManageBooks() {
                   <td>{b.author}</td>
                   <td>{b.isbn || '—'}</td>
                   <td>{b.genre || '—'}</td>
-                  <td>{b.totalCopies || 0}</td>
-                  <td>{b.availableCopies || 0}</td>
+                  <td>
+                    <span style={{
+                      padding: '4px 8px', 
+                      borderRadius: '12px', 
+                      fontSize: '0.85em', 
+                      fontWeight: 'bold', 
+                      backgroundColor: b.available ? '#d4edda' : '#f8d7da', 
+                      color: b.available ? '#155724' : '#721c24'
+                    }}>
+                      {b.available ? 'Available' : 'Borrowed'}
+                    </span>
+                  </td>
                   <td className="mb-actions-cell">
                     <button className="mb-icon-btn" onClick={() => openEdit(b)} title="Edit">
                       <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                       </svg>
                     </button>
-                    <button className="mb-icon-btn mb-del-icon" onClick={() => handleDelete(b.id)} title="Delete">
+                    <button className="mb-icon-btn mb-del-icon" onClick={() => setBookToDelete(b)} title="Delete">
                       <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                       </svg>
@@ -190,14 +279,57 @@ export default function ManageBooks() {
         <div className="mb-overlay" onClick={closeModal}>
           <div className="mb-modal" onClick={e => e.stopPropagation()}>
             <h2 className="mb-modal-title">{editBook ? 'Edit Book' : 'Add New Book'}</h2>
+            
+            {!editBook && (
+              <div className="mb-google-search" style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Search Google Books (e.g. ISBN or Title) to auto-fill..." 
+                    value={googleQuery} 
+                    onChange={e => setGoogleQuery(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), searchGoogleBooks())}
+                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)' }}
+                  />
+                  <button type="button" onClick={searchGoogleBooks} disabled={searchingGoogle} className="mb-save-btn" style={{ padding: '0 20px' }}>
+                    {searchingGoogle ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
+                {googleError && <div style={{ color: 'red', fontSize: '12px', marginBottom: '10px' }}>{googleError}</div>}
+                {googleResults.length > 0 && (
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--card-bg)' }}>
+                    {googleResults.map(item => (
+                      <div 
+                        key={item.id} 
+                        onClick={() => selectGoogleBook(item)} 
+                        style={{ padding: '10px', borderBottom: '1px solid var(--border-color)', cursor: 'pointer', display: 'flex', gap: '15px', alignItems: 'center' }}
+                        onMouseOver={e => e.currentTarget.style.background = 'var(--hover-bg)'}
+                        onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        {item.volumeInfo?.imageLinks?.smallThumbnail ? (
+                          <img src={item.volumeInfo.imageLinks.smallThumbnail} alt="cover" style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                        ) : (
+                          <div style={{ width: '40px', height: '60px', background: 'var(--bg-secondary)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                          </div>
+                        )}
+                        <div>
+                          <strong style={{ color: 'var(--text-primary)' }}>{item.volumeInfo?.title}</strong><br/>
+                          <small style={{ color: 'var(--text-secondary)' }}>{item.volumeInfo?.authors?.join(', ')}</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <form onSubmit={handleSave} className="mb-form">
               {[
                 { name: 'title',       label: 'Title',       required: true,  type: 'text' },
                 { name: 'author',      label: 'Author',      required: true,  type: 'text' },
                 { name: 'isbn',        label: 'ISBN',        required: false, type: 'text' },
                 { name: 'genre',       label: 'Category',    required: false, type: 'text' },
-                { name: 'totalCopies', label: 'Total Copies', required: false, type: 'number' },
-                { name: 'availableCopies', label: 'Available Copies', required: false, type: 'number' },
                 { name: 'coverUrl',    label: 'Cover URL',   required: false, type: 'text' },
               ].map(f => (
                 <div key={f.name} className="mb-form-group">
@@ -214,6 +346,32 @@ export default function ManageBooks() {
                 <button type="submit" className="mb-save-btn" disabled={saving}>{saving ? 'Saving...' : 'Save Book'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {bookToDelete && (
+        <div className="mb-overlay" onClick={() => setBookToDelete(null)}>
+          <div className="mb-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '30px' }}>
+            <h2 className="mb-modal-title" style={{ textAlign: 'center', marginBottom: '20px' }}>Confirm Deletion</h2>
+            <div className="mb-modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>
+                Are you sure you want to delete <br />
+                <strong style={{ color: 'var(--text-primary)', fontSize: '18px', display: 'inline-block', marginTop: '10px' }}>"{bookToDelete.title}"</strong>?
+              </p>
+              <p style={{ fontSize: '14px', color: '#dc3545', marginTop: '15px' }}>
+                This action cannot be undone.
+              </p>
+              {deleteError && (
+                <p style={{ fontSize: '14px', color: '#dc3545', marginTop: '10px', fontWeight: 'bold', background: '#fff5f5', padding: '10px', borderRadius: '8px' }}>
+                  {deleteError}
+                </p>
+              )}
+            </div>
+            <div className="mb-modal-actions" style={{ justifyContent: 'center', marginTop: '30px', borderTop: 'none', paddingTop: '0' }}>
+              <button className="mb-cancel-btn" onClick={() => setBookToDelete(null)}>Cancel</button>
+              <button className="mb-save-btn" style={{ background: '#dc3545', boxShadow: 'none' }} onClick={() => handleDelete(bookToDelete.id)}>Delete Book</button>
+            </div>
           </div>
         </div>
       )}
