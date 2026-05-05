@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,22 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BorrowRecordRepository borrowRecordRepository;
+    private final SystemLogService systemLogService;
+
+    /**
+     * Get current user email from security context
+     */
+    private String getCurrentUserEmail() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() != null) {
+                return auth.getName();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return "system";
+    }
 
     public ResponseEntity<?> getAllBooks(int page, int limit, String search, Boolean available) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
@@ -105,6 +123,11 @@ public class BookService {
                 .build();
 
         Book saved = bookRepository.save(book);
+        
+        // Log the action
+        String currentUser = getCurrentUserEmail();
+        systemLogService.logBookCreated(saved.getTitle(), saved.getId(), currentUser, currentUser);
+        
         // Adapter Pattern: ResponseBuilder for CREATED status
         return ResponseBuilder.createdWith("book", saved);
     }
@@ -120,6 +143,11 @@ public class BookService {
                     if (request.getGenre() != null)       book.setGenre(request.getGenre());
                     if (request.getCoverUrl() != null)    book.setCoverUrl(request.getCoverUrl());
                     Book updated = bookRepository.save(book);
+                    
+                    // Log the action
+                    String currentUser = getCurrentUserEmail();
+                    systemLogService.logBookUpdated(updated.getTitle(), updated.getId(), currentUser, currentUser);
+                    
                     return ResponseBuilder.okWith("book", updated);
                 })
                 .orElse(ResponseBuilder.notFound("BOOK-001", "Book not found"));
@@ -130,9 +158,33 @@ public class BookService {
         if (!bookRepository.existsById(id)) {
             return ResponseBuilder.notFound("BOOK-001", "Book not found");
         }
+        
+        // Get book title before deletion for logging
+        String bookTitle = bookRepository.findById(id).map(Book::getTitle).orElse("Unknown");
+        
         // Delete all associated borrow records first to avoid FK constraint violation
         borrowRecordRepository.deleteByBookId(id);
         bookRepository.deleteById(id);
+        
+        // Log the action
+        String currentUser = getCurrentUserEmail();
+        systemLogService.logBookDeleted(bookTitle, id, currentUser, currentUser);
+        
         return ResponseBuilder.okWith("message", "Book deleted successfully");
+    }
+
+    /**
+     * Get featured books (recently added, available books)
+     */
+    public ResponseEntity<?> getFeaturedBooks() {
+        // Get up to 8 most recent available books
+        Pageable pageable = PageRequest.of(0, 8, Sort.by("createdAt").descending());
+        Page<Book> featuredBooks = bookRepository.findAllWithFilters(
+                null,  // no search filter
+                true,  // only available books
+                pageable
+        );
+        
+        return ResponseBuilder.ok(featuredBooks.getContent());
     }
 }

@@ -25,12 +25,21 @@ export default function UserHome() {
   const fetchDashboardData = async (userData) => {
     try {
       setLoading(true);
-      // Fetch dashbord stats using the service client
+      // Fetch dashboard stats using the service client
       const statsResponse = await ApiService.dashboard.getStats(userData.email);
       setStats(statsResponse.data);
 
+      // Fetch featured books and properly extract from response
       const booksResponse = await ApiService.dashboard.getFeaturedBooks();
-      setFeaturedBooks(booksResponse.data);
+      const booksData = booksResponse.data?.data ?? booksResponse.data ?? [];
+      
+      // Add status field based on available field
+      const booksWithStatus = Array.isArray(booksData) ? booksData.map(book => ({
+        ...book,
+        status: book.available ? 'Available' : 'Borrowed'
+      })) : [];
+      
+      setFeaturedBooks(booksWithStatus);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setStats({ booksBorrowed: 0, dueSoon: 0, returned: 0 });
