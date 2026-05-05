@@ -34,23 +34,34 @@ public class BorrowRecordDto {
     private LocalDateTime dueDate;
     private LocalDateTime returnDate;
 
+    // Borrow status from entity
+    private String borrowStatus;  // "PENDING" | "APPROVED" | "RETURNED" | "REJECTED"
+
     // Computed
-    private String status;   // "ACTIVE" | "OVERDUE" | "RETURNED"
+    private String status;   // "ACTIVE" | "OVERDUE" | "RETURNED" | "PENDING" | "REJECTED"
     private long daysLeft;   // positive = days remaining, negative = days overdue
 
     /** Factory method: map a BorrowRecord entity → BorrowRecordDto */
     public static BorrowRecordDto from(BorrowRecord record) {
         String status;
         long daysLeft = 0;
+        String borrowStatus = record.getStatus() != null ? record.getStatus().toString() : "PENDING";
 
-        if (record.getReturnDate() != null) {
+        // Handle different borrow statuses
+        if (borrowStatus.equals("PENDING")) {
+            status = "PENDING";
+        } else if (borrowStatus.equals("REJECTED")) {
+            status = "REJECTED";
+        } else if (record.getReturnDate() != null || borrowStatus.equals("RETURNED")) {
             status = "RETURNED";
-        } else {
+        } else if (borrowStatus.equals("APPROVED")) {
             LocalDateTime due = record.getDueDate() != null
                     ? record.getDueDate()
                     : record.getBorrowDate().plusDays(14);
             daysLeft = ChronoUnit.DAYS.between(LocalDateTime.now(), due);
             status = daysLeft < 0 ? "OVERDUE" : "ACTIVE";
+        } else {
+            status = "UNKNOWN";
         }
 
         return BorrowRecordDto.builder()
@@ -65,6 +76,7 @@ public class BorrowRecordDto {
                 .borrowDate(record.getBorrowDate())
                 .dueDate(record.getDueDate())
                 .returnDate(record.getReturnDate())
+                .borrowStatus(borrowStatus)
                 .status(status)
                 .daysLeft(daysLeft)
                 .build();

@@ -92,8 +92,8 @@ public class UserService {
     
     public void deleteUser(Long id) {
         userRepository.findById(id).ifPresent(user -> {
-            user.setIsActive(false);
-            userRepository.save(user);
+            // Hard delete - completely remove from database
+            userRepository.delete(user);
         });
     }
 }

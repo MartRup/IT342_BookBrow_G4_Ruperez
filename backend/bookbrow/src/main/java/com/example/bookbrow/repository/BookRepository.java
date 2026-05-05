@@ -27,4 +27,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     // Count borrowed books (not available)
     long countByAvailableFalse();
+
+    // Find most popular available books (based on borrow count)
+    @Query("SELECT b FROM Book b " +
+           "LEFT JOIN BorrowRecord br ON br.book.id = b.id " +
+           "WHERE b.available = true " +
+           "GROUP BY b.id " +
+           "ORDER BY COUNT(br.id) DESC")
+    java.util.List<Book> findMostPopularAvailableBooks(Pageable pageable);
 }

@@ -309,3 +309,38 @@
 @media (max-width: 480px) {
   .mb-book-row { flex-wrap: wrap; }
 }
+
+/* ────────── PENDING/REJECTED MESSAGES ────────── */
+.mb-pending-msg,
+.mb-rejected-msg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.mb-pending-msg {
+  background: #fff4e6;
+  color: #b54708;
+  border: 1px solid #ffd6a5;
+}
+
+.mb-rejected-msg {
+  background: #ffe0e6;
+  color: #8b001d;
+  border: 1px solid #f5a3b3;
+}
+
+/* ────────── STATUS PILL UPDATES ────────── */
+.mb-status-pill.pending {
+  background: #fff4e6;
+  color: #b54708;
+  border: 1px solid #ffd6a5;
+}
+
+.mb-status-pill.rejected {
+  background: #ffe0e6;
+  color: #8b001d;
+  border: 1px solid #f5a3b3;
+}

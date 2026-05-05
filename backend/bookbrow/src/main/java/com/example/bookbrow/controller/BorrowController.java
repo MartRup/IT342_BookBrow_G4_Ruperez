@@ -56,4 +56,24 @@ public class BorrowController {
     ) {
         return borrowService.returnBook(id, authentication);
     }
+
+    /** PUT /api/v1/borrow/{id}/approve — LIBRARIAN, ADMIN */
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','ADMIN')")
+    public ResponseEntity<?> approveBorrowRequest(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return borrowService.approveBorrowRequest(id, authentication);
+    }
+
+    /** PUT /api/v1/borrow/{id}/reject — LIBRARIAN, ADMIN */
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','ADMIN')")
+    public ResponseEntity<?> rejectBorrowRequest(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return borrowService.rejectBorrowRequest(id, authentication);
+    }
 }

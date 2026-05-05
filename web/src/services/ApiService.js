@@ -133,7 +133,7 @@ const dashboard = {
     apiClient.get('/api/dashboard/stats/by-email', { params: { email } }),
 
   getFeaturedBooks: () =>
-    apiClient.get('/api/books/featured'),
+    apiClient.get('/api/v1/books/featured'),
 };
 
 // ── Export unified facade ────────────────────────────────────────

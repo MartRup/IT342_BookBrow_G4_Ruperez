@@ -16,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -174,17 +176,28 @@ public class BookService {
     }
 
     /**
-     * Get featured books (recently added, available books)
+     * Get featured books (popular + recently added, available books)
      */
     public ResponseEntity<?> getFeaturedBooks() {
-        // Get up to 8 most recent available books
-        Pageable pageable = PageRequest.of(0, 8, Sort.by("createdAt").descending());
-        Page<Book> featuredBooks = bookRepository.findAllWithFilters(
-                null,  // no search filter
-                true,  // only available books
-                pageable
-        );
+        // Strategy: Mix popular books (most borrowed) with recently added books
         
-        return ResponseBuilder.ok(featuredBooks.getContent());
+        // Get top 4 most popular books (most borrowed, currently available)
+        List<Book> popularBooks = bookRepository.findMostPopularAvailableBooks(PageRequest.of(0, 4));
+        
+        // Get 4 recently added available books (excluding popular ones)
+        List<Long> popularBookIds = popularBooks.stream().map(Book::getId).toList();
+        Pageable recentPageable = PageRequest.of(0, 8, Sort.by("createdAt").descending());
+        Page<Book> recentBooksPage = bookRepository.findAllWithFilters(null, true, recentPageable);
+        
+        List<Book> recentBooks = recentBooksPage.getContent().stream()
+                .filter(book -> !popularBookIds.contains(book.getId()))
+                .limit(4)
+                .toList();
+        
+        // Combine: popular first, then recent
+        List<Book> featuredBooks = new ArrayList<>(popularBooks);
+        featuredBooks.addAll(recentBooks);
+        
+        return ResponseBuilder.ok(featuredBooks);
     }
 }
