@@ -167,15 +167,25 @@ export default function MyBooks() {
                 {/* Actions */}
                 {activeTab === 'current' && (
                   <div className="mb-book-actions">
-                    <button
-                      className="mb-return-btn"
-                      onClick={() => handleReturn(record.id, record.bookTitle)}
-                      disabled={returningId === record.id}
-                    >
-                      {returningId === record.id ? 'Returning...' : 'Return'}
-                    </button>
+                    {record.status === 'PENDING' ? (
+                      <span className="mb-pending-msg">⏳ Awaiting librarian approval</span>
+                    ) : record.status === 'REJECTED' ? (
+                      <span className="mb-rejected-msg">❌ Request rejected</span>
+                    ) : (
+                      <button
+                        className="mb-return-btn"
+                        onClick={() => handleReturn(record.id, record.bookTitle)}
+                        disabled={returningId === record.id}
+                      >
+                        {returningId === record.id ? 'Returning...' : 'Return'}
+                      </button>
+                    )}
                     <span className={`mb-status-pill ${(record.status || 'active').toLowerCase()}`}>
-                      {record.status === 'OVERDUE' ? '⚠️ Overdue' : record.status === 'ACTIVE' ? 'Borrowing' : record.status}
+                      {record.status === 'OVERDUE' ? '⚠️ Overdue' : 
+                       record.status === 'ACTIVE' ? 'Borrowing' : 
+                       record.status === 'PENDING' ? 'Pending' :
+                       record.status === 'REJECTED' ? 'Rejected' :
+                       record.status}
                     </span>
                   </div>
                 )}

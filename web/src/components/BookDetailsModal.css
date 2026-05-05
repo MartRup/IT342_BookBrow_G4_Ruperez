@@ -1,0 +1,280 @@
+/* =====================================
+   BookDetailsModal.css
+   ===================================== */
+
+.bdm-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: bdm-fade-in 0.2s ease;
+}
+
+@keyframes bdm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bdm-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: bdm-slide-up 0.3s ease;
+}
+
+@keyframes bdm-slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bdm-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bdm-close-btn:hover {
+  background: #fff;
+  transform: scale(1.1);
+}
+
+.bdm-close-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #333;
+}
+
+.bdm-content {
+  display: flex;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.bdm-cover-section {
+  flex-shrink: 0;
+  width: 320px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.bdm-cover-image {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  object-fit: cover;
+}
+
+.bdm-cover-placeholder {
+  width: 240px;
+  height: 340px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.bdm-status-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bdm-status-badge.available {
+  background: #d4f5e4;
+  color: #156b40;
+}
+
+.bdm-status-badge.borrowed {
+  background: #ffe0e6;
+  color: #8b001d;
+}
+
+.bdm-status-badge.pending {
+  background: #fff4e6;
+  color: #b54708;
+}
+
+.bdm-details-section {
+  flex: 1;
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+
+.bdm-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.bdm-author {
+  font-size: 1.1rem;
+  color: #7a0027;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.bdm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.bdm-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.bdm-meta-item svg {
+  color: #7a0027;
+}
+
+.bdm-description {
+  margin-bottom: 2rem;
+}
+
+.bdm-description h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.75rem;
+}
+
+.bdm-description p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #444;
+  text-align: justify;
+}
+
+.bdm-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.bdm-btn {
+  flex: 1;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.bdm-btn-secondary {
+  background: #f4f5f7;
+  color: #444;
+}
+
+.bdm-btn-secondary:hover {
+  background: #e8e9ec;
+}
+
+.bdm-btn-primary {
+  background: #c8703a;
+  color: #fff;
+}
+
+.bdm-btn-primary:hover:not(:disabled) {
+  background: #a8562a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 112, 58, 0.3);
+}
+
+.bdm-btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ────────── RESPONSIVE ────────── */
+@media (max-width: 768px) {
+  .bdm-content {
+    flex-direction: column;
+  }
+
+  .bdm-cover-section {
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  .bdm-cover-image,
+  .bdm-cover-placeholder {
+    max-width: 200px;
+    height: auto;
+  }
+
+  .bdm-details-section {
+    padding: 1.5rem;
+  }
+
+  .bdm-title {
+    font-size: 1.5rem;
+  }
+
+  .bdm-actions {
+    flex-direction: column;
+  }
+}

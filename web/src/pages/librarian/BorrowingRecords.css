@@ -32,7 +32,7 @@
 
 .br-stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -358,6 +358,25 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .br-stats-container {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  
+  .br-stat-card {
+    padding: 24px 16px;
+  }
+  
+  .br-stat-label {
+    font-size: 12px;
+  }
+  
+  .br-stat-value {
+    font-size: 28px;
+  }
+}
+
 @media (max-width: 1024px) {
   .br-content {
     padding: 32px 24px;
@@ -372,7 +391,7 @@
   }
   
   .br-stats-container {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
   
@@ -567,4 +586,102 @@
   .br-empty p {
     font-size: 13px;
   }
+}
+
+/* ────────── TOAST ────────── */
+.br-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 9999;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  animation: br-toast-in 0.3s ease;
+  white-space: nowrap;
+}
+.br-toast-success { background: #d4f5e4; color: #156b40; border: 1.5px solid #a3e6c2; }
+.br-toast-error   { background: #ffe0e6; color: #8b001d; border: 1.5px solid #f5a3b3; }
+@keyframes br-toast-in { from { opacity: 0; top: 60px; } to { opacity: 1; top: 80px; } }
+
+/* ────────── PENDING BADGE ────────── */
+.br-badge {
+  display: inline-block;
+  background: #ff6b6b;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  margin-left: 0.5rem;
+}
+
+/* ────────── ACTION BUTTONS ────────── */
+.br-action-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.br-approve-btn,
+.br-reject-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.br-approve-btn {
+  background: #28a745;
+  color: white;
+}
+
+.br-approve-btn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.br-reject-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.br-reject-btn:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.br-approve-btn:disabled,
+.br-reject-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.br-no-action {
+  color: #999;
+  font-size: 1.2rem;
+}
+
+/* ────────── STATUS BADGE UPDATES ────────── */
+.br-status-badge.br-status-pending {
+  background: #fff4e6;
+  color: #b54708;
+  border: 1px solid #ffd6a5;
+}
+
+.br-status-badge.br-status-rejected {
+  background: #ffe0e6;
+  color: #8b001d;
+  border: 1px solid #f5a3b3;
 }

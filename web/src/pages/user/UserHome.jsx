@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
+import BookDetailsModal from '../../components/BookDetailsModal';
 import './UserHome.css';
 
 export default function UserHome() {
@@ -10,6 +11,9 @@ export default function UserHome() {
   const [featuredBooks, setFeaturedBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [borrowingBookId, setBorrowingBookId] = useState(null);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,43 +29,73 @@ export default function UserHome() {
   const fetchDashboardData = async (userData) => {
     try {
       setLoading(true);
-      // Fetch dashboard stats using the service client
-      const statsResponse = await ApiService.dashboard.getStats(userData.email);
-      setStats(statsResponse.data);
+      
+      // Fetch user's borrow statistics
+      try {
+        const borrowResponse = await ApiService.borrow.getUserBorrows();
+        const borrowRecords = borrowResponse.data?.data?.borrowRecords ?? borrowResponse.data?.borrowRecords ?? [];
+        
+        // Calculate stats from borrow records
+        const active = borrowRecords.filter(r => r.status === 'ACTIVE' || r.status === 'APPROVED').length;
+        const dueSoon = borrowRecords.filter(r => {
+          if (r.status !== 'ACTIVE' && r.status !== 'APPROVED') return false;
+          if (!r.dueDate) return false;
+          const daysLeft = Math.ceil((new Date(r.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+          return daysLeft <= 3 && daysLeft >= 0;
+        }).length;
+        const returned = borrowRecords.filter(r => r.status === 'RETURNED').length;
+        
+        setStats({ booksBorrowed: active, dueSoon, returned });
+      } catch (error) {
+        console.error('Error fetching borrow stats:', error);
+        setStats({ booksBorrowed: 0, dueSoon: 0, returned: 0 });
+      }
 
-      // Fetch featured books and properly extract from response
-      const booksResponse = await ApiService.dashboard.getFeaturedBooks();
-      const booksData = booksResponse.data?.data ?? booksResponse.data ?? [];
-      
-      // Add status field based on available field
-      const booksWithStatus = Array.isArray(booksData) ? booksData.map(book => ({
-        ...book,
-        status: book.available ? 'Available' : 'Borrowed'
-      })) : [];
-      
-      setFeaturedBooks(booksWithStatus);
+      // Fetch featured books
+      try {
+        const booksResponse = await ApiService.dashboard.getFeaturedBooks();
+        const booksData = booksResponse.data?.data ?? booksResponse.data ?? [];
+        
+        // Add status field based on available field
+        const booksWithStatus = Array.isArray(booksData) ? booksData.map(book => ({
+          ...book,
+          status: book.available ? 'Available' : 'Borrowed'
+        })) : [];
+        
+        setFeaturedBooks(booksWithStatus);
+      } catch (error) {
+        console.error('Error fetching featured books:', error);
+        setFeaturedBooks([]);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setStats({ booksBorrowed: 0, dueSoon: 0, returned: 0 });
-      setFeaturedBooks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
   };
 
-  const handleBorrowBook = async (bookId) => {
+  const handleBorrowBook = async (book) => {
     try {
-      // Refresh user's borrow records
-      await ApiService.borrow.create(bookId);
+      setBorrowingBookId(book.id);
+      await ApiService.borrow.create(book.id);
+      showToast('success', `Borrow request for "${book.title}" submitted! Waiting for librarian approval.`);
+      setSelectedBook(null);
       fetchDashboardData(user);
     } catch (error) {
-      console.error('Error borrowing book:', error);
+      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to submit borrow request.';
+      showToast('error', msg);
+    } finally {
+      setBorrowingBookId(null);
     }
+  };
+
+  const handleBookClick = (book) => {
+    setSelectedBook(book);
   };
 
   const handleSearch = (e) => {
@@ -82,6 +116,24 @@ export default function UserHome() {
 
   return (
     <div className="uh-wrapper">
+      {/* ── Toast Notification ── */}
+      {toast && (
+        <div className={`uh-toast uh-toast-${toast.type}`}>
+          <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+          {toast.message}
+        </div>
+      )}
+
+      {/* ── Book Details Modal ── */}
+      {selectedBook && (
+        <BookDetailsModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onBorrow={handleBorrowBook}
+          borrowing={borrowingBookId === selectedBook.id}
+        />
+      )}
+
       {/* ── NAVBAR ── */}
       <UserNavbar />
 
@@ -141,37 +193,54 @@ export default function UserHome() {
 
         {/* Featured Books */}
         <section className="uh-featured-section">
-          <h2 className="uh-featured-title">Featured Books</h2>
-          <div className="uh-books-grid">
-            {featuredBooks.map((book) => (
-              <div key={book.id} className="uh-book-card">
-                <div className="uh-book-cover">
-                  {book.coverUrl ? (
-                    <img src={book.coverUrl} alt={book.title} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-                  ) : null}
-                  <div className="uh-book-cover-placeholder" style={{ display: book.coverUrl ? 'none' : 'flex' }}>
-                    <svg viewBox="0 0 24 24" fill="#aaa" width="40" height="40">
-                      <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/>
-                    </svg>
+          <div className="uh-featured-header">
+            <h2 className="uh-featured-title">Featured Books</h2>
+            <p className="uh-featured-subtitle">Popular picks and new arrivals</p>
+          </div>
+          
+          {featuredBooks.length === 0 ? (
+            <div className="uh-empty-state">
+              <svg viewBox="0 0 24 24" fill="#ccc" width="64" height="64">
+                <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/>
+              </svg>
+              <p>No featured books available at the moment</p>
+            </div>
+          ) : (
+            <div className="uh-books-grid">
+              {featuredBooks.map((book) => (
+                <div key={book.id} className="uh-book-card" onClick={() => handleBookClick(book)}>
+                  <div className="uh-book-cover">
+                    {book.coverUrl ? (
+                      <img src={book.coverUrl} alt={book.title} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                    ) : null}
+                    <div className="uh-book-cover-placeholder" style={{ display: book.coverUrl ? 'none' : 'flex' }}>
+                      <svg viewBox="0 0 24 24" fill="#aaa" width="40" height="40">
+                        <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="uh-book-info">
+                    <h3 className="uh-book-title">{book.title}</h3>
+                    <p className="uh-book-author">{book.author}</p>
+                    {book.genre && <p className="uh-book-genre">{book.genre}</p>}
+                    <span className={`uh-book-status ${(book.status || 'available').toLowerCase()}`}>
+                      {book.status || 'Available'}
+                    </span>
+                    <button
+                      className="uh-borrow-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBorrowBook(book);
+                      }}
+                      disabled={book.status?.toLowerCase() === 'borrowed' || borrowingBookId === book.id}
+                    >
+                      {borrowingBookId === book.id ? 'Requesting...' : 'Request to Borrow'}
+                    </button>
                   </div>
                 </div>
-                <div className="uh-book-info">
-                  <h3 className="uh-book-title">{book.title}</h3>
-                  <p className="uh-book-author">{book.author}</p>
-                  <span className={`uh-book-status ${(book.status || 'available').toLowerCase()}`}>
-                    {book.status || 'Available'}
-                  </span>
-                  <button
-                    className="uh-borrow-btn"
-                    onClick={() => handleBorrowBook(book.id)}
-                    disabled={book.status?.toLowerCase() === 'borrowed'}
-                  >
-                    Borrow Now
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>

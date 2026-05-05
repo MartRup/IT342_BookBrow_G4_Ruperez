@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
+import BookDetailsModal from '../../components/BookDetailsModal';
 import './BorrowItems.css';
 
 export default function BorrowItems() {
@@ -14,6 +15,7 @@ export default function BorrowItems() {
   const [loading, setLoading] = useState(true);
   const [borrowingBookId, setBorrowingBookId] = useState(null);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
+  const [selectedBook, setSelectedBook] = useState(null); // For modal
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -71,14 +73,19 @@ export default function BorrowItems() {
     try {
       setBorrowingBookId(book.id);
       await ApiService.borrow.create(book.id);
-      showToast('success', `"${book.title}" borrowed successfully! Due in 14 days.`);
+      showToast('success', `Borrow request for "${book.title}" submitted! Waiting for librarian approval.`);
+      setSelectedBook(null); // Close modal
       fetchBooks(searchQuery);
     } catch (error) {
-      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to borrow book. Please try again.';
+      const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to submit borrow request. Please try again.';
       showToast('error', msg);
     } finally {
       setBorrowingBookId(null);
     }
+  };
+
+  const handleBookClick = (book) => {
+    setSelectedBook(book);
   };
 
   if (loading) {
@@ -98,6 +105,16 @@ export default function BorrowItems() {
           <span>{toast.type === 'success' ? '✅' : '❌'}</span>
           {toast.message}
         </div>
+      )}
+
+      {/* ── Book Details Modal ── */}
+      {selectedBook && (
+        <BookDetailsModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onBorrow={handleBorrow}
+          borrowing={borrowingBookId === selectedBook.id}
+        />
       )}
 
       {/* ── NAVBAR ── */}
@@ -158,7 +175,7 @@ export default function BorrowItems() {
             </div>
           ) : (
             filteredBooks.map((book) => (
-              <div key={book.id} className="bi-book-card">
+              <div key={book.id} className="bi-book-card" onClick={() => handleBookClick(book)}>
                 <div className="bi-book-cover">
                   {book.coverUrl ? (
                     <img src={book.coverUrl} alt={book.title} onError={(e) => { e.target.style.display = 'none'; }} />
@@ -179,10 +196,13 @@ export default function BorrowItems() {
                   </span>
                   <button
                     className="bi-borrow-btn"
-                    onClick={() => handleBorrow(book)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBorrow(book);
+                    }}
                     disabled={book.status?.toLowerCase() === 'borrowed' || borrowingBookId === book.id}
                   >
-                    {borrowingBookId === book.id ? 'Borrowing...' : 'Borrow Now'}
+                    {borrowingBookId === book.id ? 'Requesting...' : 'Request to Borrow'}
                   </button>
                 </div>
               </div>
