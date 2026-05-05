@@ -7,10 +7,12 @@ import './BorrowingRecords.css';
 export default function BorrowingRecords() {
   const [user, setUser] = useState({});
   const [records, setRecords] = useState([]);
-  const [stats, setStats] = useState({ total: 0, active: 0, overdue: 0, returned: 0 });
+  const [stats, setStats] = useState({ total: 0, active: 0, overdue: 0, returned: 0, pending: 0 });
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All Records');
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null); // Track which record is being processed
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,25 +32,72 @@ export default function BorrowingRecords() {
       const data = res.data?.data?.borrowRecords ?? res.data?.borrowRecords ?? [];
       setRecords(Array.isArray(data) ? data : []);
 
-      let active = 0, overdue = 0, returned = 0;
+      let active = 0, overdue = 0, returned = 0, pending = 0;
       data.forEach(r => {
         if (r.status === 'RETURNED') returned++;
         else if (r.status === 'OVERDUE') overdue++;
-        else active++;
+        else if (r.status === 'PENDING') pending++;
+        else if (r.status === 'ACTIVE') active++;
       });
-      setStats({ total: data.length, active, overdue, returned });
+      setStats({ total: data.length, active, overdue, returned, pending });
     } catch (e) {
       console.error('Error fetching borrowing records:', e);
       setRecords([]);
-      setStats({ total: 0, active: 0, overdue: 0, returned: 0 });
+      setStats({ total: 0, active: 0, overdue: 0, returned: 0, pending: 0 });
     } finally { setLoading(false); }
+  };
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      setActionLoading(id);
+      await axios.put(`/api/v1/borrow/${id}/approve`, {}, {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      showToast('success', 'Borrow request approved successfully!');
+      fetchRecords();
+    } catch (e) {
+      console.error('Error approving request:', e);
+      showToast('error', e.response?.data?.error?.message || 'Failed to approve request');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      setActionLoading(id);
+      await axios.put(`/api/v1/borrow/${id}/reject`, {}, {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      showToast('success', 'Borrow request rejected');
+      fetchRecords();
+    } catch (e) {
+      console.error('Error rejecting request:', e);
+      showToast('error', e.response?.data?.error?.message || 'Failed to reject request');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleMarkReturned = async (id) => {
     try {
-      await axios.put(`/api/v1/borrow/${id}/return`); // Assuming endpoint exists
+      setActionLoading(id);
+      await axios.put(`/api/v1/borrow/${id}/return`, {}, {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      showToast('success', 'Book marked as returned');
       fetchRecords();
-    } catch (e) { console.error('Error marking returned:', e); }
+    } catch (e) {
+      console.error('Error marking returned:', e);
+      showToast('error', e.response?.data?.error?.message || 'Failed to mark as returned');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const getFilteredRecords = () => {
@@ -62,7 +111,8 @@ export default function BorrowingRecords() {
       if (!matchSearch) return false;
       
       // Apply pill filter
-      if (filter === 'Active') return r.status === 'ACTIVE' || r.status === 'PENDING';
+      if (filter === 'Pending') return r.status === 'PENDING';
+      if (filter === 'Active') return r.status === 'ACTIVE';
       if (filter === 'Overdue') return r.status === 'OVERDUE';
       if (filter === 'Returned') return r.status === 'RETURNED';
       return true; // All Records
@@ -75,6 +125,14 @@ export default function BorrowingRecords() {
 
   return (
     <div className="br-page">
+      {/* ── Toast Notification ── */}
+      {toast && (
+        <div className={`br-toast br-toast-${toast.type}`}>
+          <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+          {toast.message}
+        </div>
+      )}
+
       <LibrarianNavbar />
 
       <main className="br-content">
@@ -91,6 +149,15 @@ export default function BorrowingRecords() {
             <div className="br-stat-info">
               <div className="br-stat-label">Total Records</div>
               <div className="br-stat-value">{stats.total}</div>
+            </div>
+          </div>
+          <div className="br-stat-card">
+            <div className="br-icon-box">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div className="br-stat-info">
+              <div className="br-stat-label">Pending Approval</div>
+              <div className="br-stat-value">{stats.pending}</div>
             </div>
           </div>
           <div className="br-stat-card">
@@ -138,13 +205,16 @@ export default function BorrowingRecords() {
             </div>
           </div>
           <div className="br-filters">
-            {['All Records', 'Active', 'Overdue', 'Returned'].map(f => (
+            {['All Records', 'Pending', 'Active', 'Overdue', 'Returned'].map(f => (
               <button 
                 key={f}
                 className={`br-filter-btn ${filter === f ? 'active' : ''}`}
                 onClick={() => setFilter(f)}
               >
                 {f}
+                {f === 'Pending' && stats.pending > 0 && (
+                  <span className="br-badge">{stats.pending}</span>
+                )}
               </button>
             ))}
           </div>
@@ -193,10 +263,33 @@ export default function BorrowingRecords() {
                   </td>
                   <td>{r.daysLeft || 0}</td>
                   <td className="br-actions-cell">
-                    {r.status !== 'RETURNED' && (
-                      <button className="br-return-btn" onClick={() => handleMarkReturned(r.id)}>
-                        Mark Returned
+                    {r.status === 'PENDING' ? (
+                      <div className="br-action-group">
+                        <button 
+                          className="br-approve-btn" 
+                          onClick={() => handleApprove(r.id)}
+                          disabled={actionLoading === r.id}
+                        >
+                          {actionLoading === r.id ? '...' : 'Approve'}
+                        </button>
+                        <button 
+                          className="br-reject-btn" 
+                          onClick={() => handleReject(r.id)}
+                          disabled={actionLoading === r.id}
+                        >
+                          {actionLoading === r.id ? '...' : 'Reject'}
+                        </button>
+                      </div>
+                    ) : r.status === 'ACTIVE' || r.status === 'OVERDUE' ? (
+                      <button 
+                        className="br-return-btn" 
+                        onClick={() => handleMarkReturned(r.id)}
+                        disabled={actionLoading === r.id}
+                      >
+                        {actionLoading === r.id ? 'Processing...' : 'Mark Returned'}
                       </button>
+                    ) : (
+                      <span className="br-no-action">—</span>
                     )}
                   </td>
                 </tr>

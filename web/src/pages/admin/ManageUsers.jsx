@@ -39,6 +39,7 @@ axios.interceptors.response.use(
 const EMPTY_ADD_FORM = { fullName: '', email: '', password: '', role: 'LIBRARIAN' };
 
 export default function ManageUsers() {
+  const navigate = useNavigate();
   const [user, setUser] = useState({});
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
@@ -58,7 +59,9 @@ export default function ManageUsers() {
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
-  const navigate = useNavigate();
+  // Delete Modal State
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -137,15 +140,29 @@ export default function ManageUsers() {
     } catch (e) { console.error(e); }
   };
 
-  // --- DELETE ---
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this user?')) return;
+  // --- DELETE MODAL HELPERS ---
+  const openDeleteModal = (user) => {
+    setUserToDelete(user);
+    setDeleteError('');
+  };
+
+  const closeDeleteModal = () => {
+    setUserToDelete(null);
+    setDeleteError('');
+  };
+
+  const handleDelete = async (userId) => {
+    setDeleteError('');
     try { 
-      await axios.delete(`/api/v1/users/${id}`); 
+      await axios.delete(`/api/v1/users/${userId}`); 
+      closeDeleteModal();
       fetchUsers(); 
       // Trigger dashboard refresh
       window.dispatchEvent(new CustomEvent('dashboardRefresh'));
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e);
+      setDeleteError('Failed to delete user. ' + (e.response?.data?.message || 'Please try again.'));
+    }
   };
 
   // --- ADD PRIVILEGED USER ---
@@ -350,7 +367,7 @@ export default function ManageUsers() {
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                       </svg>
                     </button>
-                    <button className="mu-icon-btn mu-del-icon" onClick={() => handleDelete(u.id)} title="Delete">
+                    <button className="mu-icon-btn mu-del-icon" onClick={() => openDeleteModal(u)} title="Delete">
                       <svg viewBox="0 0 24 24" fill="#a52a2a" width="20" height="20">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                       </svg>
@@ -540,6 +557,34 @@ export default function ManageUsers() {
                  </button>
                </div>
              </form>
+          </div>
+        </div>
+      )}
+      {/* DELETE CONFIRMATION MODAL */}
+      {userToDelete && (
+        <div className="mu-overlay" onClick={closeDeleteModal}>
+          <div className="mu-modal mu-delete-modal" onClick={e => e.stopPropagation()}>
+            <h2 className="mu-modal-title mu-delete-title">Confirm Deletion</h2>
+            <div className="mu-delete-content">
+              <p className="mu-delete-message">
+                Are you sure you want to delete
+              </p>
+              <p className="mu-delete-username">
+                "{userToDelete.fullName || userToDelete.email}"?
+              </p>
+              <p className="mu-delete-warning">
+                This action cannot be undone.
+              </p>
+              {deleteError && (
+                <div className="mu-delete-error">
+                  {deleteError}
+                </div>
+              )}
+            </div>
+            <div className="mu-delete-actions">
+              <button className="mu-btn mu-btn-cancel" onClick={closeDeleteModal}>Cancel</button>
+              <button className="mu-btn mu-btn-delete" onClick={() => handleDelete(userToDelete.id)}>Delete User</button>
+            </div>
           </div>
         </div>
       )}

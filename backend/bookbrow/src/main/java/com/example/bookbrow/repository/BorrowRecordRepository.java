@@ -48,4 +48,13 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM BorrowRecord br WHERE br.book.id = :bookId")
     void deleteByBookId(@Param("bookId") Long bookId);
+
+    // Check if user has a pending request for a book
+    boolean existsByUserAndBookAndStatus(User user, com.example.bookbrow.entity.Book book, BorrowRecord.BorrowStatus status);
+
+    // Find pending borrow requests
+    Page<BorrowRecord> findByStatus(BorrowRecord.BorrowStatus status, Pageable pageable);
+
+    // Find pending requests for a specific user
+    List<BorrowRecord> findByUserAndStatus(User user, BorrowRecord.BorrowStatus status);
 }

@@ -231,6 +231,123 @@
   fill: #800000;
 }
 
+.mu-del-icon:hover svg {
+  fill: #dc3545;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* Delete Confirmation Modal */
+.mu-delete-modal {
+  max-width: 420px !important;
+  padding: 40px !important;
+  text-align: center;
+}
+
+.mu-delete-title {
+  font-size: 26px !important;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 24px !important;
+  margin-top: 0 !important;
+  text-align: center !important;
+  display: block !important;
+  letter-spacing: -0.5px;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+
+.mu-delete-content {
+  margin-bottom: 32px;
+}
+
+.mu-delete-message {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.mu-delete-username {
+  font-size: 19px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.mu-delete-warning {
+  font-size: 14px;
+  color: #dc3545;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.mu-delete-error {
+  font-size: 14px;
+  color: #dc3545;
+  margin-top: 16px;
+  font-weight: 600;
+  background: #fff5f5;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #fed7d7;
+  line-height: 1.5;
+}
+
+.mu-delete-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.mu-btn {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  letter-spacing: 0.3px;
+}
+
+.mu-btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.mu-btn-cancel:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.mu-btn-delete {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.mu-btn-delete:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+  transform: translateY(-2px);
+}
+
+.mu-btn-delete:active {
+  transform: translateY(0);
+}
+
 .mu-loading {
   display: flex;
   flex-direction: column;
