@@ -24,15 +24,16 @@ export default function LibrarianDashboard() {
       setLoading(true);
       const [statsRes, reqRes] = await Promise.all([
         axios.get('/api/v1/librarian/stats'),
-        axios.get('/api/v1/borrow/pending') // Reusing pending as 'activities'
+        axios.get('/api/v1/borrow/all?status=pending')
       ]);
       const data = statsRes.data?.data || statsRes.data || {};
       setStats({
         borrowed: data.borrowed || 0,
-        dueSoon: data.dueSoon || 0, // Fallback if not available
+        dueSoon: data.dueSoon || 0,
         returned: data.returned || 0
       });
-      setActivities(reqRes.data?.data || reqRes.data || []);
+      const pendingActivities = reqRes.data?.data?.borrowRecords || reqRes.data?.borrowRecords || reqRes.data?.data || [];
+      setActivities(pendingActivities);
     } catch (e) {
       console.error('Error fetching librarian data:', e);
       // Fallback UI empty state

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#8B1A1A</color>
+    <color name="brand_primary_dark">#6B1010</color>
+    <color name="brand_primary_light">#B22222</color>
+    <color name="brand_primary_surface">#C0545420</color>
+    <color name="btn_primary_bg">#FF6B1010</color>
+    <color name="btn_secondary_bg">#33FFFFFF</color>
+    <color name="btn_secondary_stroke">#AAFFFFFF</color>
+    <color name="card_background">#CC8B3030</color>
+    <color name="card_stroke">#FFAB7575</color>
+    <color name="divider">#22FFFFFF</color>
+    <color name="error_red">#FFFF5252</color>
+    <color name="input_background">#1AFFFFFF</color>
+    <color name="input_stroke">#33FFFFFF</color>
+    <color name="input_text">#FFFFFFFF</color>
+    <color name="overlay">#CC3D0A0A</color>
+    <color name="success_green">#FF66BB6A</color>
+    <color name="text_hint">#99FFFFFF</color>
+    <color name="text_link">#FFFFDDDD</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#FFFDE8E8</color>
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <dimen name="btn_height">52dp</dimen>
+    <dimen name="card_margin_horizontal">24dp</dimen>
+    <dimen name="card_padding">28dp</dimen>
+    <dimen name="card_radius">24dp</dimen>
+    <dimen name="icon_logo_padding">16dp</dimen>
+    <dimen name="icon_logo_size">72dp</dimen>
+    <dimen name="input_height">56dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_xxl">48dp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_heading">26sp</dimen>
+    <dimen name="text_label">13sp</dimen>
+    <dimen name="text_link">13sp</dimen>
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_subheading">14sp</dimen>
+    <string name="already_account">Already have an account? Sign In</string>
+    <string name="app_name">BookBrow</string>
+    <string name="btn_logout">Log Out</string>
+    <string name="confirm_password_hint">Confirm your password</string>
+    <string name="email_hint">your.email@example.com</string>
+    <string name="error_empty_email">Email address is required</string>
+    <string name="error_empty_name">Full name is required</string>
+    <string name="error_empty_password">Password is required</string>
+    <string name="error_invalid_email">Enter a valid email address</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_short_password">Password must be at least 8 characters</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="full_name_hint">Enter your Full Name</string>
+    <string name="join_subtitle">Create your account and start borrowing books</string>
+    <string name="join_title">Join BookBrow!</string>
+    <string name="label_confirm_password">Confirm Password</string>
+    <string name="label_email">Email Address</string>
+    <string name="label_full_name">Full Name</string>
+    <string name="label_password">Password</string>
+    <string name="loading">Please wait…</string>
+    <string name="main_welcome_message">You are successfully logged in to BookBrow.</string>
+    <string name="no_account">Don\'t have an account? Sign Up</string>
+    <string name="password_hint">Enter your password</string>
+    <string name="register_success">Account created! Please sign in.</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_subtitle">Sign in to access BookBrow</string>
+    <string name="sign_up">Create Account</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="welcome_user">Welcome, %1$s!</string>
+    <style name="Theme.BookBrow" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="colorAccent">@color/brand_primary_light</item>
+        <item name="android:statusBarColor">@color/brand_primary_dark</item>
+        <item name="android:navigationBarColor">@color/brand_primary_dark</item>
+        <item name="android:windowBackground">@color/brand_primary_dark</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="Theme.BookBrow.Auth" parent="Theme.BookBrow">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <style name="Theme.BookBrow.Splash" parent="Theme.BookBrow">
+        <item name="android:windowBackground">@color/brand_primary_dark</item>
+    </style>
+    <style name="Widget.BookBrow.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/btn_primary_bg</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    <style name="Widget.BookBrow.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="strokeColor">@color/btn_secondary_stroke</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    <style name="Widget.BookBrow.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="Widget.BookBrow.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/input_stroke</item>
+        <item name="hintTextColor">@color/text_hint</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="boxBackgroundColor">@color/input_background</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="errorTextColor">@color/error_red</item>
+        <item name="errorIconTint">@color/error_red</item>
+    </style>
+</resources>

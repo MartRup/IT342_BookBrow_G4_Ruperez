@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-38:/layout/activity_register.xml",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_register.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-38:/layout/activity_splash.xml",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-38:/layout/activity_login.xml",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_login.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-38:/layout/activity_main.xml",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_main.xml"
+    }
+]

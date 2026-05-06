@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/layout_activity_splash.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/layout_activity_login.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_login.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/layout_activity_main.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_main.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_ic_launcher_background.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_ic_logo.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/ic_logo.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_bg_card.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/bg_card.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_bg_logo_circle.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/bg_logo_circle.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/drawable_bg_auth_gradient.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/drawable/bg_auth_gradient.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-merged_res-39:/layout_activity_register.xml.flat",
+        "source": "edu.ruperez.bookbrow.app-main-41:/layout/activity_register.xml"
+    }
+]

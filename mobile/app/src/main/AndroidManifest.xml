@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,7 +13,7 @@
 
         <!-- Splash / Entry point -->
         <activity
-            android:name=".ui.splash.SplashActivity"
+            android:name=".feature.splash.SplashActivity"
             android:exported="true"
             android:noHistory="true"
             android:theme="@style/Theme.BookBrow.Splash">
@@ -25,20 +25,21 @@
 
         <!-- Auth screens -->
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".feature.auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name=".feature.auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Main (post-login) -->
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".feature.main.MainActivity"
             android:exported="false" />
 
     </application>
 
 </manifest>
+
