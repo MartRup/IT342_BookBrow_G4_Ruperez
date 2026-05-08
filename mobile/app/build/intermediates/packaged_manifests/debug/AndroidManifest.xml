@@ -56,6 +56,36 @@
             android:name="edu.ruperez.bookbrow.feature.main.MainActivity"
             android:exported="false" />
 
+        <!-- Admin screens -->
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.admin.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.admin.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.admin.EditProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Books screen -->
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.books.BooksActivity"
+            android:exported="false" />
+
+        <!-- Records screen -->
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.borrow.RecordsActivity"
+            android:exported="false" />
+
+        <!-- Librarian screens -->
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.librarian.LibrarianDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name="edu.ruperez.bookbrow.feature.librarian.LibrarianUsersActivity"
+            android:exported="false" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="edu.ruperez.bookbrow.androidx-startup"

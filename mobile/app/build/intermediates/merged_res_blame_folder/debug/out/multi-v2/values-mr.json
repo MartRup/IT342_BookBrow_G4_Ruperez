@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "edu.ruperez.bookbrow.app-mergeDebugResources-37:/values-mr/values-mr.xml",
+            "outputFile": "edu.ruperez.bookbrow.app-mergeDebugResources-38:/values-mr/values-mr.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Raymart Ruperez\\.gradle\\caches\\transforms-3\\217cd4443c329c3de6d6b6409afab4f6\\transformed\\core-1.12.0\\res\\values-mr\\values-mr.xml",

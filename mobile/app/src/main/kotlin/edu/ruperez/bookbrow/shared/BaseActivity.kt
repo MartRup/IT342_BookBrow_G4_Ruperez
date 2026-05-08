@@ -44,12 +44,12 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
 
-    protected fun showError(message: String) {
+    protected open fun showError(message: String) {
         // Override in subclasses to implement error handling
     }
 
 
-    protected fun showLoading(isLoading: Boolean) {
+    protected open fun showLoading(isLoading: Boolean) {
         // Override in subclasses to implement loading state
     }
 

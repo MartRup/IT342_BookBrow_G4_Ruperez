@@ -39,6 +39,39 @@
             android:name=".feature.main.MainActivity"
             android:exported="false" />
 
+        <!-- Admin screens -->
+        <activity
+            android:name=".feature.admin.AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.admin.ProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.admin.EditProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Books screen -->
+        <activity
+            android:name=".feature.books.BooksActivity"
+            android:exported="false" />
+
+        <!-- Records screen -->
+        <activity
+            android:name=".feature.borrow.RecordsActivity"
+            android:exported="false" />
+
+        <!-- Librarian screens -->
+        <activity
+            android:name=".feature.librarian.LibrarianDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.librarian.LibrarianUsersActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

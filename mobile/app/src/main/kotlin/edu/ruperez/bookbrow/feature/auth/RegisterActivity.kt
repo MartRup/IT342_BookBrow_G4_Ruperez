@@ -26,7 +26,7 @@ class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(binding.root as View)
 
         setupClickListeners()
         observeViewModel()

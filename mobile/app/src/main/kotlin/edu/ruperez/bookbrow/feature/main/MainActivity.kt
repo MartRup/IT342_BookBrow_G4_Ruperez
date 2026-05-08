@@ -2,6 +2,7 @@ package edu.ruperez.bookbrow.feature.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.shared.SessionManager
@@ -29,13 +30,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check if user is admin/librarian and redirect to dashboard
+        val role = intent.getStringExtra(EXTRA_ROLE) ?: "USER"
+        if (role.equals("ADMIN", ignoreCase = true) || role.equals("LIBRARIAN", ignoreCase = true)) {
+            startActivity(Intent(this, edu.ruperez.bookbrow.feature.admin.AdminDashboardActivity::class.java))
+            finish()
+            return
+        }
+        
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(binding.root as View)
 
         // Populate user info from intent extras
         val name  = intent.getStringExtra(EXTRA_NAME)  ?: "User"
         val email = intent.getStringExtra(EXTRA_EMAIL) ?: ""
-        val role  = intent.getStringExtra(EXTRA_ROLE)  ?: "USER"
 
         binding.tvUserName.text  = name
         binding.tvUserEmail.text = email

@@ -2,6 +2,10 @@ package edu.ruperez.bookbrow.shared
 
 import edu.ruperez.bookbrow.BuildConfig
 import edu.ruperez.bookbrow.feature.auth.AuthApiService
+import edu.ruperez.bookbrow.feature.admin.AdminApiService
+import edu.ruperez.bookbrow.feature.books.BooksApiService
+import edu.ruperez.bookbrow.feature.borrow.BorrowApiService
+import edu.ruperez.bookbrow.feature.librarian.LibrarianApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -39,5 +43,25 @@ object RetrofitClient {
     /** Lazily-created AuthApiService instance */
     val authApiService: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
+    }
+
+    /** Lazily-created AdminApiService instance */
+    val adminApiService: AdminApiService by lazy {
+        retrofit.create(AdminApiService::class.java)
+    }
+
+    /** Lazily-created BooksApiService instance */
+    val booksApiService: BooksApiService by lazy {
+        retrofit.create(BooksApiService::class.java)
+    }
+
+    /** Lazily-created BorrowApiService instance */
+    val borrowApiService: BorrowApiService by lazy {
+        retrofit.create(BorrowApiService::class.java)
+    }
+
+    /** Lazily-created LibrarianApiService instance */
+    val librarianApiService: LibrarianApiService by lazy {
+        retrofit.create(LibrarianApiService::class.java)
     }
 }

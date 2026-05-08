@@ -42,4 +42,10 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     Page<BorrowRecord> findByStatus(BorrowRecord.BorrowStatus status, Pageable pageable);
 
     List<BorrowRecord> findByUserAndStatus(User user, BorrowRecord.BorrowStatus status);
+
+    Integer countByUser(User user);
+    Integer countByUserAndStatus(User user, BorrowRecord.BorrowStatus status);
+
+    @Query("SELECT br FROM BorrowRecord br WHERE br.dueDate < CURRENT_TIMESTAMP AND br.returnDate IS NULL")
+    Page<BorrowRecord> findOverdueRecords(Pageable pageable);
 }
