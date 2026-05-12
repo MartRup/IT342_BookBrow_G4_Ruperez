@@ -1,9 +1,9 @@
 package edu.ruperez.bookbrow.data.repository
 
-import edu.ruperez.bookbrow.data.remote.RetrofitClient
-import edu.ruperez.bookbrow.data.remote.model.AuthResponse
-import edu.ruperez.bookbrow.data.remote.model.LoginRequest
-import edu.ruperez.bookbrow.data.remote.model.RegisterRequest
+import edu.ruperez.bookbrow.shared.RetrofitClient
+import edu.ruperez.bookbrow.feature.auth.AuthResponse
+import edu.ruperez.bookbrow.feature.auth.LoginRequest
+import edu.ruperez.bookbrow.feature.auth.RegisterRequest
 
 /**
  * AuthRepository is the single source of truth for authentication data.

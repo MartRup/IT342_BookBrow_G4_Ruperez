@@ -1,0 +1,90 @@
+[
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_user_browse.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_user_browse.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_user_home.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_user_home.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_profile.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_profile.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_user_menu.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_user_menu.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_admin_dashboard.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_admin_dashboard.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_records.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_records.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/dialog_add_edit_book.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/dialog_add_edit_book.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_splash.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_register.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_register.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_librarian_dashboard.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_librarian_dashboard.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_main.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_main.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_user_my_books.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_user_my_books.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/item_record.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/item_record.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/bottom_navigation.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/bottom_navigation.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/dialog_edit_user.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/dialog_edit_user.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/item_user.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/item_user.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_librarian_users.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_librarian_users.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_edit_profile.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_edit_profile.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/item_book.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/item_book.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_books.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_books.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/activity_login.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/activity_login.xml"
+    },
+    {
+        "merged": "edu.ruperez.bookbrow.app-mergeDebugResources-52:/layout/dialog_user_details.xml",
+        "source": "edu.ruperez.bookbrow.app-main-55:/layout/dialog_user_details.xml"
+    }
+]
