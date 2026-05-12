@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Close Button -->
+            <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_close"
+                android:layout_gravity="end"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Avatar -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/avatarCircle"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="40dp"
+                app:cardBackgroundColor="#64B5F6"
+                app:cardElevation="4dp">
+
+                <TextView
+                    android:id="@+id/tvUserAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="U2"
+                    android:textColor="@android:color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- User Details -->
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="John Doe 2"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#212121" />
+
+            <TextView
+                android:id="@+id/tvUserEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:text="user2@email.com"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/tvUserRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text="User"
+                android:textSize="16sp"
+                android:textColor="#1976D2"
+                android:background="#E3F2FD"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvUserStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text="Status: Active"
+                android:textSize="14sp"
+                android:textColor="#4CAF50" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="#E0E0E0" />
+
+            <!-- Additional Info -->
+            <TextView
+                android:id="@+id/tvJoinedDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Joined: Jan 15, 2024"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/tvUserPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Phone: +1234567890"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/tvUserAbout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="About: Book enthusiast"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/tvBooksBorrowed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Books Borrowed: 12"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/tvActiveLoans"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Active Loans: 2"
+                android:textSize="14sp"
+                android:textColor="#757575" />
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp">
+
+                <Button
+                    android:id="@+id/btnEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Edit User"
+                    android:backgroundTint="@color/primary" />
+
+                <Button
+                    android:id="@+id/btnDeactivate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Deactivate"
+                    android:backgroundTint="#F44336"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</androidx.cardview.widget.CardView>

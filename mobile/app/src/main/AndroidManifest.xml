@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,7 +13,7 @@
 
         <!-- Splash / Entry point -->
         <activity
-            android:name=".ui.splash.SplashActivity"
+            android:name=".feature.splash.SplashActivity"
             android:exported="true"
             android:noHistory="true"
             android:theme="@style/Theme.BookBrow.Splash">
@@ -25,20 +25,54 @@
 
         <!-- Auth screens -->
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".feature.auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name=".feature.auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Main (post-login) -->
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".feature.main.MainActivity"
+            android:exported="false" />
+
+        <!-- Admin screens -->
+        <activity
+            android:name=".feature.admin.AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.admin.ProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.admin.EditProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Books screen -->
+        <activity
+            android:name=".feature.books.BooksActivity"
+            android:exported="false" />
+
+        <!-- Records screen -->
+        <activity
+            android:name=".feature.borrow.RecordsActivity"
+            android:exported="false" />
+
+        <!-- Librarian screens -->
+        <activity
+            android:name=".feature.librarian.LibrarianDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.librarian.LibrarianUsersActivity"
             android:exported="false" />
 
     </application>
 
 </manifest>
+

@@ -1,0 +1,361 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.example:bookbrow >------------------------
+[INFO] Building bookbrow 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.1.5:run (default-cli) > test-compile @ bookbrow >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ bookbrow ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ bookbrow ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ bookbrow ---
+[INFO] skip non existing resourceDirectory C:\Users\Raymart Ruperez\Desktop\System Integ\IT342_BookBrow_G4_Ruperez\backend\bookbrow\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ bookbrow ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 3 source files with javac [debug release 19] to target\test-classes
+[INFO] /C:/Users/Raymart Ruperez/Desktop/System Integ/IT342_BookBrow_G4_Ruperez/backend/bookbrow/src/test/java/com/example/bookbrow/controller/BookControllerTest.java: C:\Users\Raymart Ruperez\Desktop\System Integ\IT342_BookBrow_G4_Ruperez\backend\bookbrow\src\test\java\com\example\bookbrow\controller\BookControllerTest.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/Raymart Ruperez/Desktop/System Integ/IT342_BookBrow_G4_Ruperez/backend/bookbrow/src/test/java/com/example/bookbrow/controller/BookControllerTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] <<< spring-boot:3.1.5:run (default-cli) < test-compile @ bookbrow <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.1.5:run (default-cli) @ bookbrow ---
+[INFO] Attaching agents: []
+23:05:24.569 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.1.5)
+
+2026-05-08T23:05:25.274+08:00  INFO 1064 --- [           main] c.example.bookbrow.BookbrowApplication   : Starting BookbrowApplication using Java 23.0.2 with PID 1064 (C:\Users\Raymart Ruperez\Desktop\System Integ\IT342_BookBrow_G4_Ruperez\backend\bookbrow\target\classes started by Raymart Ruperez in C:\Users\Raymart Ruperez\Desktop\System Integ\IT342_BookBrow_G4_Ruperez\backend\bookbrow)
+2026-05-08T23:05:25.279+08:00  INFO 1064 --- [           main] c.example.bookbrow.BookbrowApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-08T23:05:25.378+08:00  INFO 1064 --- [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-05-08T23:05:26.673+08:00  INFO 1064 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-08T23:05:26.795+08:00  INFO 1064 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 107 ms. Found 4 JPA repository interfaces.
+2026-05-08T23:05:27.884+08:00  INFO 1064 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-05-08T23:05:27.906+08:00  INFO 1064 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-08T23:05:27.907+08:00  INFO 1064 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.15]
+2026-05-08T23:05:28.054+08:00  INFO 1064 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-08T23:05:28.057+08:00  INFO 1064 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2675 ms
+2026-05-08T23:05:28.299+08:00  INFO 1064 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-08T23:05:28.416+08:00  INFO 1064 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2026-05-08T23:05:28.422+08:00  INFO 1064 --- [           main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2026-05-08T23:05:28.870+08:00  INFO 1064 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-08T23:05:28.935+08:00  INFO 1064 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-08T23:05:31.843+08:00  INFO 1064 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@520a95ff
+2026-05-08T23:05:31.846+08:00  INFO 1064 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-08T23:05:32.124+08:00  WARN 1064 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-08T23:05:34.044+08:00  INFO 1064 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-08T23:05:37.458+08:00  INFO 1064 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-08T23:05:38.132+08:00  INFO 1064 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-08T23:05:39.457+08:00  WARN 1064 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-08T23:05:39.970+08:00  INFO 1064 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@34883fa2, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@20a1c8a1, org.springframework.security.web.context.SecurityContextHolderFilter@48adb967, org.springframework.security.web.header.HeaderWriterFilter@69765d94, org.springframework.web.filter.CorsFilter@1ecf19e8, org.springframework.web.filter.CorsFilter@11d1c51a, org.springframework.security.web.authentication.logout.LogoutFilter@7dcbcede, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@1926a40f, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@6ddf3c5e, com.example.bookbrow.shared.security.JwtAuthenticationFilter@46a9c368, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@6f286e1d, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@64d19dad, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@631f188a, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@d181ca3, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4a1bb556, org.springframework.security.web.access.ExceptionTranslationFilter@13e6b26c, org.springframework.security.web.access.intercept.AuthorizationFilter@b8f6500]
+2026-05-08T23:05:40.356+08:00  INFO 1064 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2026-05-08T23:05:40.371+08:00  INFO 1064 --- [           main] c.example.bookbrow.BookbrowApplication   : Started BookbrowApplication in 15.868 seconds (process running for 16.671)
+2026-05-08T23:10:08.759+08:00  INFO 1064 --- [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-08T23:10:08.761+08:00  INFO 1064 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-08T23:10:08.764+08:00  INFO 1064 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-05-08T23:11:32.229+08:00  INFO 1064 --- [nio-8080-exec-4] c.e.b.s.security.OAuth2SuccessHandler    : [OAuth2] Authentication success callback triggered
+2026-05-08T23:11:32.229+08:00  INFO 1064 --- [nio-8080-exec-4] c.e.b.s.security.OAuth2SuccessHandler    : [OAuth2] OAuth2User principal: Name: [117792766983513026763], Granted Authorities: [[OAUTH2_USER, SCOPE_https://www.googleapis.com/auth/userinfo.email, SCOPE_https://www.googleapis.com/auth/userinfo.profile, SCOPE_openid]], User Attributes: [{sub=117792766983513026763, name=RAYMART RUPEREZ, given_name=RAYMART, family_name=RUPEREZ, picture=https://lh3.googleusercontent.com/a/ACg8ocJlYescVuad7-0YH0ehHawIm6WabcpAKanhuplrYrrrlk0U5c7r=s96-c, email=raymartruperez@gmail.com, email_verified=true}]
+2026-05-08T23:11:32.230+08:00  INFO 1064 --- [nio-8080-exec-4] c.e.b.s.security.OAuth2SuccessHandler    : [OAuth2] User attributes: {sub=117792766983513026763, name=RAYMART RUPEREZ, given_name=RAYMART, family_name=RUPEREZ, picture=https://lh3.googleusercontent.com/a/ACg8ocJlYescVuad7-0YH0ehHawIm6WabcpAKanhuplrYrrrlk0U5c7r=s96-c, email=raymartruperez@gmail.com, email_verified=true}
+2026-05-08T23:11:32.230+08:00  INFO 1064 --- [nio-8080-exec-4] c.e.b.s.security.OAuth2SuccessHandler    : [OAuth2] Extracted email: raymartruperez@gmail.com, fullName: RAYMART RUPEREZ
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-05-08T23:11:32.864+08:00  INFO 1064 --- [nio-8080-exec-4] c.e.b.s.security.OAuth2SuccessHandler    : [OAuth2] Login success for user id=4 email=raymartruperez@gmail.com
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.book_id,
+        b1_0.borrow_date,
+        b1_0.created_at,
+        b1_0.due_date,
+        b1_0.processed_by,
+        b1_0.return_date,
+        b1_0.status,
+        b1_0.user_id 
+    from
+        borrow_records b1_0 
+    where
+        b1_0.user_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.book_id,
+        b1_0.borrow_date,
+        b1_0.created_at,
+        b1_0.due_date,
+        b1_0.processed_by,
+        b1_0.return_date,
+        b1_0.status,
+        b1_0.user_id 
+    from
+        borrow_records b1_0 
+    where
+        b1_0.user_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    left join
+        borrow_records b2_0 
+            on b2_0.book_id=b1_0.id 
+    where
+        b1_0.available=true 
+    group by
+        b1_0.id 
+    order by
+        count(b2_0.id) desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    where
+        (
+            ? is null 
+            or lower(b1_0.title) like ? escape '' 
+            or lower(b1_0.author) like ? escape ''
+        ) 
+        and (
+            ? is null 
+            or b1_0.available=?
+        ) 
+    order by
+        b1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.about,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_active,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    left join
+        borrow_records b2_0 
+            on b2_0.book_id=b1_0.id 
+    where
+        b1_0.available=true 
+    group by
+        b1_0.id 
+    order by
+        count(b2_0.id) desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.author,
+        b1_0.available,
+        b1_0.cover_url,
+        b1_0.created_at,
+        b1_0.description,
+        b1_0.genre,
+        b1_0.isbn,
+        b1_0.title,
+        b1_0.updated_at 
+    from
+        books b1_0 
+    where
+        (
+            ? is null 
+            or lower(b1_0.title) like ? escape '' 
+            or lower(b1_0.author) like ? escape ''
+        ) 
+        and (
+            ? is null 
+            or b1_0.available=?
+        ) 
+    order by
+        b1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only

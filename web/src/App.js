@@ -28,6 +28,7 @@ import TestData             from './pages/admin/TestData.jsx';
 
 // ── Shared ────────────────────────────────────────────────
 import Settings from './components/Settings.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 // ── Helpers ───────────────────────────────────────────────
 const getUser = () => {
@@ -89,7 +90,7 @@ function AppContent() {
       <Route path="/admin/settings"          element={<ProtectedRoute element={<Settings />}       allowedRoles={['ADMIN']} />} />
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
