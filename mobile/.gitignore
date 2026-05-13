@@ -49,3 +49,6 @@ proguard/
 
 # Captures folder
 captures/
+
+# Environment
+.env

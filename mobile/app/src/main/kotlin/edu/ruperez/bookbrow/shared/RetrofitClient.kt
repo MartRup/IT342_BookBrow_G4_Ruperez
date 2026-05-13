@@ -6,9 +6,6 @@ import edu.ruperez.bookbrow.feature.admin.AdminApiService
 import edu.ruperez.bookbrow.feature.books.BooksApiService
 import edu.ruperez.bookbrow.feature.borrow.BorrowApiService
 import edu.ruperez.bookbrow.feature.librarian.LibrarianApiService
-import edu.ruperez.bookbrow.data.remote.api.BookApiService
-import edu.ruperez.bookbrow.data.remote.api.BorrowApiService as DataBorrowApiService
-import edu.ruperez.bookbrow.data.remote.api.DashboardApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -53,12 +50,12 @@ object RetrofitClient {
         retrofit.create(AdminApiService::class.java)
     }
 
-    /** Lazily-created BooksApiService instance (feature) */
+    /** Lazily-created BooksApiService instance */
     val booksApiService: BooksApiService by lazy {
         retrofit.create(BooksApiService::class.java)
     }
 
-    /** Lazily-created BorrowApiService instance (feature) */
+    /** Lazily-created BorrowApiService instance */
     val borrowApiService: BorrowApiService by lazy {
         retrofit.create(BorrowApiService::class.java)
     }
@@ -66,22 +63,5 @@ object RetrofitClient {
     /** Lazily-created LibrarianApiService instance */
     val librarianApiService: LibrarianApiService by lazy {
         retrofit.create(LibrarianApiService::class.java)
-    }
-
-    // ===== Data Layer API Services =====
-
-    /** Lazily-created BookApiService instance (data layer) */
-    val bookApiService: BookApiService by lazy {
-        retrofit.create(BookApiService::class.java)
-    }
-
-    /** Lazily-created BorrowApiService instance (data layer) */
-    val dataBorrowApiService: DataBorrowApiService by lazy {
-        retrofit.create(DataBorrowApiService::class.java)
-    }
-
-    /** Lazily-created DashboardApiService instance (data layer) */
-    val dashboardApiService: DashboardApiService by lazy {
-        retrofit.create(DashboardApiService::class.java)
     }
 }
