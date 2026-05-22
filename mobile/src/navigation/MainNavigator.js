@@ -1,16 +1,19 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 
-import HomeScreen from '../screens/main/HomeScreen';
-import BrowseScreen from '../screens/main/BrowseScreen';
-import MyBooksScreen from '../screens/main/MyBooksScreen';
-import MenuScreen from '../screens/main/MenuScreen';
+import HomeScreen from '../screens/user/HomeScreen';
+import BrowseScreen from '../screens/user/BrowseScreen';
+import MyBooksScreen from '../screens/user/MyBooksScreen';
+import MenuScreen from '../screens/user/MenuScreen';
+import BookDetailScreen from '../screens/user/BookDetailScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-export default function MainNavigator() {
+function TabNavigator() {
   const { colors } = useTheme();
 
   return (
@@ -40,26 +43,35 @@ export default function MainNavigator() {
         },
       })}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
         options={{ tabBarLabel: 'Home' }}
       />
-      <Tab.Screen 
-        name="Browse" 
+      <Tab.Screen
+        name="Browse"
         component={BrowseScreen}
         options={{ tabBarLabel: 'Browse' }}
       />
-      <Tab.Screen 
-        name="MyBooks" 
+      <Tab.Screen
+        name="MyBooks"
         component={MyBooksScreen}
         options={{ tabBarLabel: 'My Books' }}
       />
-      <Tab.Screen 
-        name="Menu" 
+      <Tab.Screen
+        name="Menu"
         component={MenuScreen}
         options={{ tabBarLabel: 'More' }}
       />
     </Tab.Navigator>
+  );
+}
+
+export default function MainNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={TabNavigator} />
+      <Stack.Screen name="BookDetail" component={BookDetailScreen} />
+    </Stack.Navigator>
   );
 }

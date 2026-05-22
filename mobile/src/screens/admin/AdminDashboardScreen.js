@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,7 @@ export default function AdminDashboardScreen({ navigation }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchingCovers, setFetchingCovers] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -58,6 +60,31 @@ export default function AdminDashboardScreen({ navigation }) {
     setRefreshing(true);
     await loadDashboardData();
     setRefreshing(false);
+  };
+
+  const handleFetchCovers = () => {
+    Alert.alert(
+      'Fetch Book Covers',
+      'Fetch cover images from Google Books for all books without covers?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Fetch',
+          onPress: async () => {
+            setFetchingCovers(true);
+            try {
+              const response = await api.post('/books/fetch-all-covers');
+              Alert.alert('Success', response.data?.data?.message || 'Covers updated.');
+              await loadDashboardData();
+            } catch (error) {
+              Alert.alert('Error', error.response?.data?.message || 'Failed to fetch covers.');
+            } finally {
+              setFetchingCovers(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const StatCard = ({ icon, label, value, color }) => (
@@ -140,7 +167,7 @@ export default function AdminDashboardScreen({ navigation }) {
           <View style={styles.actionsGrid}>
             <TouchableOpacity
               style={[styles.actionCard, { backgroundColor: colors.card }]}
-              onPress={() => navigation.navigate('AdminManageBooks')}
+              onPress={() => navigation.navigate('AdminBooks')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#2196F3' + '20' }]}>
                 <Ionicons name="book" size={24} color="#2196F3" />
@@ -150,7 +177,7 @@ export default function AdminDashboardScreen({ navigation }) {
 
             <TouchableOpacity
               style={[styles.actionCard, { backgroundColor: colors.card }]}
-              onPress={() => navigation.navigate('AdminManageUsers')}
+              onPress={() => navigation.navigate('AdminRecords')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#4CAF50' + '20' }]}>
                 <Ionicons name="people" size={24} color="#4CAF50" />
@@ -160,7 +187,7 @@ export default function AdminDashboardScreen({ navigation }) {
 
             <TouchableOpacity
               style={[styles.actionCard, { backgroundColor: colors.card }]}
-              onPress={() => navigation.navigate('AdminBorrowingRecords')}
+              onPress={() => navigation.navigate('AdminRecords')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#FF9800' + '20' }]}>
                 <Ionicons name="list" size={24} color="#FF9800" />
@@ -176,6 +203,21 @@ export default function AdminDashboardScreen({ navigation }) {
                 <Ionicons name="settings" size={24} color="#9C27B0" />
               </View>
               <Text style={[styles.actionLabel, { color: colors.text }]}>Settings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: colors.card }]}
+              onPress={handleFetchCovers}
+              disabled={fetchingCovers}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: '#00BCD4' + '20' }]}>
+                {fetchingCovers ? (
+                  <ActivityIndicator size="small" color="#00BCD4" />
+                ) : (
+                  <Ionicons name="cloud-download" size={24} color="#00BCD4" />
+                )}
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>Fetch Covers</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -329,6 +371,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -6,
+    justifyContent: 'space-between',
   },
   actionCard: {
     width: '47%',

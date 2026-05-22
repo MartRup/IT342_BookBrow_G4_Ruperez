@@ -1,7 +1,7 @@
 import apiClient from '../../services/apiClient';
 
 export const getStats = (email) =>
-  apiClient.get('/api/dashboard/stats/by-email', { params: { email } });
+  apiClient.get('/api/v1/dashboard/stats/by-email', { params: { email } });
 
 export const getFeaturedBooks = () =>
   apiClient.get('/api/v1/books/featured');

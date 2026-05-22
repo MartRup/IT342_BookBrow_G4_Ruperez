@@ -8,7 +8,7 @@ import retrofit2.http.*
  */
 interface BorrowApiService {
     
-    @GET("borrow/all")
+    @GET("api/v1/borrow/all")
     suspend fun getAllBorrows(
         @Header("Authorization") token: String,
         @Query("page") page: Int = 1,
@@ -16,31 +16,31 @@ interface BorrowApiService {
         @Query("status") status: String? = null
     ): Response<ApiResponse<BorrowsResponse>>
     
-    @GET("borrow/user")
+    @GET("api/v1/borrow/user")
     suspend fun getUserBorrows(
         @Header("Authorization") token: String,
         @Query("status") status: String? = null
-    ): Response<ApiResponse<List<BorrowRecord>>>
+    ): Response<ApiResponse<UserBorrowsResponse>>
     
-    @POST("borrow")
+    @POST("api/v1/borrow")
     suspend fun borrowBook(
         @Header("Authorization") token: String,
         @Body request: BorrowRequest
     ): Response<ApiResponse<BorrowRecord>>
     
-    @PUT("borrow/{id}/return")
+    @PUT("api/v1/borrow/{id}/return")
     suspend fun returnBook(
         @Header("Authorization") token: String,
         @Path("id") id: Long
     ): Response<ApiResponse<BorrowRecord>>
     
-    @PUT("borrow/{id}/approve")
+    @PUT("api/v1/borrow/{id}/approve")
     suspend fun approveBorrow(
         @Header("Authorization") token: String,
         @Path("id") id: Long
     ): Response<ApiResponse<BorrowRecord>>
     
-    @PUT("borrow/{id}/reject")
+    @PUT("api/v1/borrow/{id}/reject")
     suspend fun rejectBorrow(
         @Header("Authorization") token: String,
         @Path("id") id: Long
@@ -57,6 +57,10 @@ data class ApiResponse<T>(
 data class BorrowsResponse(
     val borrowRecords: List<BorrowRecord>,
     val pagination: Pagination?
+)
+
+data class UserBorrowsResponse(
+    val borrowRecords: List<BorrowRecord>
 )
 
 data class Pagination(

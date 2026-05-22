@@ -2,6 +2,7 @@ import './Dashboard.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getApiUrl } from './config';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -31,11 +32,11 @@ export default function Dashboard() {
       setLoading(true);
       
       // Fetch user stats using email
-      const statsResponse = await axios.get(`http://localhost:8080/api/dashboard/stats/by-email?email=${userData.email}`);
+      const statsResponse = await axios.get(getApiUrl(`/api/v1/dashboard/stats/by-email?email=${userData.email}`));
       setStats(statsResponse.data);
       
       // Fetch featured books
-      const booksResponse = await axios.get('http://localhost:8080/api/books/featured');
+      const booksResponse = await axios.get(getApiUrl('/api/v1/books/featured'));
       setFeaturedBooks(booksResponse.data);
       
     } catch (error) {
@@ -77,7 +78,7 @@ export default function Dashboard() {
 
   const handleBorrowBook = async (bookId) => {
     try {
-      await axios.post(`http://localhost:8080/api/books/${bookId}/borrow`);
+      await axios.post(getApiUrl('/api/v1/borrow'), { bookId });
       fetchDashboardData(user); // Refresh data
     } catch (error) {
       console.error('Error borrowing book:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,50 +14,80 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { bookService } from '../../services/bookService';
+import BookDetailsModal from '../../components/BookDetailsModal';
 
-export default function BrowseScreen() {
+const getCoverUrl = (book) => {
+  if (book?.coverUrl) return book.coverUrl;
+  const isbn = String(book?.isbn || '').replace(/[^0-9Xx]/g, '');
+  return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : null;
+};
+
+export default function BrowseScreen({ navigation }) {
   const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    loadBooks();
+    loadBooks(1, true);
   }, []);
 
-  const loadBooks = async () => {
+  const loadBooks = async (pageNum = 1, reset = false) => {
     try {
-      const response = await bookService.getAllBooks(0, 20);
-      setBooks(response.data?.content || []);
+      // Backend returns { data: { books: [...], pagination: { page, limit, total, pages } } }
+      const response = await bookService.getAllBooks(pageNum, 20);
+      const newBooks = response?.data?.books ?? [];
+      const pagination = response?.data?.pagination ?? {};
+
+      setBooks(reset ? newBooks : (prev) => [...prev, ...newBooks]);
+      setPage(pageNum);
+      setTotalPages(pagination.pages ?? 1);
     } catch (error) {
       console.error('Error loading books:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      loadBooks();
-      return;
-    }
-
+  const handleSearch = useCallback(async () => {
+    const query = searchQuery.trim();
     setLoading(true);
+    setPage(1);
     try {
-      const response = await bookService.searchBooks(searchQuery);
-      setBooks(response.data?.content || []);
+      if (!query) {
+        await loadBooks(1, true);
+        return;
+      }
+      // searchBooks uses GET /books?search=query
+      const response = await bookService.searchBooks(query, 1, 20);
+      const results = response?.data?.books ?? [];
+      const pagination = response?.data?.pagination ?? {};
+      setBooks(results);
+      setTotalPages(pagination.pages ?? 1);
     } catch (error) {
       console.error('Error searching books:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadBooks();
+    setSearchQuery('');
+    await loadBooks(1, true);
     setRefreshing(false);
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || page >= totalPages) return;
+    setLoadingMore(true);
+    await loadBooks(page + 1, false);
   };
 
   return (
@@ -68,7 +98,10 @@ export default function BrowseScreen() {
           <Ionicons name="school" size={24} color="#FFFFFF" />
         </View>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Browse</Text>
-        <TouchableOpacity style={[styles.profileButton, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity
+          style={[styles.profileButton, { backgroundColor: colors.primary }]}
+          onPress={() => navigation.navigate('Menu')}
+        >
           <Ionicons name="person" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -86,48 +119,101 @@ export default function BrowseScreen() {
             onSubmitEditing={handleSearch}
             returnKeyType="search"
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchQuery('');
+                loadBooks(1, true);
+              }}
+            >
+              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
         </View>
-        <TouchableOpacity style={[styles.filterButton, { backgroundColor: colors.surface }]}>
-          <Ionicons name="options" size={24} color={colors.text} />
+        <TouchableOpacity
+          style={[styles.searchButton, { backgroundColor: colors.primary }]}
+          onPress={handleSearch}
+        >
+          <Ionicons name="search" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
       {/* Books Grid */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isNearBottom =
+            layoutMeasurement.height + contentOffset.y >= contentSize.height - 80;
+          if (isNearBottom) loadMore();
+        }}
+        scrollEventThrottle={400}
       >
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-        ) : (
-          <View style={styles.booksGrid}>
-            {books.map((book) => (
-              <TouchableOpacity key={book.id} style={styles.bookCard}>
-                <View style={[styles.bookCover, { backgroundColor: colors.surface }]}>
-                  {book.coverImage ? (
-                    <Image source={{ uri: book.coverImage }} style={styles.bookImage} />
-                  ) : (
-                    <Ionicons name="book" size={48} color={colors.textSecondary} />
-                  )}
-                  <TouchableOpacity
-                    style={[styles.addButton, { backgroundColor: '#4CAF50' }]}
-                  >
-                    <Ionicons name="add" size={20} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-                <Text style={[styles.bookTitle, { color: colors.text }]} numberOfLines={2}>
-                  {book.title}
-                </Text>
-                <Text style={[styles.bookAuthor, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {book.author}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        ) : books.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="book-outline" size={64} color={colors.textSecondary} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No books found</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+              {searchQuery ? `No results for "${searchQuery}"` : 'The library is empty'}
+            </Text>
           </View>
+        ) : (
+          <>
+            <View style={styles.booksGrid}>
+              {books.map((book) => (
+                <TouchableOpacity
+                  key={book.id}
+                  style={styles.bookCard}
+                  onPress={() => setSelectedBook(book)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.bookCover, { backgroundColor: colors.surface }]}>
+                    {getCoverUrl(book) ? (
+                      <Image source={{ uri: getCoverUrl(book) }} style={styles.bookImage} />
+                    ) : (
+                      <Ionicons name="book" size={48} color={colors.textSecondary} />
+                    )}
+                    {/* Available / Unavailable badge */}
+                    {!book.available && (
+                      <View style={styles.unavailableBadge}>
+                        <Text style={styles.unavailableText}>Unavailable</Text>
+                      </View>
+                    )}
+                    {book.available && (
+                      <View style={styles.availableBadge}>
+                        <Text style={styles.availableText}>Available</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.bookTitle, { color: colors.text }]} numberOfLines={2}>
+                    {book.title}
+                  </Text>
+                  <Text style={[styles.bookAuthor, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {book.author}
+                  </Text>
+                  {book.genre ? (
+                    <Text style={[styles.bookGenre, { color: colors.primary }]} numberOfLines={1}>
+                      {book.genre}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+            </View>
+            {loadingMore && (
+              <ActivityIndicator size="small" color={colors.primary} style={styles.loadMoreIndicator} />
+            )}
+          </>
         )}
       </ScrollView>
+      <BookDetailsModal
+        visible={Boolean(selectedBook)}
+        book={selectedBook}
+        colors={colors}
+        onClose={() => setSelectedBook(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -197,7 +283,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 15,
   },
-  filterButton: {
+  searchButton: {
     width: 52,
     height: 52,
     borderRadius: 12,
@@ -205,9 +291,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 2,
   },
   booksGrid: {
     flexDirection: 'row',
@@ -240,30 +326,67 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  addButton: {
+  unavailableBadge: {
     position: 'absolute',
-    bottom: 8,
+    top: 8,
     right: 8,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    backgroundColor: '#E53935',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  unavailableText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  availableBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#43A047',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  availableText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
   },
   bookTitle: {
     fontSize: 13,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   bookAuthor: {
     fontSize: 11,
+    marginBottom: 2,
+  },
+  bookGenre: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 80,
+    gap: 12,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
   loader: {
     marginVertical: 40,
+  },
+  loadMoreIndicator: {
+    marginVertical: 16,
   },
 });

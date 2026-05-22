@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.databinding.ItemRecordBinding
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -78,7 +80,12 @@ class RecordsAdapter : ListAdapter<BorrowRecord, RecordsAdapter.RecordViewHolder
                 }
             }
 
-            // TODO: Load book cover image using Glide or Coil
+            Glide.with(binding.ivBookCover)
+                .load(record.bookCoverUrl?.takeIf { it.isNotBlank() })
+                .placeholder(R.drawable.ic_book)
+                .error(R.drawable.ic_book)
+                .centerCrop()
+                .into(binding.ivBookCover)
         }
 
         private fun formatDate(dateString: String): String {

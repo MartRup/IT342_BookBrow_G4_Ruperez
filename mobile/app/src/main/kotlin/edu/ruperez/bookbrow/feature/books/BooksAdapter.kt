@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.databinding.ItemBookBinding
 
 /**
@@ -50,8 +52,12 @@ class BooksAdapter(
                 binding.tvAvailableCopies.setTextColor(0xFFF44336.toInt()) // Red
             }
 
-            // TODO: Load book cover image using Glide or Coil
-            // For now, just show placeholder
+            Glide.with(binding.ivBookCover)
+                .load(resolveCoverUrl(book))
+                .placeholder(R.drawable.ic_book)
+                .error(R.drawable.ic_book)
+                .centerCrop()
+                .into(binding.ivBookCover)
             
             binding.btnEdit.setOnClickListener {
                 onEditClick(book)
@@ -62,6 +68,14 @@ class BooksAdapter(
                 onDeleteClick(book)
                 true
             }
+        }
+
+        private fun resolveCoverUrl(book: Book): String? {
+            book.coverUrl?.takeIf { it.isNotBlank() }?.let { return it }
+            return book.isbn
+                ?.filter { it.isDigit() || it == 'X' || it == 'x' }
+                ?.takeIf { it.isNotBlank() }
+                ?.let { "https://covers.openlibrary.org/b/isbn/$it-L.jpg" }
         }
     }
 

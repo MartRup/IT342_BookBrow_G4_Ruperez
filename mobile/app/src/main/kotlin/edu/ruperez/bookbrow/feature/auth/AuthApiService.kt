@@ -20,13 +20,13 @@ interface AuthApiService {
      * Register a new member account.
      * POST /api/v1/auth/register
      */
-    @POST("auth/register")
+    @POST("api/v1/auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 
     /**
      * Login with email and password.
      * POST /api/v1/auth/login
      */
-    @POST("auth/login")
+    @POST("api/v1/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
 }

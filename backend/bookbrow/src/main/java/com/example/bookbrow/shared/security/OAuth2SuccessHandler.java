@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,6 +23,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(
@@ -43,7 +47,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         if (email == null) {
             log.error("[OAuth2] Google did not return an email address — aborting login");
-            getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/login?error=true");
+            getRedirectStrategy().sendRedirect(request, response, frontendUrl + "/login?error=true");
             return;
         }
 
@@ -66,7 +70,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("[OAuth2] Login success for user id={} email={}", user.getId(), email);
 
         String token       = jwtService.generateToken(user);
-        String redirectUrl = "http://localhost:3000/auth/success?token=" + token;
+        String redirectUrl = frontendUrl + "/auth/success?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

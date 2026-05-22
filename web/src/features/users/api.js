@@ -22,5 +22,8 @@ export const changePassword = (data) =>
 export const deleteAccount = () =>
   apiClient.delete('/api/v1/users/account');
 
-const usersApi = { getAll, updateRole, remove, updateProfile, changePassword, deleteAccount };
+export const getSuspensionStatus = () =>
+  apiClient.get('/api/v1/users/suspension-status');
+
+const usersApi = { getAll, updateRole, remove, updateProfile, changePassword, deleteAccount, getSuspensionStatus };
 export default usersApi;

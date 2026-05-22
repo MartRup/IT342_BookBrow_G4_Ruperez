@@ -685,3 +685,130 @@
   color: #8b001d;
   border: 1px solid #f5a3b3;
 }
+
+/* Suspend User Modal */
+.br-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.br-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.br-modal h3 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.br-modal-user {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.br-modal-field {
+  margin-bottom: 20px;
+}
+
+.br-modal-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.br-modal-field input,
+.br-modal-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.br-modal-field input:focus,
+.br-modal-field textarea:focus {
+  outline: none;
+  border-color: #2e70ff;
+}
+
+.br-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.br-modal-cancel,
+.br-modal-confirm {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.br-modal-cancel {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.br-modal-cancel:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.br-modal-confirm {
+  background-color: #ff4d4d;
+  color: white;
+}
+
+.br-modal-confirm:hover:not(:disabled) {
+  background-color: #ff3333;
+}
+
+.br-modal-cancel:disabled,
+.br-modal-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Suspend Button in Table */
+.br-member-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.br-suspend-btn-small {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.br-suspend-btn-small:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}

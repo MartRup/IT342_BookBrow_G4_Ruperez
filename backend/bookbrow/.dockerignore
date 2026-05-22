@@ -1,0 +1,7 @@
+target
+.mvn/wrapper/maven-wrapper.jar
+backend-run.log
+backend-run.err.log
+.env
+.git
+.gitignore

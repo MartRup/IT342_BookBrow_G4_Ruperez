@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping({"/api/dashboard", "/api/v1/dashboard"})
 public class DashboardController {
     
     @Autowired

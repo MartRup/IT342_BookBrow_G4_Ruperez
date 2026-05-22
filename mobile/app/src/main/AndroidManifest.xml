@@ -39,6 +39,23 @@
             android:name=".feature.main.MainActivity"
             android:exported="false" />
 
+        <!-- User screens -->
+        <activity
+            android:name=".feature.user.UserHomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.user.UserBrowseActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.user.UserMyBooksActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".feature.user.UserMenuActivity"
+            android:exported="false" />
+
         <!-- Admin screens -->
         <activity
             android:name=".feature.admin.AdminDashboardActivity"

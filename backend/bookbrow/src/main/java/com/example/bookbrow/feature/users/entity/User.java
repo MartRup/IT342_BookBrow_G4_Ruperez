@@ -47,6 +47,12 @@ public class User implements UserDetails {
     @Column(name = "about", length = 500)
     private String about;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expires_at")
+    private LocalDateTime resetPasswordTokenExpiresAt;
+
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -56,6 +62,12 @@ public class User implements UserDetails {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "borrow_suspended_until")
+    private LocalDateTime borrowSuspendedUntil;
+
+    @Column(name = "suspension_reason", length = 500)
+    private String suspensionReason;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -63,6 +75,17 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Helper method to check if user is currently suspended from borrowing
+    public boolean isBorrowSuspended() {
+        return borrowSuspendedUntil != null && LocalDateTime.now().isBefore(borrowSuspendedUntil);
+    }
+
+    // Get remaining suspension time in seconds
+    public long getSuspensionRemainingSeconds() {
+        if (!isBorrowSuspended()) return 0;
+        return java.time.Duration.between(LocalDateTime.now(), borrowSuspendedUntil).getSeconds();
+    }
 
     public enum UserRole { USER, LIBRARIAN, ADMIN }
 

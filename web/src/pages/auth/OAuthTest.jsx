@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getApiUrl } from '../../config';
 
 export default function OAuthTest() {
   const [configStatus, setConfigStatus] = useState('loading');
@@ -7,7 +8,7 @@ export default function OAuthTest() {
 
   useEffect(() => {
     // Test if backend is running
-    fetch('http://localhost:8080/api/v1/oauth/config-check')
+    fetch(getApiUrl('/api/v1/oauth/config-check'))
       .then(response => response.json())
       .then(data => {
         console.log('Config check result:', data);
@@ -19,7 +20,7 @@ export default function OAuthTest() {
       });
 
     // Test OAuth status (will fail if not authenticated)
-    fetch('http://localhost:8080/api/v1/oauth/test', {
+    fetch(getApiUrl('/api/v1/oauth/test'), {
       credentials: 'include'
     })
       .then(response => response.json())
@@ -35,7 +36,7 @@ export default function OAuthTest() {
 
   const handleOAuthLogin = () => {
     console.log('Initiating OAuth login...');
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    window.location.href = getApiUrl('/oauth2/authorization/google');
   };
 
   return (
@@ -93,11 +94,11 @@ export default function OAuthTest() {
         <div style={{ backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '4px' }}>
           <p><strong>Authorization URL:</strong></p>
           <code style={{ wordBreak: 'break-all' }}>
-            http://localhost:8080/oauth2/authorization/google
+            {getApiUrl('/oauth2/authorization/google')}
           </code>
           <p style={{ marginTop: '10px' }}><strong>Redirect URI:</strong></p>
           <code style={{ wordBreak: 'break-all' }}>
-            http://localhost:8080/login/oauth2/code/google
+            {getApiUrl('/login/oauth2/code/google')}
           </code>
         </div>
       </div>
@@ -113,7 +114,7 @@ export default function OAuthTest() {
         <p>Current values (from backend):</p>
         <ul>
           <li>Client ID: 479851263262-srhurugk43nu8ljq8q9j3d4hrad6ql2m.apps.googleusercontent.com</li>
-          <li>Redirect URI: http://localhost:8080/login/oauth2/code/google</li>
+          <li>Redirect URI: {getApiUrl('/login/oauth2/code/google')}</li>
         </ul>
       </div>
 

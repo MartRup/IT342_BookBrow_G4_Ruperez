@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,6 +18,10 @@ public class UserListDto {
     private String email;
     private String role;
     private Boolean isActive;
+    private Boolean isBorrowSuspended;
+    private LocalDateTime borrowSuspendedUntil;
+    private String suspensionReason;
+    private Long suspensionRemainingSeconds;
 
     public static UserListDto from(User user) {
         return UserListDto.builder()
@@ -24,6 +30,10 @@ public class UserListDto {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .isActive(user.getIsActive())
+                .isBorrowSuspended(user.isBorrowSuspended())
+                .borrowSuspendedUntil(user.getBorrowSuspendedUntil())
+                .suspensionReason(user.getSuspensionReason())
+                .suspensionRemainingSeconds(user.getSuspensionRemainingSeconds())
                 .build();
     }
 }

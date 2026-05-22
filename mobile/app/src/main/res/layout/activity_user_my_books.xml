@@ -63,7 +63,10 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/bg_card"
+        android:background="@drawable/bg_user_card"
+        app:tabIndicatorColor="@color/primary"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabTextColor="@color/text_secondary"
         app:tabMode="fixed"
         app:tabGravity="fill"
         app:layout_constraintTop_toBottomOf="@id/header"
@@ -73,7 +76,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Currently (0)" />
+            android:text="Current (0)" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -151,6 +154,8 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:background="@color/white"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
         app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

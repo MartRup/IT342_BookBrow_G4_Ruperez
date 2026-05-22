@@ -1,5 +1,6 @@
 package com.example.bookbrow.feature.librarian.controller;
 
+import com.example.bookbrow.feature.librarian.dto.SuspendUserRequest;
 import com.example.bookbrow.feature.librarian.dto.UpdateUserRequest;
 import com.example.bookbrow.shared.dto.ResponseBuilder;
 import com.example.bookbrow.feature.librarian.service.LibrarianDashboardService;
@@ -34,6 +35,19 @@ public class LibrarianController {
             return ResponseBuilder.ok(stats);
         } catch (Exception e) {
             return ResponseBuilder.serverError("LIBRARIAN-001", "Failed to fetch stats: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/recent-activities")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<?> getRecentActivities(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        try {
+            var activities = librarianDashboardService.getRecentActivities(limit);
+            return ResponseBuilder.ok(activities);
+        } catch (Exception e) {
+            return ResponseBuilder.serverError("LIBRARIAN-002", "Failed to fetch recent activities: " + e.getMessage());
         }
     }
 
@@ -77,6 +91,21 @@ public class LibrarianController {
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<?> activateUser(@PathVariable Long id) {
         return librarianUserService.activateUser(id);
+    }
+
+    @PutMapping("/users/{id}/suspend-borrowing")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<?> suspendUserBorrowing(
+            @PathVariable Long id,
+            @RequestBody SuspendUserRequest request
+    ) {
+        return librarianUserService.suspendUserBorrowing(id, request);
+    }
+
+    @PutMapping("/users/{id}/unsuspend-borrowing")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<?> unsuspendUserBorrowing(@PathVariable Long id) {
+        return librarianUserService.unsuspendUserBorrowing(id);
     }
 
     // ═══════════════════════════════════════════════════════════════

@@ -364,14 +364,12 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Featured Books Placeholder -->
-            <TextView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFeaturedBooks"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:text="Featured books will appear here"
-                android:gravity="center"
-                android:textColor="#999999"
-                android:background="@drawable/bg_menu_item" />
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:minHeight="160dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -14,7 +14,7 @@ export const borrowService = {
   // Get user's borrow records
   getMyBorrowRecords: async () => {
     try {
-      const response = await api.get('/borrow/my-records');
+      const response = await api.get('/borrow/user');
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +24,9 @@ export const borrowService = {
   // Get active borrows
   getActiveBorrows: async () => {
     try {
-      const response = await api.get('/borrow/active');
+      const response = await api.get('/borrow/user', {
+        params: { status: 'active' },
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -34,17 +36,7 @@ export const borrowService = {
   // Get borrow history
   getBorrowHistory: async () => {
     try {
-      const response = await api.get('/borrow/history');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Get borrow record by ID
-  getBorrowRecordById: async (id) => {
-    try {
-      const response = await api.get(`/borrow/${id}`);
+      const response = await api.get('/borrow/user');
       return response.data;
     } catch (error) {
       throw error;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../config';
 import ApiService from '../../services/ApiService';
 import LibrarianNavbar from './LibrarianNavbar';
 import './ManageBooks.css';
@@ -103,7 +104,7 @@ export default function ManageBooks() {
     setSearchingGoogle(true);
     setGoogleError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`, {
+      const res = await fetch(getApiUrl(`/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`), {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       if (!res.ok) throw new Error('API Error: ' + res.status);

@@ -8,6 +8,7 @@ import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.shared.SessionManager
 import edu.ruperez.bookbrow.databinding.ActivityMainBinding
 import edu.ruperez.bookbrow.feature.auth.LoginActivity
+import edu.ruperez.bookbrow.feature.user.UserHomeActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,9 +33,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         
         // Check if user is admin/librarian and redirect to dashboard
-        val role = intent.getStringExtra(EXTRA_ROLE) ?: "USER"
-        if (role.equals("ADMIN", ignoreCase = true) || role.equals("LIBRARIAN", ignoreCase = true)) {
+        val role = intent.getStringExtra(EXTRA_ROLE)?.trim().orEmpty().ifBlank { "USER" }
+        val normalizedRole = role.removePrefix("ROLE_")
+        if (normalizedRole.equals("ADMIN", ignoreCase = true) || normalizedRole.equals("LIBRARIAN", ignoreCase = true)) {
             startActivity(Intent(this, edu.ruperez.bookbrow.feature.admin.AdminDashboardActivity::class.java))
+            finish()
+            return
+        }
+
+        if (normalizedRole.equals("USER", ignoreCase = true)) {
+            startActivity(Intent(this, UserHomeActivity::class.java))
             finish()
             return
         }

@@ -8,7 +8,7 @@ import retrofit2.http.*
  */
 interface BooksApiService {
     
-    @GET("books")
+    @GET("api/v1/books")
     suspend fun getAllBooks(
         @Header("Authorization") token: String,
         @Query("page") page: Int = 1,
@@ -17,26 +17,31 @@ interface BooksApiService {
         @Query("available") available: Boolean? = null
     ): Response<ApiResponse<BooksResponse>>
     
-    @GET("books/{id}")
+    @GET("api/v1/books/{id}")
     suspend fun getBook(
         @Header("Authorization") token: String,
         @Path("id") id: Long
     ): Response<ApiResponse<Book>>
+
+    @GET("api/v1/books/featured")
+    suspend fun getFeaturedBooks(
+        @Header("Authorization") token: String? = null
+    ): Response<ApiResponse<List<Book>>>
     
-    @POST("books")
+    @POST("api/v1/books")
     suspend fun createBook(
         @Header("Authorization") token: String,
         @Body request: BookRequest
     ): Response<ApiResponse<Book>>
     
-    @PUT("books/{id}")
+    @PUT("api/v1/books/{id}")
     suspend fun updateBook(
         @Header("Authorization") token: String,
         @Path("id") id: Long,
         @Body request: BookRequest
     ): Response<ApiResponse<Book>>
     
-    @DELETE("books/{id}")
+    @DELETE("api/v1/books/{id}")
     suspend fun deleteBook(
         @Header("Authorization") token: String,
         @Path("id") id: Long

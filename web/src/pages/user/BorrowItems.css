@@ -332,3 +332,41 @@
 @media (max-width: 480px) {
   .bi-books-grid { grid-template-columns: 1fr; }
 }
+
+/* ────────── SUSPENSION BANNER ────────── */
+.bi-suspension-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  background: #fff3cd;
+  border: 1.5px solid #ffc107;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #856404;
+}
+
+.bi-suspension-banner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #e65100;
+}
+
+.bi-suspension-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.bi-suspension-text strong {
+  font-size: 1rem;
+  color: #c62828;
+}
+
+.bi-suspension-reason {
+  font-size: 0.82rem;
+  color: #888;
+  font-style: italic;
+}

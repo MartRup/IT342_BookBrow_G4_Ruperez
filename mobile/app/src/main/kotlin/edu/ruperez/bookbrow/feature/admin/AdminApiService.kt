@@ -8,17 +8,17 @@ import retrofit2.http.*
  */
 interface AdminApiService {
     
-    @GET("admin/stats")
+    @GET("api/v1/admin/stats")
     suspend fun getDashboardStats(
         @Header("Authorization") token: String
     ): Response<ApiResponse<DashboardStats>>
     
-    @GET("admin/stats/detailed")
+    @GET("api/v1/admin/stats/detailed")
     suspend fun getDetailedStats(
         @Header("Authorization") token: String
     ): Response<ApiResponse<DetailedStats>>
     
-    @GET("admin/logs")
+    @GET("api/v1/admin/logs")
     suspend fun getRecentLogs(
         @Header("Authorization") token: String
     ): Response<ApiResponse<List<SystemLog>>>

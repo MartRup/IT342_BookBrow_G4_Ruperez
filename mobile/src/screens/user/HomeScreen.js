@@ -14,13 +14,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { bookService } from '../../services/bookService';
+import BookDetailsModal from '../../components/BookDetailsModal';
 
 const CATEGORIES = ['All', 'Fiction', 'Educational', 'Sci-Fi', 'Mystery', 'Romance'];
+const getCoverUrl = (book) => {
+  if (book?.coverUrl) return book.coverUrl;
+  const isbn = String(book?.isbn || '').replace(/[^0-9Xx]/g, '');
+  return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : null;
+};
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedBook, setSelectedBook] = useState(null);
   const [featuredBooks, setFeaturedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -31,10 +38,13 @@ export default function HomeScreen({ navigation }) {
 
   const loadFeaturedBooks = async () => {
     try {
-      const response = await bookService.getAllBooks(0, 10);
-      setFeaturedBooks(response.data?.content || []);
+      // /books/featured returns the array directly inside response.data.data
+      const response = await bookService.getFeaturedBooks();
+      const books = response?.data ?? [];
+      setFeaturedBooks(Array.isArray(books) ? books : []);
     } catch (error) {
       console.error('Error loading featured books:', error);
+      setFeaturedBooks([]);
     } finally {
       setLoading(false);
     }
@@ -45,6 +55,14 @@ export default function HomeScreen({ navigation }) {
     await loadFeaturedBooks();
     setRefreshing(false);
   };
+
+  // Filter featured books by selected category (genre field)
+  const filteredBooks =
+    selectedCategory === 'All'
+      ? featuredBooks
+      : featuredBooks.filter(
+          (b) => b.genre?.toLowerCase() === selectedCategory.toLowerCase()
+        );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -60,7 +78,10 @@ export default function HomeScreen({ navigation }) {
             <Ionicons name="school" size={24} color="#FFFFFF" />
           </View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>HOME</Text>
-          <TouchableOpacity style={[styles.profileButton, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity
+            style={[styles.profileButton, { backgroundColor: colors.primary }]}
+            onPress={() => navigation.navigate('Menu')}
+          >
             <Ionicons name="person" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -78,15 +99,21 @@ export default function HomeScreen({ navigation }) {
 
         {/* Banner Placeholders */}
         <View style={styles.bannerContainer}>
-          <View style={[styles.banner, { backgroundColor: colors.surface }]} />
-          <View style={[styles.banner, { backgroundColor: colors.surface }]} />
+          <View style={[styles.banner, { backgroundColor: colors.surface }]}>
+            <Ionicons name="library-outline" size={32} color={colors.textSecondary} />
+            <Text style={[styles.bannerText, { color: colors.textSecondary }]}>Explore Library</Text>
+          </View>
+          <View style={[styles.banner, { backgroundColor: colors.surface }]}>
+            <Ionicons name="bookmark-outline" size={32} color={colors.textSecondary} />
+            <Text style={[styles.bannerText, { color: colors.textSecondary }]}>My Reading List</Text>
+          </View>
         </View>
 
         {/* Categories */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Categories</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Browse')}>
               <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -97,15 +124,15 @@ export default function HomeScreen({ navigation }) {
                 key={category}
                 style={[
                   styles.categoryButton,
-                  selectedCategory === category && { backgroundColor: colors.primary },
-                  selectedCategory !== category && { backgroundColor: colors.surface },
+                  selectedCategory === category
+                    ? { backgroundColor: colors.primary }
+                    : { backgroundColor: colors.surface },
                 ]}
                 onPress={() => setSelectedCategory(category)}
               >
                 <Text
                   style={[
                     styles.categoryText,
-                    selectedCategory === category && styles.categoryTextActive,
                     { color: selectedCategory === category ? '#FFFFFF' : colors.text },
                   ]}
                 >
@@ -127,15 +154,35 @@ export default function HomeScreen({ navigation }) {
 
           {loading ? (
             <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+          ) : filteredBooks.length === 0 ? (
+            <View style={[styles.emptyContainer, { backgroundColor: colors.surface }]}>
+              <Ionicons name="book-outline" size={48} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                {selectedCategory === 'All'
+                  ? 'No featured books available'
+                  : `No ${selectedCategory} books found`}
+              </Text>
+            </View>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {featuredBooks.map((book) => (
-                <TouchableOpacity key={book.id} style={styles.bookCard}>
+              {filteredBooks.map((book) => (
+                <TouchableOpacity
+                  key={book.id}
+                  style={styles.bookCard}
+                  onPress={() => setSelectedBook(book)}
+                  activeOpacity={0.8}
+                >
                   <View style={[styles.bookCover, { backgroundColor: colors.surface }]}>
-                    {book.coverImage ? (
-                      <Image source={{ uri: book.coverImage }} style={styles.bookImage} />
+                    {getCoverUrl(book) ? (
+                      <Image source={{ uri: getCoverUrl(book) }} style={styles.bookImage} />
                     ) : (
                       <Ionicons name="book" size={48} color={colors.textSecondary} />
+                    )}
+                    {/* Availability badge */}
+                    {!book.available && (
+                      <View style={styles.unavailableBadge}>
+                        <Text style={styles.unavailableBadgeText}>Unavailable</Text>
+                      </View>
                     )}
                   </View>
                   <Text style={[styles.bookTitle, { color: colors.text }]} numberOfLines={2}>
@@ -144,12 +191,23 @@ export default function HomeScreen({ navigation }) {
                   <Text style={[styles.bookAuthor, { color: colors.textSecondary }]} numberOfLines={1}>
                     {book.author}
                   </Text>
+                  {book.genre ? (
+                    <Text style={[styles.bookGenre, { color: colors.primary }]} numberOfLines={1}>
+                      {book.genre}
+                    </Text>
+                  ) : null}
                 </TouchableOpacity>
               ))}
             </ScrollView>
           )}
         </View>
       </ScrollView>
+      <BookDetailsModal
+        visible={Boolean(selectedBook)}
+        book={selectedBook}
+        colors={colors}
+        onClose={() => setSelectedBook(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -223,11 +281,18 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 100,
     borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+  },
+  bannerText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 6,
   },
   section: {
     marginBottom: 24,
@@ -265,8 +330,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  categoryTextActive: {
-    color: '#FFFFFF',
+  emptyContainer: {
+    marginHorizontal: 20,
+    height: 200,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   bookCard: {
     width: 140,
@@ -292,13 +366,32 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  unavailableBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#E53935',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  unavailableBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
   bookTitle: {
     fontSize: 13,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   bookAuthor: {
     fontSize: 11,
+    marginBottom: 2,
+  },
+  bookGenre: {
+    fontSize: 10,
+    fontWeight: '600',
   },
   loader: {
     marginVertical: 40,

@@ -6,6 +6,7 @@ import edu.ruperez.bookbrow.feature.admin.AdminApiService
 import edu.ruperez.bookbrow.feature.books.BooksApiService
 import edu.ruperez.bookbrow.feature.borrow.BorrowApiService
 import edu.ruperez.bookbrow.feature.librarian.LibrarianApiService
+import edu.ruperez.bookbrow.feature.user.UserApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -17,7 +18,8 @@ import java.util.concurrent.TimeUnit
  *
  * The BASE_URL is injected from BuildConfig so it can be changed
  * without touching source code. For local development it defaults to
- * "http://10.0.2.2:8080/api/v1/" (the Android emulator loopback).
+ * "http://10.0.2.2:8080/" (the Android emulator loopback). Endpoint
+ * interfaces include /api/v1/... to match the web frontend paths.
  */
 object RetrofitClient {
 
@@ -63,5 +65,10 @@ object RetrofitClient {
     /** Lazily-created LibrarianApiService instance */
     val librarianApiService: LibrarianApiService by lazy {
         retrofit.create(LibrarianApiService::class.java)
+    }
+
+    /** Lazily-created UserApiService instance */
+    val userApiService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 }
