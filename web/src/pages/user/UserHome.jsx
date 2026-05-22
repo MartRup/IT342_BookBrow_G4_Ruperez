@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
 import BookDetailsModal from '../../components/BookDetailsModal';
+import SuspendedBorrowButton from '../../components/SuspendedBorrowButton';
+import useSuspension from '../../hooks/useSuspension';
 import './UserHome.css';
 
 export default function UserHome() {
@@ -15,6 +17,8 @@ export default function UserHome() {
   const [borrowingBookId, setBorrowingBookId] = useState(null);
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+
+  const { isSuspended, formattedTime, suspensionReason, refresh: refreshSuspension } = useSuspension();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -80,6 +84,10 @@ export default function UserHome() {
   };
 
   const handleBorrowBook = async (book) => {
+    if (isSuspended) {
+      showToast('error', `You are suspended from borrowing. Cooldown: ${formattedTime}`);
+      return;
+    }
     try {
       setBorrowingBookId(book.id);
       await ApiService.borrow.create(book.id);
@@ -88,6 +96,9 @@ export default function UserHome() {
       fetchDashboardData(user);
     } catch (error) {
       const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to submit borrow request.';
+      if (error.response?.data?.error?.code === 'BORROW-008') {
+        refreshSuspension();
+      }
       showToast('error', msg);
     } finally {
       setBorrowingBookId(null);
@@ -131,6 +142,9 @@ export default function UserHome() {
           onClose={() => setSelectedBook(null)}
           onBorrow={handleBorrowBook}
           borrowing={borrowingBookId === selectedBook.id}
+          isSuspended={isSuspended}
+          formattedTime={formattedTime}
+          suspensionReason={suspensionReason}
         />
       )}
 
@@ -177,6 +191,18 @@ export default function UserHome() {
 
         {/* Stats Cards */}
         <section className="uh-stats-section">
+          {isSuspended && (
+            <div className="uh-suspension-banner">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+              <div>
+                <strong>Borrowing Suspended</strong>
+                <span> — Cooldown: <strong>{formattedTime}</strong></span>
+                {suspensionReason && <span className="uh-suspension-reason"> · {suspensionReason}</span>}
+              </div>
+            </div>
+          )}
           <div className="uh-stat-card">
             <span className="uh-stat-number">{stats.booksBorrowed}</span>
             <span className="uh-stat-label">Books Borrowed</span>
@@ -226,16 +252,15 @@ export default function UserHome() {
                     <span className={`uh-book-status ${(book.status || 'available').toLowerCase()}`}>
                       {book.status || 'Available'}
                     </span>
-                    <button
+                    <SuspendedBorrowButton
+                      isSuspended={isSuspended}
+                      formattedTime={formattedTime}
+                      suspensionReason={suspensionReason}
+                      isBookBorrowed={book.status?.toLowerCase() === 'borrowed'}
+                      isBorrowing={borrowingBookId === book.id}
+                      onClick={(e) => { e.stopPropagation(); handleBorrowBook(book); }}
                       className="uh-borrow-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBorrowBook(book);
-                      }}
-                      disabled={book.status?.toLowerCase() === 'borrowed' || borrowingBookId === book.id}
-                    >
-                      {borrowingBookId === book.id ? 'Requesting...' : 'Request to Borrow'}
-                    </button>
+                    />
                   </div>
                 </div>
               ))}

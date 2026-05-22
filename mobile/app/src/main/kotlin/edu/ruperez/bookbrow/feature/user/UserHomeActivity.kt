@@ -3,16 +3,16 @@ package edu.ruperez.bookbrow.feature.user
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.databinding.ActivityUserHomeBinding
 import edu.ruperez.bookbrow.feature.auth.LoginActivity
-import edu.ruperez.bookbrow.feature.books.BooksAdapter
 import edu.ruperez.bookbrow.feature.books.BooksApiService
+import edu.ruperez.bookbrow.feature.books.Book
 import edu.ruperez.bookbrow.shared.RetrofitClient
 import edu.ruperez.bookbrow.shared.SessionManager
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +35,9 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
     private lateinit var binding: ActivityUserHomeBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var booksApiService: BooksApiService
-    private lateinit var featuredBooksAdapter: BooksAdapter
+    private lateinit var featuredBooksAdapter: UserBooksAdapter
+    private var featuredBooks = emptyList<Book>()
+    private var suspensionStatus: UserSuspensionStatus? = null
     private var selectedCategory = "All"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +51,7 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
         setupUI()
         setupBottomNavigation()
         loadUserInfo()
+        loadSuspensionStatus()
         loadFeaturedBooks()
     }
 
@@ -59,19 +62,21 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
             binding.bottomNavigation.selectedItemId = R.id.nav_browse
         }
 
+        binding.profileButton.setOnClickListener {
+            binding.bottomNavigation.selectedItemId = R.id.nav_menu
+        }
+
         // Setup category buttons
         setupCategoryButtons()
 
         // Setup featured books RecyclerView
-        featuredBooksAdapter = BooksAdapter(
-            onEditClick = { book ->
-                // Handle book click - show details
-                Toast.makeText(this, "Book: ${book.title}", Toast.LENGTH_SHORT).show()
-            },
-            onDeleteClick = { }
+        featuredBooksAdapter = UserBooksAdapter(
+            onBookClick = { book -> showBookDetails(book) },
+            onBorrowClick = { book -> requestBorrow(book) },
+            showBorrowButton = false
         )
         binding.rvFeaturedBooks.apply {
-            layoutManager = LinearLayoutManager(this@UserHomeActivity, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = LinearLayoutManager(this@UserHomeActivity)
             adapter = featuredBooksAdapter
         }
 
@@ -79,14 +84,45 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
         binding.btnViewAllFeatured.setOnClickListener {
             binding.bottomNavigation.selectedItemId = R.id.nav_browse
         }
+
+        binding.btnSeeAllCategories.setOnClickListener {
+            binding.bottomNavigation.selectedItemId = R.id.nav_browse
+        }
     }
 
     private fun setupCategoryButtons() {
-        val categories = listOf("All", "Fiction", "Educational", "Sci-Fi", "Mystery", "Romance")
-        
-        // You can implement category chips/buttons here
-        // For now, we'll just set the default category
-        selectedCategory = "All"
+        val chips = listOf(
+            binding.chipAll to "All",
+            binding.chipFiction to "Fiction",
+            binding.chipEducational to "Educational",
+            binding.chipSciFi to "Sci-Fi"
+        )
+
+        chips.forEach { (chip, category) ->
+            chip.setOnClickListener {
+                selectedCategory = category
+                updateCategoryChips(chips)
+                applyCategoryFilter()
+            }
+        }
+        updateCategoryChips(chips)
+    }
+
+    private fun updateCategoryChips(chips: List<Pair<TextView, String>>) {
+        chips.forEach { (chip, category) ->
+            val selected = category == selectedCategory
+            chip.setBackgroundResource(if (selected) R.drawable.bg_user_chip_selected else R.drawable.bg_user_chip)
+            chip.setTextColor(getColor(if (selected) R.color.white else R.color.text_primary))
+        }
+    }
+
+    private fun applyCategoryFilter() {
+        val books = if (selectedCategory == "All") {
+            featuredBooks
+        } else {
+            featuredBooks.filter { it.genre.equals(selectedCategory, ignoreCase = true) }
+        }
+        featuredBooksAdapter.submitList(books)
     }
 
     private fun setupBottomNavigation() {
@@ -107,12 +143,13 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val token = sessionManager.getToken() ?: ""
-                val response = booksApiService.getAllBooks("Bearer $token", 0, 10)
+                val response = booksApiService.getFeaturedBooks("Bearer $token")
                     
                 withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
-                        val books = response.body()?.data?.books ?: emptyList()
-                        featuredBooksAdapter.submitList(books)
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val books = response.body()?.data ?: emptyList()
+                        featuredBooks = books
+                        applyCategoryFilter()
                     } else {
                         Toast.makeText(
                             this@UserHomeActivity,
@@ -130,6 +167,67 @@ class UserHomeActivity : AppCompatActivity(), BottomNavigationView.OnNavigationI
                     ).show()
                 }
             }
+        }
+    }
+
+    private fun loadSuspensionStatus() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val token = sessionManager.getToken()
+                if (token.isNullOrBlank()) return@launch
+                val response = RetrofitClient.userApiService.getSuspensionStatus("Bearer $token")
+                if (response.isSuccessful && response.body()?.success == true) {
+                    suspensionStatus = response.body()?.data
+                }
+            } catch (_: Exception) {
+                suspensionStatus = null
+            }
+        }
+    }
+
+    private fun requestBorrow(book: Book) {
+        if (suspensionStatus?.isSuspended == true) {
+            Toast.makeText(this, "Borrowing is currently suspended for your account.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val token = sessionManager.getToken()
+                if (token.isNullOrBlank()) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@UserHomeActivity, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                val response = RetrofitClient.borrowApiService.borrowBook(
+                    token = "Bearer $token",
+                    request = edu.ruperez.bookbrow.feature.borrow.BorrowRequest(book.id)
+                )
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        Toast.makeText(this@UserHomeActivity, "Borrow request sent for \"${book.title}\"", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            this@UserHomeActivity,
+                            response.body()?.message ?: response.message(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@UserHomeActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun showBookDetails(book: Book) {
+        BookDetailsDialog.show(this, book, suspensionStatus = suspensionStatus) { selectedBook ->
+            requestBorrow(selectedBook)
         }
     }
 

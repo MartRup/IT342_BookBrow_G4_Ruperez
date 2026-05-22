@@ -111,8 +111,10 @@ class LibrarianDashboardActivity : BaseActivity() {
     }
 
     private fun updateStatsUI(stats: StatsData) {
-        binding.tvBorrowedCount.text = stats.borrowed.toString()
-        binding.tvDueSoonCount.text = stats.dueSoon.toString()
+        binding.tvTotalUsersCount.text = stats.totalUsers.toString()
+        binding.tvTotalBooksCount.text = stats.totalBooks.toString()
+        binding.tvBorrowedCount.text = stats.activeLoans.toString()
+        binding.tvDueSoonCount.text = stats.overdue.toString()
         binding.tvReturnedCount.text = stats.returned.toString()
         
         // Update timestamp

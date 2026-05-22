@@ -11,6 +11,7 @@ import com.google.android.material.tabs.TabLayout
 import edu.ruperez.bookbrow.R
 import edu.ruperez.bookbrow.databinding.ActivityUserMyBooksBinding
 import edu.ruperez.bookbrow.feature.borrow.BorrowApiService
+import edu.ruperez.bookbrow.feature.borrow.RecordsAdapter
 import edu.ruperez.bookbrow.shared.RetrofitClient
 import edu.ruperez.bookbrow.shared.SessionManager
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ class UserMyBooksActivity : AppCompatActivity(), BottomNavigationView.OnNavigati
     private lateinit var binding: ActivityUserMyBooksBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var borrowApiService: BorrowApiService
+    private lateinit var borrowedBooksAdapter: RecordsAdapter
     private var currentTab = 0 // 0 = Currently, 1 = History
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,14 +62,19 @@ class UserMyBooksActivity : AppCompatActivity(), BottomNavigationView.OnNavigati
         })
 
         // Setup RecyclerView
+        borrowedBooksAdapter = RecordsAdapter()
         binding.rvBorrowedBooks.apply {
             layoutManager = LinearLayoutManager(this@UserMyBooksActivity)
-            // adapter will be set when data is loaded
+            adapter = borrowedBooksAdapter
         }
 
         // Setup swipe refresh
         binding.swipeRefresh.setOnRefreshListener {
             loadBorrowedBooks()
+        }
+
+        binding.profileButton.setOnClickListener {
+            binding.bottomNavigation.selectedItemId = R.id.nav_menu
         }
 
         // Setup browse button (shown when empty)
@@ -88,21 +95,26 @@ class UserMyBooksActivity : AppCompatActivity(), BottomNavigationView.OnNavigati
                 
                 val response = borrowApiService.getUserBorrows(
                     token = "Bearer $token",
-                    status = if (currentTab == 0) "BORROWED" else null
+                    status = if (currentTab == 0) "active" else null
                 )
                 
                 withContext(Dispatchers.Main) {
                     binding.swipeRefresh.isRefreshing = false
                     
                     if (response.isSuccessful) {
-                        val records = response.body()?.data ?: emptyList()
+                        val records = response.body()?.data?.borrowRecords ?: emptyList()
+                        val activeRecords = records.filter { it.status == "ACTIVE" || it.borrowStatus == "APPROVED" }
+                        val historyRecords = records.filter { it.status != "ACTIVE" && it.borrowStatus != "APPROVED" }
+                        val visibleRecords = if (currentTab == 0) activeRecords else historyRecords
+
+                        binding.tabLayout.getTabAt(0)?.text = "Current (${activeRecords.size})"
+                        binding.tabLayout.getTabAt(1)?.text = "History (${historyRecords.size})"
                         
-                        if (records.isEmpty()) {
+                        if (visibleRecords.isEmpty()) {
                             showEmptyState()
                         } else {
                             hideEmptyState()
-                            // Update adapter with records
-                            // You'll need to create a BorrowRecordsAdapter
+                            borrowedBooksAdapter.submitList(visibleRecords)
                         }
                     } else {
                         Toast.makeText(

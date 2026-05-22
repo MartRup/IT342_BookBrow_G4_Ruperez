@@ -176,4 +176,88 @@ public class BookService {
         
         return ResponseBuilder.ok(featuredBooks);
     }
+
+    public ResponseEntity<?> fetchAndUpdateCover(Long bookId) {
+        return bookRepository.findById(bookId)
+                .<ResponseEntity<?>>map(book -> {
+                    try {
+                        String coverUrl = fetchCoverFromGoogleBooks(book.getTitle(), book.getAuthor());
+                        if (coverUrl != null) {
+                            book.setCoverUrl(coverUrl);
+                            bookRepository.save(book);
+                            return ResponseBuilder.okWith("message", "Cover updated successfully");
+                        } else {
+                            return ResponseBuilder.badRequest("COVER-001", "No cover found for this book");
+                        }
+                    } catch (Exception e) {
+                        return ResponseBuilder.badRequest("COVER-002", "Error fetching cover: " + e.getMessage());
+                    }
+                })
+                .orElse(ResponseBuilder.notFound("BOOK-001", "Book not found"));
+    }
+
+    public ResponseEntity<?> fetchAndUpdateAllCovers() {
+        List<Book> booksWithoutCovers = bookRepository.findAll().stream()
+                .filter(book -> book.getCoverUrl() == null || book.getCoverUrl().isBlank())
+                .toList();
+
+        int updated = 0;
+        for (Book book : booksWithoutCovers) {
+            try {
+                String coverUrl = fetchCoverFromGoogleBooks(book.getTitle(), book.getAuthor());
+                if (coverUrl != null) {
+                    book.setCoverUrl(coverUrl);
+                    bookRepository.save(book);
+                    updated++;
+                    Thread.sleep(200); // Rate limiting
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching cover for book " + book.getId() + ": " + e.getMessage());
+            }
+        }
+
+        return ResponseBuilder.okWith("message", "Updated " + updated + " book covers");
+    }
+
+    private String fetchCoverFromGoogleBooks(String title, String author) {
+        try {
+            String query = title + " " + author;
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" +
+                    java.net.URLEncoder.encode(query, "UTF-8") +
+                    "&maxResults=1";
+
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            restTemplate.setRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
+                setConnectTimeout(5000);
+                setReadTimeout(10000);
+            }});
+
+            java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+            if (response != null && response.containsKey("items")) {
+                java.util.List<java.util.Map<String, Object>> items =
+                        (java.util.List<java.util.Map<String, Object>>) response.get("items");
+                if (!items.isEmpty()) {
+                    java.util.Map<String, Object> volumeInfo =
+                            (java.util.Map<String, Object>) items.get(0).get("volumeInfo");
+                    if (volumeInfo != null && volumeInfo.containsKey("imageLinks")) {
+                        java.util.Map<String, Object> imageLinks =
+                                (java.util.Map<String, Object>) volumeInfo.get("imageLinks");
+                        // Prefer medium or large thumbnail
+                        if (imageLinks.containsKey("medium")) {
+                            return (String) imageLinks.get("medium");
+                        } else if (imageLinks.containsKey("large")) {
+                            return (String) imageLinks.get("large");
+                        } else if (imageLinks.containsKey("thumbnail")) {
+                            String thumb = (String) imageLinks.get("thumbnail");
+                            // Upgrade thumbnail to higher quality by replacing zoom parameter
+                            return thumb.replace("zoom=1", "zoom=2");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching cover from Google Books: " + e.getMessage());
+        }
+        return null;
+    }
 }

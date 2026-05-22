@@ -5,6 +5,7 @@ import { AuthProvider } from './AuthContext';
 // ── Auth ──────────────────────────────────────────────────
 import Login       from './pages/auth/Login.jsx';
 import Register    from './pages/auth/Register.jsx';
+import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import AuthSuccess from './pages/auth/AuthSuccess.jsx';
 import OAuthTest   from './pages/auth/OAuthTest.jsx';
 
@@ -18,6 +19,7 @@ import LibrarianDashboard from './pages/librarian/LibrarianDashboard.jsx';
 import ManageBooks        from './pages/librarian/ManageBooks.jsx';
 import BorrowingRecords   from './pages/librarian/BorrowingRecords.jsx';
 import BookBorrowTest    from './pages/librarian/BookBorrowTest.jsx';
+import LibrarianUsers     from './pages/librarian/LibrarianUsers.jsx';
 
 // ── Admin ─────────────────────────────────────────────────
 import AdminDashboard        from './pages/admin/AdminDashboard.jsx';
@@ -60,6 +62,7 @@ function AppContent() {
       <Route path="/"             element={<Navigate to="/login" />} />
       <Route path="/login"        element={<Login />} />
       <Route path="/register"     element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       {/* Google OAuth2 callback landing page */}
       <Route path="/auth/success" element={<AuthSuccess />} />
       {/* OAuth debugging tool */}
@@ -78,6 +81,7 @@ function AppContent() {
       <Route path="/librarian/dashboard"         element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/manage-books"      element={<ProtectedRoute element={<ManageBooks />}        allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/borrowing-records" element={<ProtectedRoute element={<BorrowingRecords />}   allowedRoles={['LIBRARIAN']} />} />
+      <Route path="/librarian/users"             element={<ProtectedRoute element={<LibrarianUsers />}     allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/borrow-test"        element={<ProtectedRoute element={<BookBorrowTest />}    allowedRoles={['LIBRARIAN']} />} />
       <Route path="/librarian/settings"          element={<ProtectedRoute element={<Settings />}           allowedRoles={['LIBRARIAN']} />} />
 

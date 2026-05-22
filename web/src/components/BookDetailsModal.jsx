@@ -1,7 +1,16 @@
 import React from 'react';
+import SuspendedBorrowButton from './SuspendedBorrowButton';
 import './BookDetailsModal.css';
 
-export default function BookDetailsModal({ book, onClose, onBorrow, borrowing }) {
+export default function BookDetailsModal({
+  book,
+  onClose,
+  onBorrow,
+  borrowing,
+  isSuspended = false,
+  formattedTime = '',
+  suspensionReason = '',
+}) {
   if (!book) return null;
 
   const handleBackdropClick = (e) => {
@@ -77,13 +86,15 @@ export default function BookDetailsModal({ book, onClose, onBorrow, borrowing })
               >
                 Close
               </button>
-              <button 
-                className="bdm-btn bdm-btn-primary" 
+              <SuspendedBorrowButton
+                isSuspended={isSuspended}
+                formattedTime={formattedTime}
+                suspensionReason={suspensionReason}
+                isBookBorrowed={book.status?.toLowerCase() === 'borrowed'}
+                isBorrowing={borrowing}
                 onClick={() => onBorrow(book)}
-                disabled={book.status?.toLowerCase() === 'borrowed' || borrowing}
-              >
-                {borrowing ? 'Requesting...' : 'Request to Borrow'}
-              </button>
+                className="bdm-btn bdm-btn-primary"
+              />
             </div>
           </div>
         </div>

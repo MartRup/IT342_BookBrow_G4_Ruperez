@@ -40,6 +40,7 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     boolean existsByUserAndBookAndStatus(User user, Book book, BorrowRecord.BorrowStatus status);
 
     Page<BorrowRecord> findByStatus(BorrowRecord.BorrowStatus status, Pageable pageable);
+    long countByStatus(BorrowRecord.BorrowStatus status);
 
     List<BorrowRecord> findByUserAndStatus(User user, BorrowRecord.BorrowStatus status);
 

@@ -1,10 +1,12 @@
 package com.example.bookbrow.feature.auth.controller;
 
 import com.example.bookbrow.feature.auth.dto.AuthResponse;
+import com.example.bookbrow.feature.auth.dto.ForgotPasswordRequest;
 import com.example.bookbrow.feature.auth.dto.LibrarianCreateRequest;
 import com.example.bookbrow.feature.auth.dto.PrivilegedUserCreateRequest;
 import com.example.bookbrow.feature.auth.dto.LoginRequest;
 import com.example.bookbrow.feature.auth.dto.RegisterRequest;
+import com.example.bookbrow.feature.auth.dto.ResetPasswordRequest;
 import com.example.bookbrow.feature.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,19 @@ public class AuthController {
         return response.isSuccess()
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<AuthResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        AuthResponse response = authService.resetPassword(request);
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.badRequest().body(response);
     }
 
     @GetMapping("/health")

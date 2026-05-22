@@ -49,6 +49,10 @@ export default function LibrarianNavbar() {
             className={`lib-nav-link ${currentPath.includes('/borrowing-records') ? 'active' : ''}`} 
             onClick={() => navigate('/librarian/borrowing-records')}
           >Borrowing Records</button>
+          <button 
+            className={`lib-nav-link ${currentPath.includes('/users') ? 'active' : ''}`} 
+            onClick={() => navigate('/librarian/users')}
+          >Users</button>
         </div>
 
         <div className="lib-nav-right">

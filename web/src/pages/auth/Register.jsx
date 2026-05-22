@@ -347,7 +347,7 @@ export default function Register() {
               {loading ? (
                 <span className="button-content"><span className="button-spinner" />Creating Account...</span>
               ) : (
-                <span className="button-content">Create Account <span aria-hidden="true">-&gt;</span></span>
+                <span className="button-content">Create Account</span>
               )}
             </button>
           </form>

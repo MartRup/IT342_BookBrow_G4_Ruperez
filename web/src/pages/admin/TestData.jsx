@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../../config';
 import ApiService from '../../services/ApiService';
 
 export default function TestData() {
@@ -18,7 +19,7 @@ export default function TestData() {
 
   const fetchBookCount = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/test/book-count');
+      const response = await fetch(getApiUrl('/api/v1/test/book-count'));
       const data = await response.text();
       setBookCount(data);
     } catch (error) {
@@ -32,7 +33,7 @@ export default function TestData() {
     setMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/v1/test/add-sample-books', {
+      const response = await fetch(getApiUrl('/api/v1/test/add-sample-books'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ export default function TestData() {
     setMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/v1/test/clear-books', {
+      const response = await fetch(getApiUrl('/api/v1/test/clear-books'), {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ export default function TestData() {
     setMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/v1/test/add-single-book', {
+      const response = await fetch(getApiUrl('/api/v1/test/add-single-book'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

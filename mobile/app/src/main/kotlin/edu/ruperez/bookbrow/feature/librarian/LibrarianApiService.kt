@@ -6,13 +6,13 @@ import retrofit2.http.*
 interface LibrarianApiService {
 
     // Dashboard
-    @GET("librarian/stats")
+    @GET("api/v1/librarian/stats")
     suspend fun getStats(
         @Header("Authorization") token: String
     ): Response<StatsResponse>
 
     // Users Management
-    @GET("librarian/users")
+    @GET("api/v1/librarian/users")
     suspend fun getUsers(
         @Header("Authorization") token: String,
         @Query("page") page: Int = 1,
@@ -21,33 +21,33 @@ interface LibrarianApiService {
         @Query("role") role: String? = null
     ): Response<UsersResponse>
 
-    @GET("librarian/users/{id}")
+    @GET("api/v1/librarian/users/{id}")
     suspend fun getUserDetails(
         @Header("Authorization") token: String,
         @Path("id") userId: Long
     ): Response<UserDetailsResponse>
 
-    @PUT("librarian/users/{id}")
+    @PUT("api/v1/librarian/users/{id}")
     suspend fun updateUser(
         @Header("Authorization") token: String,
         @Path("id") userId: Long,
         @Body request: UpdateUserRequest
     ): Response<UpdateUserResponse>
 
-    @PUT("librarian/users/{id}/deactivate")
+    @PUT("api/v1/librarian/users/{id}/deactivate")
     suspend fun deactivateUser(
         @Header("Authorization") token: String,
         @Path("id") userId: Long
     ): Response<MessageResponse>
 
-    @PUT("librarian/users/{id}/activate")
+    @PUT("api/v1/librarian/users/{id}/activate")
     suspend fun activateUser(
         @Header("Authorization") token: String,
         @Path("id") userId: Long
     ): Response<MessageResponse>
 
     // Records Management
-    @GET("librarian/records")
+    @GET("api/v1/librarian/records")
     suspend fun getRecords(
         @Header("Authorization") token: String,
         @Query("page") page: Int = 1,
@@ -55,7 +55,7 @@ interface LibrarianApiService {
         @Query("status") status: String? = null
     ): Response<RecordsResponse>
 
-    @GET("librarian/records/{id}")
+    @GET("api/v1/librarian/records/{id}")
     suspend fun getRecordDetails(
         @Header("Authorization") token: String,
         @Path("id") recordId: Long
@@ -69,7 +69,11 @@ data class StatsResponse(
 )
 
 data class StatsData(
+    val totalUsers: Int,
+    val totalBooks: Int,
     val borrowed: Int,
+    val activeLoans: Int,
+    val overdue: Int,
     val dueSoon: Int,
     val returned: Int,
     val timestamp: String

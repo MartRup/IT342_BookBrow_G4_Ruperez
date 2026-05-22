@@ -2,6 +2,7 @@ package com.example.bookbrow.feature.librarian.service;
 
 import com.example.bookbrow.feature.borrow.entity.BorrowRecord;
 import com.example.bookbrow.feature.borrow.repository.BorrowRecordRepository;
+import com.example.bookbrow.feature.librarian.dto.SuspendUserRequest;
 import com.example.bookbrow.feature.librarian.dto.UpdateUserRequest;
 import com.example.bookbrow.feature.librarian.dto.UserDetailsDto;
 import com.example.bookbrow.feature.librarian.dto.UserListDto;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -143,6 +145,46 @@ public class LibrarianUserService {
                     log.info("User {} activated by librarian", userId);
 
                     return ResponseBuilder.okWith("message", "User activated successfully");
+                })
+                .orElse(ResponseBuilder.notFound("USER-001", "User not found"));
+    }
+
+    @Transactional
+    public ResponseEntity<?> suspendUserBorrowing(Long userId, SuspendUserRequest request) {
+        return userRepository.findById(userId)
+                .<ResponseEntity<?>>map(user -> {
+                    if (user.getRole() == User.UserRole.ADMIN || user.getRole() == User.UserRole.LIBRARIAN) {
+                        return ResponseBuilder.badRequest("USER-004", "Cannot suspend admin or librarian users");
+                    }
+
+                    if (request.getDays() == null || request.getDays() < 1) {
+                        return ResponseBuilder.badRequest("VALID-002", "Suspension days must be at least 1");
+                    }
+
+                    LocalDateTime suspendUntil = LocalDateTime.now().plusDays(request.getDays());
+                    user.setBorrowSuspendedUntil(suspendUntil);
+                    user.setSuspensionReason(request.getReason() != null ? request.getReason() : "Suspended by librarian");
+                    userRepository.save(user);
+                    
+                    log.info("User {} suspended from borrowing until {} by librarian", userId, suspendUntil);
+
+                    return ResponseBuilder.okWith("message", 
+                        String.format("User suspended from borrowing for %d days", request.getDays()));
+                })
+                .orElse(ResponseBuilder.notFound("USER-001", "User not found"));
+    }
+
+    @Transactional
+    public ResponseEntity<?> unsuspendUserBorrowing(Long userId) {
+        return userRepository.findById(userId)
+                .<ResponseEntity<?>>map(user -> {
+                    user.setBorrowSuspendedUntil(null);
+                    user.setSuspensionReason(null);
+                    userRepository.save(user);
+                    
+                    log.info("User {} unsuspended from borrowing by librarian", userId);
+
+                    return ResponseBuilder.okWith("message", "User borrowing suspension lifted");
                 })
                 .orElse(ResponseBuilder.notFound("USER-001", "User not found"));
     }

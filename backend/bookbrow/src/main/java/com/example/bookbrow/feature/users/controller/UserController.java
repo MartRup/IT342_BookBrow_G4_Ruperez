@@ -140,4 +140,23 @@ public class UserController {
         }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error("USER-001", "User not found")));
     }
+
+    /** GET /api/v1/users/suspension-status — Authenticated */
+    @GetMapping("/suspension-status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getSuspensionStatus(Principal principal) {
+        String email = principal.getName();
+        return userRepository.findByEmail(email).map(user -> {
+            boolean isSuspended = user.isBorrowSuspended();
+            long remainingSeconds = user.getSuspensionRemainingSeconds();
+            
+            return ResponseEntity.ok(ApiResponse.success(Map.of(
+                "isSuspended", isSuspended,
+                "remainingSeconds", remainingSeconds,
+                "suspensionReason", user.getSuspensionReason() != null ? user.getSuspensionReason() : "",
+                "suspendedUntil", user.getBorrowSuspendedUntil() != null ? user.getBorrowSuspendedUntil().toString() : null
+            )));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("USER-001", "User not found")));
+    }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -8,8 +8,9 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import RegisterScreen from './src/screens/auth/RegisterScreen';
 
-// Main App
+// Navigators
 import MainNavigator from './src/navigation/MainNavigator';
+import AdminNavigator from './src/navigation/AdminNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,13 +18,22 @@ function AppNavigator() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return null; // Or a loading screen
+    return null;
   }
+
+  // Determine which navigator to use based on role
+  const role = user?.role?.replace(/^ROLE_/, '');
+  const isAdminOrLibrarian =
+    role === 'ADMIN' || role === 'LIBRARIAN';
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="Main" component={MainNavigator} />
+        isAdminOrLibrarian ? (
+          <Stack.Screen name="AdminMain" component={AdminNavigator} />
+        ) : (
+          <Stack.Screen name="Main" component={MainNavigator} />
+        )
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />

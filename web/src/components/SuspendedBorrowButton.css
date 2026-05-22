@@ -1,0 +1,81 @@
+.sbb-suspended-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+}
+
+/* ── Normal borrow button ── */
+.sbb-btn-normal {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #7b1113;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sbb-btn-normal:hover:not(:disabled) {
+  background-color: #5a0d0f;
+}
+
+.sbb-btn-normal:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* ── Suspended state button ── */
+.sbb-btn-suspended {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0.9;
+}
+
+/* ── Countdown badge ── */
+.sbb-cooldown-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #856404;
+  animation: sbb-pulse 1s ease-in-out infinite;
+}
+
+@keyframes sbb-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ── Reason text ── */
+.sbb-reason {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

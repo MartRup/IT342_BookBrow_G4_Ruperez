@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../config';
 import ApiService from '../../services/ApiService';
 import AdminNavbar from './AdminNavbar';
 import '../librarian/ManageBooks.css'; // Reusing librarian's CSS
@@ -106,7 +107,7 @@ export default function AdminManageBooks() {
     try {
       console.log('🔍 Searching Google Books for:', googleQuery);
       // Use backend as proxy to avoid CORS issues
-      const res = await fetch(`http://localhost:8080/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`, {
+      const res = await fetch(getApiUrl(`/api/v1/books/search/external?q=${encodeURIComponent(googleQuery)}`), {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
         
@@ -137,7 +138,7 @@ export default function AdminManageBooks() {
     } catch (e) {
       console.error('❌ Google Books search failed:', e);
       if (e.message.includes('Failed to fetch') || e.name === 'TypeError') {
-        setGoogleError('Cannot connect to backend. Please ensure the server is running on http://localhost:8080');
+        setGoogleError('Cannot connect to backend. Please ensure the API URL is configured correctly.');
       } else {
         setGoogleError(e.message || 'Failed to search Google Books.');
       }

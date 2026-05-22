@@ -16,8 +16,27 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // Build config field for base URL â€“ change to your backend IP/host
-        buildConfigField "String", "BASE_URL", "\"http://10.0.2.2:8080/api/v1/\""
+        // Match the web frontend host. Retrofit endpoint paths add /api/v1/... explicitly.
+        // Android emulator uses 10.0.2.2 to reach the host machine's localhost.
+        // Override with -PBOOKBROW_API_BASE_URL=... or the BOOKBROW_API_BASE_URL env var.
+        def apiBaseUrl = project.findProperty("BOOKBROW_API_BASE_URL")
+        if (apiBaseUrl == null || apiBaseUrl.toString().trim().isEmpty()) {
+            apiBaseUrl = System.getenv("BOOKBROW_API_BASE_URL")
+        }
+        if (apiBaseUrl == null || apiBaseUrl.toString().trim().isEmpty()) {
+            apiBaseUrl = "http://10.0.2.2:8080/"
+        }
+        apiBaseUrl = apiBaseUrl.toString().trim()
+        if (apiBaseUrl.endsWith("/api/v1")) {
+            apiBaseUrl = apiBaseUrl.substring(0, apiBaseUrl.length() - "/api/v1".length())
+        }
+        if (apiBaseUrl.endsWith("/api/v1/")) {
+            apiBaseUrl = apiBaseUrl.substring(0, apiBaseUrl.length() - "/api/v1/".length())
+        }
+        if (!apiBaseUrl.endsWith("/")) {
+            apiBaseUrl = "${apiBaseUrl}/"
+        }
+        buildConfigField "String", "BASE_URL", "\"${apiBaseUrl}\""
     }
 
     buildFeatures {

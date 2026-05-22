@@ -4,7 +4,7 @@ export const userService = {
   // Get user profile
   getProfile: async () => {
     try {
-      const response = await api.get('/users/profile');
+      const response = await api.get('/users/suspension-status');
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +24,7 @@ export const userService = {
   // Change password
   changePassword: async (currentPassword, newPassword) => {
     try {
-      const response = await api.put('/users/change-password', {
+      const response = await api.put('/users/password', {
         currentPassword,
         newPassword,
       });
@@ -37,7 +37,7 @@ export const userService = {
   // Delete account
   deleteAccount: async () => {
     try {
-      const response = await api.delete('/users/profile');
+      const response = await api.delete('/users/account');
       return response.data;
     } catch (error) {
       throw error;

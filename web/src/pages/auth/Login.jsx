@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import Alert from '../../components/Alert';
+import { getApiUrl } from '../../config';
 import ApiService from '../../services/ApiService';
 import { rateLimit, sanitizeInput, validateEmail } from '../../utils/validation';
 
@@ -194,7 +195,7 @@ export default function Login() {
               {loading ? (
                 <span className="button-content"><span className="button-spinner" />Signing In...</span>
               ) : (
-                <span className="button-content">Sign In <span aria-hidden="true">-&gt;</span></span>
+                <span className="button-content">Sign In</span>
               )}
             </button>
           </form>
@@ -203,7 +204,7 @@ export default function Login() {
             <span>OR</span>
           </div>
 
-          <a href="http://localhost:8080/oauth2/authorization/google" className="auth-button google-button">
+          <a href={getApiUrl('/oauth2/authorization/google')} className="auth-button google-button">
             <div className="google-button-content">
               <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

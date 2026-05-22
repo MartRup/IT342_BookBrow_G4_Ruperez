@@ -61,4 +61,16 @@ public class BookController {
     public ResponseEntity<?> getFeaturedBooks() {
         return bookService.getFeaturedBooks();
     }
+
+    @PostMapping("/{id}/fetch-cover")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<?> fetchCoverFromGoogle(@PathVariable Long id) {
+        return bookService.fetchAndUpdateCover(id);
+    }
+
+    @PostMapping("/fetch-all-covers")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<?> fetchAllCoversFromGoogle() {
+        return bookService.fetchAndUpdateAllCovers();
+    }
 }

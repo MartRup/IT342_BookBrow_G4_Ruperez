@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import UserNavbar from './UserNavbar';
 import BookDetailsModal from '../../components/BookDetailsModal';
+import SuspendedBorrowButton from '../../components/SuspendedBorrowButton';
+import useSuspension from '../../hooks/useSuspension';
 import './BorrowItems.css';
 
 export default function BorrowItems() {
@@ -14,10 +16,12 @@ export default function BorrowItems() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [borrowingBookId, setBorrowingBookId] = useState(null);
-  const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
-  const [selectedBook, setSelectedBook] = useState(null); // For modal
+  const [toast, setToast] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { isSuspended, formattedTime, suspensionReason, refresh: refreshSuspension } = useSuspension();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -70,14 +74,22 @@ export default function BorrowItems() {
   };
 
   const handleBorrow = async (book) => {
+    if (isSuspended) {
+      showToast('error', `You are suspended from borrowing. Cooldown: ${formattedTime}`);
+      return;
+    }
     try {
       setBorrowingBookId(book.id);
       await ApiService.borrow.create(book.id);
       showToast('success', `Borrow request for "${book.title}" submitted! Waiting for librarian approval.`);
-      setSelectedBook(null); // Close modal
+      setSelectedBook(null);
       fetchBooks(searchQuery);
     } catch (error) {
       const msg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to submit borrow request. Please try again.';
+      // If server returns suspension error, refresh suspension state
+      if (error.response?.data?.error?.code === 'BORROW-008') {
+        refreshSuspension();
+      }
       showToast('error', msg);
     } finally {
       setBorrowingBookId(null);
@@ -114,6 +126,9 @@ export default function BorrowItems() {
           onClose={() => setSelectedBook(null)}
           onBorrow={handleBorrow}
           borrowing={borrowingBookId === selectedBook.id}
+          isSuspended={isSuspended}
+          formattedTime={formattedTime}
+          suspensionReason={suspensionReason}
         />
       )}
 
@@ -126,6 +141,20 @@ export default function BorrowItems() {
           <h1 className="bi-page-title">Browse Library</h1>
           <p className="bi-page-subtitle">Discover amazing books</p>
         </div>
+
+        {/* Suspension Banner */}
+        {isSuspended && (
+          <div className="bi-suspension-banner">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <div className="bi-suspension-text">
+              <strong>Borrowing Suspended</strong>
+              <span>You cannot borrow books for another <strong>{formattedTime}</strong>.</span>
+              {suspensionReason && <span className="bi-suspension-reason">Reason: {suspensionReason}</span>}
+            </div>
+          </div>
+        )}
 
         {/* Search + Filter */}
         <div className="bi-controls">
@@ -194,16 +223,15 @@ export default function BorrowItems() {
                   <span className={`bi-status-badge ${(book.status || 'available').toLowerCase()}`}>
                     {book.status || 'Available'}
                   </span>
-                  <button
+                  <SuspendedBorrowButton
+                    isSuspended={isSuspended}
+                    formattedTime={formattedTime}
+                    suspensionReason={suspensionReason}
+                    isBookBorrowed={book.status?.toLowerCase() === 'borrowed'}
+                    isBorrowing={borrowingBookId === book.id}
+                    onClick={(e) => { e.stopPropagation(); handleBorrow(book); }}
                     className="bi-borrow-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleBorrow(book);
-                    }}
-                    disabled={book.status?.toLowerCase() === 'borrowed' || borrowingBookId === book.id}
-                  >
-                    {borrowingBookId === book.id ? 'Requesting...' : 'Request to Borrow'}
-                  </button>
+                  />
                 </div>
               </div>
             ))

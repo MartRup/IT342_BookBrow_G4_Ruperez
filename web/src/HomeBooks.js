@@ -1,6 +1,7 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from './config';
 
 function HomeBooks() {
   const [books, setBooks] = useState([]);
@@ -16,7 +17,7 @@ function HomeBooks() {
     try {
       setLoading(true);
       // Replace with your actual backend URL
-      const response = await axios.get('http://localhost:8080/api/books');
+      const response = await axios.get(getApiUrl('/api/books'));
       setBooks(response.data);
       setError(null);
     } catch (err) {

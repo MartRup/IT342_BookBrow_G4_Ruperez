@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: bookbrow-backend
+    env: docker
+    rootDir: backend/bookbrow
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 3600000
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://bookbrow-backend.onrender.com/login/oauth2/code/google
+      - key: FRONTEND_URL
+        value: https://bookbrow-web.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://bookbrow-web.onrender.com,http://localhost:3000,http://127.0.0.1:3000
+
+  - type: web
+    name: bookbrow-web
+    env: docker
+    rootDir: web
+    plan: free
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://bookbrow-backend.onrender.com
+      - key: BACKEND_URL
+        value: https://bookbrow-backend.onrender.com

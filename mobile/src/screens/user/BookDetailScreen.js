@@ -15,6 +15,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { bookService } from '../../services/bookService';
 import { borrowService } from '../../services/borrowService';
 
+const getCoverUrl = (book) => {
+  if (book?.coverUrl) return book.coverUrl;
+  const isbn = String(book?.isbn || '').replace(/[^0-9Xx]/g, '');
+  return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : null;
+};
+
 export default function BookDetailScreen({ route, navigation }) {
   const { bookId } = route.params;
   const { colors } = useTheme();
@@ -28,8 +34,9 @@ export default function BookDetailScreen({ route, navigation }) {
 
   const loadBookDetails = async () => {
     try {
+      // Backend returns { data: { book: {...} } }
       const response = await bookService.getBookById(bookId);
-      setBook(response.data);
+      setBook(response?.data?.book ?? null);
     } catch (error) {
       console.error('Error loading book details:', error);
       Alert.alert('Error', 'Failed to load book details');
@@ -39,8 +46,8 @@ export default function BookDetailScreen({ route, navigation }) {
   };
 
   const handleBorrow = async () => {
-    if (book.availableCopies === 0) {
-      Alert.alert('Unavailable', 'This book is currently unavailable');
+    if (!book.available) {
+      Alert.alert('Unavailable', 'This book is currently unavailable for borrowing.');
       return;
     }
 
@@ -63,7 +70,7 @@ export default function BookDetailScreen({ route, navigation }) {
             } catch (error) {
               Alert.alert(
                 'Error',
-                error.response?.data?.message || 'Failed to borrow book'
+                error.response?.data?.message || 'Failed to submit borrow request.'
               );
             } finally {
               setBorrowing(false);
@@ -85,6 +92,11 @@ export default function BookDetailScreen({ route, navigation }) {
   if (!book) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
         <Text style={[styles.errorText, { color: colors.text }]}>Book not found</Text>
       </SafeAreaView>
     );
@@ -98,49 +110,56 @@ export default function BookDetailScreen({ route, navigation }) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Book Details</Text>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color={colors.text} />
-        </TouchableOpacity>
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Book Cover */}
         <View style={styles.coverContainer}>
           <View style={[styles.cover, { backgroundColor: colors.surface }]}>
-            {book.coverImage ? (
-              <Image source={{ uri: book.coverImage }} style={styles.coverImage} />
+            {getCoverUrl(book) ? (
+              <Image source={{ uri: getCoverUrl(book) }} style={styles.coverImage} />
             ) : (
               <Ionicons name="book" size={80} color={colors.textSecondary} />
             )}
+          </View>
+          {/* Availability pill */}
+          <View
+            style={[
+              styles.availabilityPill,
+              { backgroundColor: book.available ? '#43A047' : '#E53935' },
+            ]}
+          >
+            <Ionicons
+              name={book.available ? 'checkmark-circle' : 'close-circle'}
+              size={14}
+              color="#FFFFFF"
+            />
+            <Text style={styles.availabilityPillText}>
+              {book.available ? 'Available' : 'Unavailable'}
+            </Text>
           </View>
         </View>
 
         {/* Book Info */}
         <View style={styles.infoContainer}>
           <Text style={[styles.title, { color: colors.text }]}>{book.title}</Text>
-          <Text style={[styles.author, { color: colors.textSecondary }]}>{book.author}</Text>
+          <Text style={[styles.author, { color: colors.textSecondary }]}>by {book.author}</Text>
 
-          {/* Stats */}
-          <View style={styles.stats}>
-            <View style={styles.statItem}>
-              <Ionicons name="book-outline" size={20} color={colors.primary} />
-              <Text style={[styles.statText, { color: colors.text }]}>
-                {book.availableCopies} / {book.totalCopies}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Available</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-              <Text style={[styles.statText, { color: colors.text }]}>
-                {new Date(book.publicationYear).getFullYear()}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Published</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="pricetag-outline" size={20} color={colors.primary} />
-              <Text style={[styles.statText, { color: colors.text }]}>{book.genre || 'N/A'}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Genre</Text>
-            </View>
+          {/* Genre & ISBN row */}
+          <View style={styles.tagsRow}>
+            {book.genre ? (
+              <View style={[styles.tag, { backgroundColor: colors.primary + '22' }]}>
+                <Text style={[styles.tagText, { color: colors.primary }]}>{book.genre}</Text>
+              </View>
+            ) : null}
+            {book.isbn ? (
+              <View style={[styles.tag, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.tagText, { color: colors.textSecondary }]}>
+                  ISBN: {book.isbn}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Description */}
@@ -151,27 +170,18 @@ export default function BookDetailScreen({ route, navigation }) {
             </Text>
           </View>
 
-          {/* Additional Info */}
-          <View style={styles.section}>
+          {/* Details */}
+          <View style={[styles.section, styles.detailsCard, { backgroundColor: colors.surface }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Details</Text>
-            <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>ISBN:</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>
-                {book.isbn || 'N/A'}
-              </Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Publisher:</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>
-                {book.publisher || 'N/A'}
-              </Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Language:</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>
-                {book.language || 'English'}
-              </Text>
-            </View>
+            <DetailRow label="Author" value={book.author} colors={colors} />
+            <DetailRow label="Genre" value={book.genre || 'N/A'} colors={colors} />
+            <DetailRow label="ISBN" value={book.isbn || 'N/A'} colors={colors} />
+            <DetailRow
+              label="Status"
+              value={book.available ? 'Available' : 'Unavailable'}
+              colors={colors}
+              valueColor={book.available ? '#43A047' : '#E53935'}
+            />
           </View>
         </View>
       </ScrollView>
@@ -181,12 +191,10 @@ export default function BookDetailScreen({ route, navigation }) {
         <TouchableOpacity
           style={[
             styles.borrowButton,
-            {
-              backgroundColor: book.availableCopies > 0 ? colors.primary : colors.textSecondary,
-            },
+            { backgroundColor: book.available ? colors.primary : colors.textSecondary },
           ]}
           onPress={handleBorrow}
-          disabled={borrowing || book.availableCopies === 0}
+          disabled={borrowing || !book.available}
         >
           {borrowing ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -194,13 +202,22 @@ export default function BookDetailScreen({ route, navigation }) {
             <>
               <Ionicons name="add-circle-outline" size={24} color="#FFFFFF" />
               <Text style={styles.borrowButtonText}>
-                {book.availableCopies > 0 ? 'Borrow Book' : 'Unavailable'}
+                {book.available ? 'Borrow Book' : 'Currently Unavailable'}
               </Text>
             </>
           )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+function DetailRow({ label, value, colors, valueColor }) {
+  return (
+    <View style={styles.detailRow}>
+      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.detailValue, { color: valueColor ?? colors.text }]}>{value}</Text>
+    </View>
   );
 }
 
@@ -222,6 +239,7 @@ const styles = StyleSheet.create({
   coverContainer: {
     alignItems: 'center',
     paddingVertical: 24,
+    gap: 12,
   },
   cover: {
     width: 200,
@@ -230,40 +248,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
   coverImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
+  availabilityPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  availabilityPillText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
   infoContainer: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   author: {
     fontSize: 16,
+    marginBottom: 16,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 24,
   },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 32,
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  statItem: {
-    alignItems: 'center',
-  },
-  statText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 8,
-  },
-  statLabel: {
+  tagText: {
     fontSize: 12,
-    marginTop: 4,
+    fontWeight: '600',
   },
   section: {
     marginBottom: 24,
@@ -277,10 +312,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
   },
+  detailsCard: {
+    borderRadius: 16,
+    padding: 16,
+  },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
   detailLabel: {
     fontSize: 14,
@@ -288,6 +329,8 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 14,
     fontWeight: '500',
+    maxWidth: '60%',
+    textAlign: 'right',
   },
   footer: {
     padding: 20,
@@ -299,15 +342,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 12,
+    gap: 8,
   },
   borrowButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
   },
   loader: {
     flex: 1,
+    justifyContent: 'center',
   },
   errorText: {
     fontSize: 16,

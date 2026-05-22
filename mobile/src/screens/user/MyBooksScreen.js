@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,9 +30,20 @@ export default function MyBooksScreen() {
     try {
       const activeResponse = await borrowService.getActiveBorrows();
       const historyResponse = await borrowService.getBorrowHistory();
-      
-      setCurrentBooks(activeResponse.data || []);
-      setHistoryBooks(historyResponse.data || []);
+
+      const activeRecords = activeResponse.data?.borrowRecords || [];
+      const allRecords = historyResponse.data?.borrowRecords || [];
+
+      setCurrentBooks(
+        activeRecords.filter(
+          (record) => record.status === 'ACTIVE' || record.borrowStatus === 'APPROVED'
+        )
+      );
+      setHistoryBooks(
+        allRecords.filter(
+          (record) => record.status !== 'ACTIVE' && record.borrowStatus !== 'APPROVED'
+        )
+      );
     } catch (error) {
       console.error('Error loading borrow records:', error);
     } finally {
@@ -65,14 +77,18 @@ export default function MyBooksScreen() {
   const renderBookItem = (record) => (
     <View key={record.id} style={[styles.bookItem, { backgroundColor: colors.surface }]}>
       <View style={[styles.bookItemCover, { backgroundColor: colors.border }]}>
-        <Ionicons name="book" size={32} color={colors.textSecondary} />
+        {record.bookCoverUrl ? (
+          <Image source={{ uri: record.bookCoverUrl }} style={styles.bookItemCoverImage} />
+        ) : (
+          <Ionicons name="book" size={32} color={colors.textSecondary} />
+        )}
       </View>
       <View style={styles.bookItemInfo}>
         <Text style={[styles.bookItemTitle, { color: colors.text }]} numberOfLines={2}>
-          {record.book?.title || 'Unknown Title'}
+          {record.bookTitle || 'Unknown Title'}
         </Text>
         <Text style={[styles.bookItemAuthor, { color: colors.textSecondary }]} numberOfLines={1}>
-          {record.book?.author || 'Unknown Author'}
+          {record.bookAuthor || 'Unknown Author'}
         </Text>
         <View style={styles.bookItemMeta}>
           <Text style={[styles.bookItemDate, { color: colors.textSecondary }]}>
@@ -83,7 +99,7 @@ export default function MyBooksScreen() {
               styles.statusBadge,
               {
                 backgroundColor:
-                  record.status === 'APPROVED'
+                  record.status === 'ACTIVE' || record.borrowStatus === 'APPROVED'
                     ? '#4CAF50'
                     : record.status === 'PENDING'
                     ? '#FF9800'
@@ -300,6 +316,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
+    overflow: 'hidden',
+  },
+  bookItemCoverImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   bookItemInfo: {
     flex: 1,

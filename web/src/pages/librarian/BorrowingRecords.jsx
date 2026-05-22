@@ -13,6 +13,9 @@ export default function BorrowingRecords() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null); // Track which record is being processed
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
+  const [suspendModal, setSuspendModal] = useState(null); // { userId, userName }
+  const [suspendDays, setSuspendDays] = useState(7);
+  const [suspendReason, setSuspendReason] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,6 +103,30 @@ export default function BorrowingRecords() {
     }
   };
 
+  const handleSuspendUser = async () => {
+    if (!suspendModal) return;
+    
+    try {
+      setActionLoading('suspend');
+      await axios.put(`/api/v1/librarian/users/${suspendModal.userId}/suspend-borrowing`, {
+        days: suspendDays,
+        reason: suspendReason || 'Suspended by librarian'
+      }, {
+        headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}` }
+      });
+      showToast('success', `User ${suspendModal.userName} suspended for ${suspendDays} days`);
+      setSuspendModal(null);
+      setSuspendDays(7);
+      setSuspendReason('');
+      fetchRecords();
+    } catch (e) {
+      console.error('Error suspending user:', e);
+      showToast('error', e.response?.data?.error?.message || 'Failed to suspend user');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const getFilteredRecords = () => {
     return records.filter(r => {
       // Apply search string
@@ -130,6 +157,54 @@ export default function BorrowingRecords() {
         <div className={`br-toast br-toast-${toast.type}`}>
           <span>{toast.type === 'success' ? '✅' : '❌'}</span>
           {toast.message}
+        </div>
+      )}
+
+      {/* ── Suspend User Modal ── */}
+      {suspendModal && (
+        <div className="br-modal-overlay" onClick={() => setSuspendModal(null)}>
+          <div className="br-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Suspend User from Borrowing</h3>
+            <p className="br-modal-user">User: <strong>{suspendModal.userName}</strong></p>
+            
+            <div className="br-modal-field">
+              <label>Suspension Duration (days)</label>
+              <input 
+                type="number" 
+                min="1" 
+                max="365" 
+                value={suspendDays} 
+                onChange={(e) => setSuspendDays(parseInt(e.target.value) || 1)}
+              />
+            </div>
+            
+            <div className="br-modal-field">
+              <label>Reason (optional)</label>
+              <textarea 
+                rows="3" 
+                placeholder="Enter reason for suspension..."
+                value={suspendReason}
+                onChange={(e) => setSuspendReason(e.target.value)}
+              />
+            </div>
+            
+            <div className="br-modal-actions">
+              <button 
+                className="br-modal-cancel" 
+                onClick={() => setSuspendModal(null)}
+                disabled={actionLoading === 'suspend'}
+              >
+                Cancel
+              </button>
+              <button 
+                className="br-modal-confirm" 
+                onClick={handleSuspendUser}
+                disabled={actionLoading === 'suspend'}
+              >
+                {actionLoading === 'suspend' ? 'Suspending...' : `Suspend for ${suspendDays} days`}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -252,7 +327,23 @@ export default function BorrowingRecords() {
                 </tr>
               ) : filtered.map((r, i) => (
                 <tr key={r.id || i}>
-                  <td>{r.userFullName || r.userEmail || '—'}</td>
+                  <td>
+                    <div className="br-member-cell">
+                      <span>{r.userFullName || r.userEmail || '—'}</span>
+                      {(r.status === 'OVERDUE' || r.status === 'ACTIVE') && (
+                        <button 
+                          className="br-suspend-btn-small"
+                          onClick={() => setSuspendModal({ 
+                            userId: r.userId, 
+                            userName: r.userFullName || r.userEmail 
+                          })}
+                          title="Suspend user from borrowing"
+                        >
+                          🚫
+                        </button>
+                      )}
+                    </div>
+                  </td>
                   <td>{r.bookTitle || '—'}</td>
                   <td>{r.borrowDate ? new Date(r.borrowDate).toLocaleDateString() : '—'}</td>
                   <td>{r.dueDate ? new Date(r.dueDate).toLocaleDateString() : '—'}</td>

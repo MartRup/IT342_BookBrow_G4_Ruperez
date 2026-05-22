@@ -73,8 +73,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="12dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="1dp">
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/searchView"
@@ -88,8 +89,9 @@
             android:id="@+id/btnFilter"
             android:layout_width="52dp"
             android:layout_height="52dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="1dp">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -115,9 +117,10 @@
             android:id="@+id/rvBooks"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp"
             android:clipToPadding="false"
-            tools:listitem="@layout/item_book" />
+            tools:listitem="@layout/item_user_book" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- Bottom Navigation -->
@@ -126,6 +129,8 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:background="@color/white"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
         app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

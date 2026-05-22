@@ -36,6 +36,14 @@ public class BorrowService {
     public ResponseEntity<?> borrowBook(Long bookId, Authentication auth) {
         User user = (User) auth.getPrincipal();
 
+        // Check if user is suspended from borrowing
+        if (user.isBorrowSuspended()) {
+            long remainingSeconds = user.getSuspensionRemainingSeconds();
+            return ResponseBuilder.badRequest("BORROW-008", 
+                String.format("You are suspended from borrowing books. Suspension ends in %d seconds. Reason: %s", 
+                    remainingSeconds, user.getSuspensionReason() != null ? user.getSuspensionReason() : "No reason provided"));
+        }
+
         return bookRepository.findById(bookId)
                 .<ResponseEntity<?>>map(book -> {
                     if (!book.getAvailable()) {

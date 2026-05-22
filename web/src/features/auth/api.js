@@ -6,6 +6,12 @@ export const login = (email, password) =>
 export const register = (data) =>
   apiClient.post('/api/v1/auth/register', data);
 
+export const forgotPassword = (email) =>
+  apiClient.post('/api/v1/auth/forgot-password', { email });
+
+export const resetPassword = (token, newPassword) =>
+  apiClient.post('/api/v1/auth/reset-password', { token, newPassword });
+
 export const createLibrarian = (data) =>
   apiClient.post('/api/v1/auth/librarian', data);
 
@@ -15,5 +21,13 @@ export const createPrivilegedUser = (data) =>
 export const health = () =>
   apiClient.get('/api/v1/auth/health');
 
-const authApi = { login, register, createLibrarian, createPrivilegedUser, health };
+const authApi = {
+  login,
+  register,
+  forgotPassword,
+  resetPassword,
+  createLibrarian,
+  createPrivilegedUser,
+  health,
+};
 export default authApi;
