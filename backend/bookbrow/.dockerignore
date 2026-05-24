@@ -5,3 +5,5 @@ backend-run.err.log
 .env
 .git
 .gitignore
+.idea
+*.md
