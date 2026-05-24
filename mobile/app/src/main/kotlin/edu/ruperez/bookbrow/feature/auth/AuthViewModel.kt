@@ -54,6 +54,27 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
+     * Initiate Google Login flow.
+     */
+    fun loginWithGoogle(idToken: String) {
+        _loginState.value = UiState.Loading
+        viewModelScope.launch {
+            repository.googleLogin(idToken)
+                .onSuccess { response ->
+                    if (response.success) {
+                        _loginState.value = UiState.Success(response)
+                    } else {
+                        val msg = response.error?.message ?: "Google login failed"
+                        _loginState.value = UiState.Error(msg)
+                    }
+                }
+                .onFailure { throwable ->
+                    _loginState.value = UiState.Error(throwable.message ?: "Network error")
+                }
+        }
+    }
+
+    /**
      * Initiate registration flow.
      * Input validation is performed in the Activity before calling this.
      */

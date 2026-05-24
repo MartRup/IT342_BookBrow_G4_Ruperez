@@ -29,4 +29,11 @@ interface AuthApiService {
      */
     @POST("api/v1/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+
+    /**
+     * Login with Google ID token.
+     * POST /api/v1/auth/google
+     */
+    @POST("api/v1/auth/google")
+    suspend fun googleLogin(@Body request: GoogleLoginRequest): Response<AuthResponse>
 }

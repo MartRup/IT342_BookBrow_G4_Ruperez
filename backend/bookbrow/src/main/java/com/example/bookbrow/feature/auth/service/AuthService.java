@@ -7,6 +7,7 @@ import com.example.bookbrow.feature.auth.dto.PrivilegedUserCreateRequest;
 import com.example.bookbrow.feature.auth.dto.LoginRequest;
 import com.example.bookbrow.feature.auth.dto.RegisterRequest;
 import com.example.bookbrow.feature.auth.dto.ResetPasswordRequest;
+import com.example.bookbrow.feature.auth.dto.GoogleLoginRequest;
 import com.example.bookbrow.feature.users.entity.User;
 import com.example.bookbrow.shared.factory.UserFactory;
 import com.example.bookbrow.feature.users.repository.UserRepository;
@@ -21,6 +22,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+
+import java.util.Collections;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -43,6 +52,9 @@ public class AuthService {
     private final RegistrationValidator registrationValidator;
     private final LibrarianCreationValidator librarianValidator;
     private final PrivilegedUserValidator privilegedValidator;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 
     public AuthResponse register(RegisterRequest request) {
 
@@ -149,6 +161,56 @@ public class AuthService {
                 .role(user.getRole().name())
                 .token(token)
                 .build());
+    }
+
+    public AuthResponse googleLogin(GoogleLoginRequest request) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(request.getIdToken());
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+
+                User user = userRepository.findByEmail(email).orElseGet(() -> {
+                    log.info("New Google user '{}' — saving to database...", email);
+
+                    User newUser = User.builder()
+                            .email(email)
+                            .fullName(name != null && !name.isBlank() ? name : "Google User")
+                            .password("OAUTH_" + UUID.randomUUID())
+                            .role(User.UserRole.USER)
+                            .isActive(true)
+                            .build();
+
+                    return userRepository.save(newUser);
+                });
+
+                if (!user.isEnabled()) {
+                    return AuthResponse.error("AUTH-102", "Account is deactivated");
+                }
+
+                String token = jwtService.generateToken(user);
+
+                return AuthResponse.success(AuthResponse.UserData.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .role(user.getRole().name())
+                        .token(token)
+                        .message("Google Sign In successful")
+                        .build());
+            } else {
+                return AuthResponse.error("AUTH-103", "Invalid Google ID Token");
+            }
+        } catch (Exception e) {
+            log.error("Google login failed", e);
+            return AuthResponse.error("AUTH-104", "Google verification failed: " + e.getMessage());
+        }
     }
 
     public AuthResponse forgotPassword(ForgotPasswordRequest request) {

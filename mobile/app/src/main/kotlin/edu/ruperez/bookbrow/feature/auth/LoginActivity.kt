@@ -12,13 +12,20 @@ import edu.ruperez.bookbrow.feature.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: AuthViewModel by viewModels()
     private lateinit var sessionManager: SessionManager
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +34,32 @@ class LoginActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(applicationContext)
 
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(edu.ruperez.bookbrow.R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
         setupClickListeners()
         observeViewModel()
+    }
+
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                if (idToken != null) {
+                    viewModel.loginWithGoogle(idToken)
+                } else {
+                    showError("Failed to get Google ID token")
+                }
+            } catch (e: ApiException) {
+                Log.w("LoginActivity", "Google sign in failed", e)
+                showError("Google sign in failed: ${e.message}")
+            }
+        }
     }
 
     private fun setupClickListeners() {
@@ -42,6 +73,11 @@ class LoginActivity : AppCompatActivity() {
 
         binding.btnRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+        }
+
+        binding.btnGoogleSignIn.setOnClickListener {
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
         }
 
         binding.tvForgotPassword.setOnClickListener {
@@ -116,7 +152,9 @@ class LoginActivity : AppCompatActivity() {
     private fun setLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.btnLogin.visibility    = if (isLoading) View.INVISIBLE else View.VISIBLE
+        binding.btnGoogleSignIn.visibility = if (isLoading) View.INVISIBLE else View.VISIBLE
         binding.btnLogin.isEnabled     = !isLoading
+        binding.btnGoogleSignIn.isEnabled = !isLoading
         binding.btnRegister.isEnabled  = !isLoading
     }
 
