@@ -1,0 +1,100 @@
+# ============================================================
+# BookBrow – Docker Compose
+# Connects backend, web, and mobile on a shared Docker network
+#
+# QUICK START:
+#   1. Copy .env.docker to .env.compose and fill in your values
+#   2. Run:  docker compose --env-file .env.compose up --build
+#
+# ACCESS:
+#   Web app   → http://localhost:3000
+#   Backend   → http://localhost:8080
+#   Mobile    → Scan QR code printed by Expo in the terminal
+#
+# NOTE FOR MOBILE:
+#   Physical devices (phone/tablet) cannot reach Docker-internal hostnames.
+#   Set HOST_IP in .env.compose to your computer's LAN IP (e.g. 192.168.1.5)
+#   so the Expo bundle can call the backend from your device.
+# ============================================================
+
+version: '3.9'
+
+networks:
+  bookbrow-network:
+    driver: bridge
+
+services:
+
+  # ── Backend (Spring Boot) ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend/bookbrow
+      dockerfile: Dockerfile
+    container_name: bookbrow-backend
+    networks:
+      - bookbrow-network
+    ports:
+      - "8080:8080"
+    environment:
+      # Database (Supabase Pooler)
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      # Google OAuth2
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/google}
+      # CORS — allow web + mobile dev origins
+      FRONTEND_URL: http://localhost:3000
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://10.0.2.2:8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v1/auth/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
+    restart: unless-stopped
+
+  # ── Web (React + Nginx) ─────────────────────────────────────────────────────
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: bookbrow-web
+    networks:
+      - bookbrow-network
+    ports:
+      - "3000:80"
+    environment:
+      # Nginx uses BACKEND_URL internally to proxy /api/, /oauth2/, /login/oauth2/
+      BACKEND_URL: http://backend:8080
+      # Browser uses REACT_APP_API_URL — must be reachable from the user's browser
+      REACT_APP_API_URL: http://localhost:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Mobile (Expo Dev Server) ────────────────────────────────────────────────
+  mobile:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+    container_name: bookbrow-mobile
+    networks:
+      - bookbrow-network
+    ports:
+      - "8081:8081"    # Metro bundler
+      - "19000:19000"  # Expo dev server
+      - "19001:19001"  # Expo dev server (legacy)
+    environment:
+      # Physical devices call this URL — must be your LAN IP, not a Docker hostname
+      # Set HOST_IP in .env.compose to your machine's local IP (e.g. 192.168.1.5)
+      API_BASE_URL: http://${HOST_IP:-host.docker.internal}:8080/api/v1
+      EXPO_DEVTOOLS_LISTEN_ADDRESS: "0.0.0.0"
+    depends_on:
+      - backend
+    restart: unless-stopped
