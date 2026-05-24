@@ -4,3 +4,6 @@ build
 .git
 .gitignore
 npm-debug.log
+img
+test-api.js
+*.md
