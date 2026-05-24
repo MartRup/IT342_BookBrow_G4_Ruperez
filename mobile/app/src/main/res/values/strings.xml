@@ -29,4 +29,6 @@
     <string name="welcome_user">Welcome, %1$s!</string>
     <string name="btn_logout">Log Out</string>
     <string name="main_welcome_message">You are successfully logged in to BookBrow.</string>
+    <string name="default_web_client_id">479851263262-srhurugk43nu8ljq8q9j3d4hrad6ql2m.apps.googleusercontent.com</string>
+    <string name="sign_in_with_google">Login with Google</string>
 </resources>

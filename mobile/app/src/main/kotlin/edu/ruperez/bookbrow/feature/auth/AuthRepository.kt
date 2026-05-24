@@ -38,8 +38,8 @@ class AuthRepository {
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response body")
         } else {
-            // Try to extract the backend's error message
-            val errorMsg = response.errorBody()?.string() ?: "Registration failed (${response.code()})"
+            val rawError = response.errorBody()?.string()
+            val errorMsg = parseError(rawError, "Registration failed (${response.code()})")
             throw Exception(errorMsg)
         }
     }
@@ -53,8 +53,43 @@ class AuthRepository {
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response body")
         } else {
-            val errorMsg = response.errorBody()?.string() ?: "Login failed (${response.code()})"
+            val rawError = response.errorBody()?.string()
+            val errorMsg = parseError(rawError, "Login failed (${response.code()})")
             throw Exception(errorMsg)
+        }
+    }
+
+    /**
+     * Attempt to login with Google ID token.
+     * @return Result.Success with AuthResponse on HTTP 2xx, Result.Error otherwise.
+     */
+    suspend fun googleLogin(idToken: String): Result<AuthResponse> = runCatching {
+        val response = api.googleLogin(GoogleLoginRequest(idToken = idToken))
+        if (response.isSuccessful) {
+            response.body() ?: throw Exception("Empty response body")
+        } else {
+            val rawError = response.errorBody()?.string()
+            val errorMsg = parseError(rawError, "Google login failed (${response.code()})")
+            throw Exception(errorMsg)
+        }
+    }
+
+    private fun parseError(errorBody: String?, fallback: String): String {
+        if (errorBody.isNullOrBlank()) return fallback
+        return try {
+            val jsonObject = org.json.JSONObject(errorBody)
+            if (jsonObject.has("error")) {
+                val errorObj = jsonObject.getJSONObject("error")
+                if (errorObj.has("message")) {
+                    return errorObj.getString("message")
+                }
+            }
+            if (jsonObject.has("message")) {
+                return jsonObject.getString("message")
+            }
+            errorBody
+        } catch (e: Exception) {
+            errorBody
         }
     }
 }

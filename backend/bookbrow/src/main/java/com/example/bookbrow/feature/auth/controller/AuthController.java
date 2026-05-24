@@ -57,6 +57,14 @@ public class AuthController {
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody com.example.bookbrow.feature.auth.dto.GoogleLoginRequest request) {
+        AuthResponse response = authService.googleLogin(request);
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<AuthResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         return ResponseEntity.ok(authService.forgotPassword(request));
