@@ -190,8 +190,11 @@ public class AuthService {
                     return userRepository.save(newUser);
                 });
 
+                // Reactivate account if it was deactivated (Google OAuth users should always be active)
                 if (!user.isEnabled()) {
-                    return AuthResponse.error("AUTH-102", "Account is deactivated");
+                    log.info("Reactivating deactivated account for Google user: {}", email);
+                    user.setIsActive(true);
+                    user = userRepository.save(user);
                 }
 
                 String token = jwtService.generateToken(user);
